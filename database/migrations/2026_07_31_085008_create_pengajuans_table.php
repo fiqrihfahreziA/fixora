@@ -1,0 +1,87 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('pengajuans', function (Blueprint $table) {
+            $table->id();
+            // identitas
+            $table->foreignId('karyawan_id')->constrained('karyawans');
+            $table->foreignId('bidang_id')->nullable()->constrained('bidangs')->nullOnDelete();
+            $table->string('no_pengajuan')->unique();
+            $table->date('tanggal_pengajuan');
+            $table->year('tahun_anggaran')->nullable();
+            $table->string('instalasi');
+             // dasar usulan
+            $table->string('dasar_usulan')->nullable();
+                    // uraian umum
+            $table->text('alasan_justifikasi')->nullable();
+            $table->text('manfaat')->nullable();
+            $table->text('dampak')->nullable();
+             // kondisi barang lama (digabung saja)
+            $table->text('kondisi_barang_lama')->nullable();
+            $table->text('ket_barang_lama')->nullable();
+               // dokumen pendukung (opsional checkbox sederhana)
+            $table->boolean('foto_barang')->default(false);
+            $table->boolean('data_kerusakan')->default(false);
+            $table->boolean('penawaran_harga')->default(false);
+
+            // approval sederhana
+            $table->foreignId('penerima_id')->nullable()->constrained('karyawans')->nullOnDelete();
+            $table->foreignId('atasan_id')->nullable()->constrained('karyawans')->nullOnDelete();
+            $table->foreignId('direktur_id')->nullable()->constrained('karyawans')->nullOnDelete();
+
+             $table->decimal('total_pengajuan', 15, 2)->default(0);
+             $table->enum('status', [
+                'draft',
+                'diajukan',
+                'disetujui_koordinator',
+                'disetujui_kabid',
+                'menunggu_direktur',
+                'disetujui',
+                'ditolak'
+            ])->default('draft');
+            // waktu approval
+            $table->timestamp('diterima_at')->nullable();
+            $table->timestamp('disetujui_kabid_at')->nullable();
+            $table->timestamp('disetujui_direktur_at')->nullable();
+             $table->text('catatan_unit')->nullable();
+
+            // Kepala Bidang
+            $table->text('catatan_bidang')->nullable();
+
+            // Perencanaan
+            $table->text('catatan_perencanaan')->nullable();
+
+            // IPSRS
+            $table->text('catatan_ipsrs')->nullable();
+
+            // Farmasi
+            $table->text('catatan_farmasi')->nullable();
+
+            // Keuangan
+            $table->text('catatan_keuangan')->nullable();
+
+            // Direktur
+            $table->text('catatan_direktur')->nullable();
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('pengajuans');
+    }
+};

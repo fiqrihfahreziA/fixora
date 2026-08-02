@@ -1,0 +1,41 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AtasanController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
+
+
+// Route::get('/admin/login', function () {
+//     return view('auth.admin-login');
+// })->name('admin.login');
+
+// Route::get('/admin/login', [AdminController::class, 'login'])
+//             ->name('admin.login');
+
+Route::middleware(['auth', 'role:atasan'])
+    ->prefix('atasan')
+    ->name('atasan.')
+    ->group(function () {
+
+        Route::get('/', [AtasanController::class, 'index'])
+            ->name('dashboard');
+         
+        Route::get('/permintaann/atasan', [AtasanController::class, 'showpermintaann'])
+            ->name('permintaan');
+        
+        Route::get('/permintaann/edit/{id}', [AtasanController::class, 'edit'])->name('permintaan.edit');
+        Route::put('/permintaannea/update/{id}', [AtasanController::class, 'update'])->name('permintaan.update');   
+      
+        Route::get('/atasan/permintaan/{id}/view', [AtasanController::class, 'view'])
+            ->name('permintaan.view');
+            Route::get('permintaan/{id}/gambar', [AtasanController::class, 'lihatGambar'])->name('permintaan.gambar');
+        // Route::delete('/permintaan-penerima/{id}',[PenerimaController::class, 'destroy'])->name('permintaan.destroyy');
+
+        
+
+
+    });
+

@@ -1,0 +1,67 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PenerimaController;
+use App\Http\Controllers\AtasanController;
+use App\Http\Controllers\PemohonController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
+
+
+// Route::get('/admin/login', function () {
+//     return view('auth.admin-login');
+// })->name('admin.login');
+
+// Route::get('/admin/login', [AdminController::class, 'login'])
+//             ->name('admin.login');
+
+Route::middleware(['auth', 'role:pemohon'])
+    ->prefix('pemohon')
+    ->name('pemohon.')
+    ->group(function () {
+
+        Route::get('/', [PemohonController::class, 'index'])
+            ->name('dashboard');
+ 
+        Route::get('/permintaan', [PemohonController::class, 'showpermintaan'])
+            ->name('permintaan');
+            
+        Route::post('/permintaan', [PemohonController::class, 'storebarang'])->name('permintaan.store');
+
+        // Rute untuk halaman edit permintaan
+        Route::get('/permintaan/edit/{id}', [PemohonController::class, 'edit'])->name('permintaan.edit');
+
+
+        Route::put('/permintaan/update/{id}', [PemohonController::class, 'update'])->name('permintaan.update');
+        Route::delete('/pemohon/permintaan/{id}', [PemohonController::class, 'destroypermintaan'])->name('permintaan.destroy');
+
+        Route::get('permintaan/{id}/gambar', [PemohonController::class, 'lihatGambar'])->name('permintaan.gambar');
+        
+        Route::get('/pengadaan', [PemohonController::class, 'showpengadaan'])
+            ->name('pengadaan');
+            Route::get('pengadaan/create', [PemohonController::class, 'create'])->name('pengadaan.create');
+
+        // Route::put('/karyawan/{id}', [AdminController::class, 'update'])
+        //     ->name('karyawan.update');
+        
+        // Route::delete('/karyawan/{id}', [AdminController::class, 'destroy'])
+        //     ->name('karyawan.destroy');
+        
+        // Route::get('/pengguna', [AdminController::class, 'akun'])
+        //     ->name('pengguna');
+
+        // Route::post('/pengguna', [AdminController::class, 'storeuser'])
+        //     ->name('pengguna.store');
+
+        // Route::delete('/pengguna/{id}', [AdminController::class, 'destroyakun'])
+        //     ->name('users.destroy');
+        
+        // Route::put('/admin/users/{user}', [AdminController::class, 'updateUser'])
+        //     ->name('users.update');
+
+
+    });
+

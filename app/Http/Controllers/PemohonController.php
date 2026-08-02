@@ -1,0 +1,518 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use App\Models\bidang;
+use App\Models\detail_barang;
+use App\Models\pengajuan;
+use App\Models\pengajuan_item;
+use App\Models\RequestModel;
+use Illuminate\Support\Facades\Auth;
+
+class PemohonController extends Controller
+{
+
+     public function index()
+    {
+        $authUser = Auth::user();
+
+        // $requests = RequestModel::with('detailBarang')
+        //     ->where('status', 'menunggu_simrs')
+        //     ->orderBy('created_at', 'desc')
+        //     ->get();
+
+        return view('pemohon.dashboard', [
+            'authUser' => $authUser,
+        ]);
+    }
+
+    //    public function Showpermintaan()
+    // {
+    //             $authUser = Auth::user();
+
+    //         $requests = RequestModel::with('detailBarang')
+    //             ->where('karyawan_id', $authUser->id)
+    //             ->orderBy('created_at', 'desc')
+    //             ->get();
+
+    //         return view('pemohon.permintaan', [
+    //             'authUser' => $authUser,
+    //             'modalreq' => $requests,
+    //         ]);
+    // }
+
+//     public function Showpermintaan(Request $request)
+// {
+//     $authUser = Auth::user();
+
+//     // Ambil query pencarian dari request
+//     $search = $request->input('search', '');
+
+//     // Query untuk mengambil data permintaan berdasarkan pencarian
+//     $requests = RequestModel::with('detailBarang')
+//         ->where('karyawan_id', $authUser->id)
+//         ->where(function ($query) use ($search) {
+//             $query->where('request_type', 'like', '%' . $search . '%')
+//                   ->orWhereHas('detailBarang', function ($q) use ($search) {
+//                       $q->where('nama_barang', 'like', '%' . $search . '%')
+//                         ->orWhere('deskripsi', 'like', '%' . $search . '%');
+//                   });
+//         })
+//         ->orderBy('created_at', 'desc')
+//         ->get();
+
+//     // Fetch Permintaan with pagination
+// $permintaanRequests = RequestModel::with('detailBarang')
+// ->where('karyawan_id', $authUser->id)
+//     ->where('request_type', 'permintaan')  // Filter for permintaan
+//     ->where(function ($query) use ($search) {
+//         $query->where('request_type', 'like', '%' . $search . '%')
+//               ->orWhereHas('detailBarang', function ($q) use ($search) {
+//                   $q->where('nama_barang', 'like', '%' . $search . '%')
+//                     ->orWhere('deskripsi', 'like', '%' . $search . '%');
+//               });
+//     })
+//     ->orderBy('created_at', 'desc')
+//     ->paginate(10);  // Pagination for permintaan
+
+// // Fetch Perbaikan with pagination
+// $perbaikanRequests = RequestModel::with('detailBarang')
+// ->where('karyawan_id', $authUser->id)
+//     ->where('request_type', 'perbaikan')  // Filter for perbaikan
+//     ->where(function ($query) use ($search) {
+//         $query->where('request_type', 'like', '%' . $search . '%')
+//               ->orWhereHas('detailBarang', function ($q) use ($search) {
+//                   $q->where('nama_barang', 'like', '%' . $search . '%')
+//                     ->orWhere('deskripsi', 'like', '%' . $search . '%');
+//               });
+//     })
+//     ->orderBy('created_at', 'desc')
+//     ->paginate(10);  // Pagination for perbaikan
+
+
+//     return view('pemohon.permintaan', [
+//         'authUser' => $authUser,
+//         'modalreq' => $requests,
+//         'search' => $search,  // Pass search query to the view
+//         'permintaanRequests' => $permintaanRequests,
+//         'perbaikanRequests' => $perbaikanRequests,
+//     ]);
+// }
+
+public function Showpermintaan(Request $request)
+{
+    $authUser = Auth::user();
+    $ruangan = $authUser->karyawan->ruangan; // 🔑 RUANGAN USER LOGIN
+
+    // Ambil query pencarian
+    $search = $request->input('search');
+
+    /**
+     * ============================
+     * MODAL / LIST SEMUA REQUEST (BERDASARKAN RUANGAN)
+     * ============================
+     */
+    $requests = RequestModel::with('detailBarang')
+        ->where('ruangan', $ruangan)
+        
+        ->when($search, function ($query) use ($search) {
+            $query->whereHas('detailBarang', function ($q) use ($search) {
+                $q->where('nama_barang', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    /**
+     * ============================
+     * PERMINTAAN (PAGINATION)
+     * ============================
+     */
+    $permintaanRequests = RequestModel::with('detailBarang')
+        ->where('ruangan', $ruangan)
+        ->where('request_type', 'permintaan')
+        ->when($search, function ($query) use ($search) {
+            $query->whereHas('detailBarang', function ($q) use ($search) {
+                $q->where('nama_barang', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+    /**
+     * ============================
+     * PERBAIKAN (PAGINATION)
+     * ============================
+     */
+    $perbaikanRequests = RequestModel::with('detailBarang')
+        ->where('ruangan', $ruangan)
+        ->where('request_type', 'perbaikan')
+        ->when($search, function ($query) use ($search) {
+            $query->whereHas('detailBarang', function ($q) use ($search) {
+                $q->where('nama_barang', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+          $bidangs = bidang::all();
+
+    return view('pemohon.permintaan', compact(
+        'authUser',
+        'requests',
+        'search',
+        'permintaanRequests',
+        'perbaikanRequests',
+        'bidangs'
+    ));
+}
+
+
+public function storebarang(Request $request)
+{
+       $authUser = Auth::user();
+
+    // Validasi data
+    $request->validate([
+        'nama_barang' => 'required|string|max:255',
+        'bidang_id' => 'required|exists:bidangs,id',
+        'kode_aset' => 'nullable|string|max:255', // Hanya diperlukan untuk perbaikan
+        'jumlah' => 'nullable|integer',  // Jumlah hanya diperlukan untuk permintaan barang
+        'deskripsi' => 'nullable|string',  // Deskripsi untuk perbaikan
+        'ruangan' => 'nullable|string',   // Ruangan hanya untuk perbaikan
+        'request_type' => 'required|string|in:permintaan,perbaikan',
+        'tanggal_kerusakan' => 'nullable|date',  // Hanya untuk perbaikan
+        'spesifikasi' => 'nullable|string',  // Spesifikasi hanya untuk permintaan
+        'alasan' => 'nullable|string',  // Alasan hanya untuk permintaan
+        'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    // Simpan data permintaan ke database
+    $req = RequestModel::create([
+        'karyawan_id' => $authUser->karyawan->id,
+        'ruangan' => $authUser->karyawan->ruangan,
+        'request_type' => $request->request_type,
+        'status' => 'pending',
+        'bidang_id' => $request->bidang_id,
+    ]);
+
+    // Simpan detail barang (gabungkan spesifikasi/alasan ke deskripsi jika perlu)
+    $deskripsi = $request->deskripsi;
+
+        $pathImage = null;
+
+    if ($request->hasFile('gambar')) {
+        $pathImage = $request->file('gambar')->store('permintaan', 'public');
+    }
+
+    // Jika jenis permintaan adalah 'permintaan', gabungkan spesifikasi dan alasan ke deskripsi
+    if ($request->request_type === 'permintaan') {
+        $deskripsi = ($request->spesifikasi ?? '') . ' | Alasan: ' . ($request->alasan ?? '');
+    }
+
+    // Untuk perbaikan, pastikan deskripsi berisi data yang relevan
+    if ($request->request_type === 'perbaikan') {
+        // Pastikan tanggal_kerusakan ada jika request_type adalah perbaikan
+        if (!$request->tanggal_kerusakan) {
+            return redirect()->back()->with('error', 'Tanggal kerusakan harus diisi untuk perbaikan.');
+        }
+    }
+
+    // Simpan data detail barang untuk permintaan atau perbaikan
+    detail_barang::create([
+        'request_id' => $req->id,
+        'nama_barang' => $request->nama_barang ?? '-',
+        'kode_aset' => $request->kode_aset ?? '-', // Untuk perbaikan
+        'deskripsi' => $deskripsi ?? '-',
+        'jumlah' => $request->jumlah ?? 0, // Untuk permintaan
+        'tanggal_kerusakan' => $request->tanggal_kerusakan ?? null, // Untuk perbaikan
+        'alasan'  => $request->alasan, // Untuk permintaan
+        'gambar' => $pathImage,
+        
+        
+    ]);
+
+    Log::info('Request created: ' . $req->id);
+    Log::info('Detail barang created for request: ' . $req->id);
+
+    // Redirect
+    return redirect()->route('pemohon.permintaan')->with('success', 'Permintaan berhasil ditambahkan');
+}
+
+public function lihatGambar($id)
+{
+    $req = RequestModel::with('detailBarang')->findOrFail($id);
+
+    return view('pemohon.detail_gambar', compact('req'));
+}
+
+public function edit($id)
+{
+    $authUser = Auth::user();
+    // Ambil permintaan berdasarkan ID
+    $permintaan = RequestModel::findOrFail($id);
+    
+    // Kirim data ke halaman edit
+    return view('pemohon.permintaanedit', [
+        'authUser' => $authUser,
+        'permintaan' => $permintaan,
+    ]);
+}
+
+
+public function update(Request $request, $id)
+{
+    // Validasi input
+    $validated = $request->validate([
+        'nama_barang' => 'required|string|max:255',
+        'kode_aset' => 'nullable|string|max:255',
+        'jumlah' => 'nullable|integer',
+        'deskripsi' => 'nullable|string',
+        'ruangan' => 'nullable|string',
+        'request_type' => 'required|string|in:permintaan,perbaikan',
+        'tanggal_kerusakan' => 'nullable|date',
+        'spesifikasi' => 'nullable|string',
+        'alasan' => 'nullable|string',
+        'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    // Ambil permintaan berdasarkan ID
+    $permintaan = RequestModel::findOrFail($id);
+
+    $pathImage = $permintaan->detailBarang->gambar;
+
+$pathImage = $permintaan->detailBarang->gambar;
+
+if ($request->hasFile('gambar')) {
+
+    // Hapus gambar lama jika ada
+    if ($pathImage && Storage::disk('public')->exists($pathImage)) {
+        Storage::disk('public')->delete($pathImage);
+    }
+
+    // Upload gambar baru
+    $pathImage = $request->file('gambar')->store('permintaan', 'public');
+}
+
+    // Update data permintaan
+    $permintaan->update([
+        'request_type' => $request->request_type,
+        'status' => 'pending',
+    ]);
+
+    // Ambil detail barang terkait permintaan
+    $detailBarang = $permintaan->detailBarang;
+
+    // Update detail barang (nama_barang, jumlah, dll)
+    $detailBarang->update([
+        'nama_barang' => $request->nama_barang,
+        'kode_aset' => $request->kode_aset,
+        'deskripsi' => $request->deskripsi,
+        'jumlah' => $request->jumlah,
+        'tanggal_kerusakan' => $request->tanggal_kerusakan,
+        'alasan' => $request->alasan,
+        'gambar' => $pathImage,
+    ]);
+
+    // Redirect ke halaman permintaan dengan pesan sukses
+    return redirect()->route('pemohon.permintaan')->with('success', 'Permintaan berhasil diupdate');
+}
+
+// public function destroypermintaan($id)
+// {
+//     // Cari permintaan berdasarkan ID
+//     $permintaan = RequestModel::findOrFail($id);
+      
+//     $permintaan->detailBarang()->delete();
+
+
+//     // Hapus permintaan
+//     $permintaan->delete();
+    
+//     // Redirect ke halaman dengan pesan sukses
+//     return redirect()->route('pemohon.permintaan')->with('success', 'Permintaan berhasil dihapus!');
+// }
+
+public function destroypermintaan($id)
+{
+    // Cari permintaan
+    $permintaan = RequestModel::findOrFail($id);
+
+    // Ambil detail barang
+    $detail = $permintaan->detailBarang;
+
+    // Hapus gambar jika ada
+    if ($detail && $detail->gambar) {
+        if (Storage::disk('public')->exists($detail->gambar)) {
+            Storage::disk('public')->delete($detail->gambar);
+        }
+    }
+
+    // Hapus detail barang
+    if ($detail) {
+        $detail->delete();
+    }
+
+    // Hapus permintaan
+    $permintaan->delete();
+
+    return redirect()->route('pemohon.permintaan')
+        ->with('success', 'Permintaan berhasil dihapus!');
+}
+
+// pengadaan
+ public function showpengadaanm(){
+     $authUser = Auth::user();
+    return view('pemohon.pengadaan.pengadaan', [
+        'title' => 'Pengadaan',
+        'authUser' => $authUser
+    ]);
+   }
+public function showpengadaan(Request $request)
+{
+    $authUser = Auth::user();
+    
+    // Ambil ruangan dari karyawan yang login
+    $ruangan = $authUser->karyawan->ruangan ?? null;
+    
+    // Ambil bidang untuk filter
+    $bidangs = Bidang::all();
+
+    // Ambil query pencarian
+    $search = $request->input('search');
+    $statusFilter = $request->input('status');
+    $bidangFilter = $request->input('bidang');
+    $typeFilter = $request->input('type'); // 'permintaan' atau 'perbaikan'
+
+    /**
+     * ============================
+     * QUERY DASAR PENGADAAN (SEMUA)
+     * ============================
+     */
+    $query = Pengajuan::with(['items', 'karyawan', 'bidang'])
+        ->where('instalasi', $ruangan)
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($query) use ($search) {
+                $query->where('no_pengajuan', 'like', "%{$search}%")
+                    ->orWhere('dasar_usulan', 'like', "%{$search}%")
+                    ->orWhereHas('items', function ($itemQuery) use ($search) {
+                        $itemQuery->where('nama_barang', 'like', "%{$search}%")
+                            ->orWhere('spesifikasi', 'like', "%{$search}%");
+                    });
+            });
+        })
+        ->when($statusFilter, function ($q) use ($statusFilter) {
+            $q->where('status', $statusFilter);
+        })
+        ->when($bidangFilter, function ($q) use ($bidangFilter) {
+            $q->where('bidang_id', $bidangFilter);
+        });
+
+    /**
+     * ============================
+     * DATA UNTUK TABEL SEMUA PENGAJUAN
+     * ============================
+     */
+    $allPengajuan = clone $query;
+    $allPengajuan = $allPengajuan->orderBy('created_at', 'desc')
+        ->paginate(10)
+        ->appends($request->all());
+
+    /**
+     * ============================
+     * DATA UNTUK TAB PERMINTAAN 
+     * Menggunakan dasar_usulan untuk filter
+     * ============================
+     */
+    $permintaanQuery = clone $query;
+    $permintaanPengajuan = $permintaanQuery->where(function($q) {
+            $q->where('dasar_usulan', 'LIKE', '%permintaan%')
+              ->orWhere('dasar_usulan', 'LIKE', '%pengadaan%')
+              ->orWhere('dasar_usulan', 'LIKE', '%beli%')
+              ->orWhereNull('dasar_usulan'); // Default dianggap permintaan
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10)
+        ->appends($request->all());
+
+    /**
+     * ============================
+     * DATA UNTUK TAB PERBAIKAN 
+     * Menggunakan dasar_usulan untuk filter
+     * ============================
+     */
+    $perbaikanQuery = clone $query;
+    $perbaikanPengajuan = $perbaikanQuery->where(function($q) {
+            $q->where('dasar_usulan', 'LIKE', '%perbaikan%')
+              ->orWhere('dasar_usulan', 'LIKE', '%service%')
+              ->orWhere('dasar_usulan', 'LIKE', '%repair%');
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10)
+        ->appends($request->all());
+
+    /**
+     * ============================
+     * STATISTIK DASHBOARD
+     * ============================
+     */
+    $stats = [
+        'total' => Pengajuan::where('instalasi', $ruangan)->count(),
+        'draft' => Pengajuan::where('instalasi', $ruangan)->where('status', 'draft')->count(),
+        'diajukan' => Pengajuan::where('instalasi', $ruangan)->where('status', 'diajukan')->count(),
+        'disetujui' => Pengajuan::where('instalasi', $ruangan)->where('status', 'disetujui')->count(),
+        'ditolak' => Pengajuan::where('instalasi', $ruangan)->where('status', 'ditolak')->count(),
+        'menunggu_direktur' => Pengajuan::where('instalasi', $ruangan)->where('status', 'menunggu_direktur')->count(),
+        
+        // Statistik berdasarkan jenis (menggunakan dasar_usulan)
+        'permintaan_count' => Pengajuan::where('instalasi', $ruangan)
+            ->where(function($q) {
+                $q->where('dasar_usulan', 'LIKE', '%permintaan%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%pengadaan%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%beli%')
+                  ->orWhereNull('dasar_usulan');
+            })->count(),
+            
+        'perbaikan_count' => Pengajuan::where('instalasi', $ruangan)
+            ->where(function($q) {
+                $q->where('dasar_usulan', 'LIKE', '%perbaikan%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%service%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%repair%');
+            })->count(),
+    ];
+
+    return view('pemohon.pengadaan.pengadaan', compact(
+        'authUser',
+        'allPengajuan',
+        'permintaanPengajuan',
+        'perbaikanPengajuan',
+        'bidangs',
+        'search',
+        'statusFilter',
+        'bidangFilter',
+        'typeFilter',
+        'stats'
+    ));
+}
+
+public function create()
+{
+    $bidangs = Bidang::all();
+     $authUser = Auth::user();
+    
+    return view('pemohon.pengadaan.create', compact('bidangs', 'authUser'));
+}
+
+   
+
+}
