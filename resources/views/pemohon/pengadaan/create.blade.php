@@ -4,7 +4,6 @@
 
 <div class="container-fluid px-0">
 
-
 <!-- Header -->
 <div class="row g-4 mb-4">
     <div class="col-12">
@@ -67,12 +66,11 @@
                 </h6>
 
                 <div class="row g-3">
-
-                    <div class="col-md-4">
+                    <!-- Kolom 1: Tanggal Pengajuan -->
+                    <div class="col-md-3">
                         <label class="form-label fw-semibold small">
                             Tanggal Pengajuan <span class="text-danger">*</span>
                         </label>
-
                         <input type="date"
                                name="tanggal_pengajuan"
                                class="form-control"
@@ -80,12 +78,11 @@
                                required>
                     </div>
 
-                    <div class="col-md-4">
+                    <!-- Kolom 2: Bidang -->
+                    <div class="col-md-3">
                         <label class="form-label fw-semibold small">Bidang</label>
-
                         <select name="bidang_id" class="form-select">
                             <option value="">Pilih Bidang</option>
-
                             @foreach($bidangs as $bidang)
                                 <option value="{{ $bidang->id }}">
                                     {{ $bidang->nama_bidang }}
@@ -94,66 +91,154 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    <!-- Kolom 3: Tahun Anggaran -->
+                    <div class="col-md-2">
                         <label class="form-label fw-semibold small">Tahun Anggaran</label>
-
                         <input type="number"
                                name="tahun_anggaran"
                                class="form-control"
                                placeholder="2026">
                     </div>
 
-                    <!-- Jenis Pengajuan + Nama Pengaju dalam kolom yang sama -->
-<div class="col-md-4">
+                    <!-- Kolom 4: Dasar Usulan -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">
+                            Dasar Usulan <span class="text-danger">*</span>
+                        </label>
+                        <select name="dasar_usulan" class="form-select" required>
+                            <option value="">Pilih Dasar Usulan</option>
+                            <option value="Program Kerja">Program Kerja</option>
+                            <option value="Kebutuhan Operasional">Kebutuhan Operasional</option>
+                            <option value="Penggantian Barang Rusak">Penggantian Barang Rusak</option>
+                            <option value="Penambahan Kapasitas Pelayanan">Penambahan Kapasitas Pelayanan</option>
+                            <option value="Pemenuhan Standar Akreditasi">Pemenuhan Standar Akreditasi</option>
+                            <option value="Keselamatan Pasien">Keselamatan Pasien</option>
+                            <option value="lainnya">Lainnya...</option>
+                        </select>
+                    </div>
 
-    <label class="form-label fw-semibold small">
-        Jenis Pengajuan <span class="text-danger">*</span>
-    </label>
+                    <!-- Kolom 5: Nama Pengaju dengan Hidden ID -->
+                    <div class="col-md-4">
+                        <input type="hidden" 
+                               name="karyawan_id" 
+                               value="{{ $authUser->karyawan->id ?? '' }}">
+                        <label class="form-label fw-semibold small mb-1">
+                            Nama Pengaju <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control bg-light"
+                               value="{{ $authUser->karyawan->nama ?? $authUser->name ?? '' }}"
+                               readonly>
+                    </div>
 
-    <div class="d-flex gap-3 mb-2">
+                    <!-- Kolom 6: Jabatan -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small mb-1">
+                            Jabatan <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control bg-light"
+                               value="{{ $authUser->karyawan->jabatan ?? $authUser->jabatan ?? '' }}"
+                               readonly>
+                    </div>
 
-        <div class="form-check">
-            <input class="form-check-input"
-                   type="radio"
-                   name="jenis_pengajuan"
-                   value="permintaan"
-                   checked>
+                    <!-- Kolom 7: NIP -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small mb-1">
+                            NIP <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control bg-light"
+                               value="{{ $authUser->karyawan->nip ?? '' }}"
+                               readonly>
+                    </div>
 
-            <label class="form-check-label">Permintaan</label>
-        </div>
+                    <!-- Kolom 8: Instalasi -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Instalasi</label>
+                        <input type="text"
+                               name="instalasi"
+                               class="form-control bg-light"
+                               value="{{ $authUser->karyawan->ruangan ?? '' }}"
+                               readonly>
+                    </div>
 
-        <div class="form-check">
-            <input class="form-check-input"
-                   type="radio"
-                   name="jenis_pengajuan"
-                   value="perbaikan">
+                    <!-- Kolom 9: Jenis Pengajuan -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">
+                            Jenis Pengajuan <span class="text-danger">*</span>
+                        </label>
+                        <select name="jenis_pengajuan" class="form-select" required>
+                            <option value="permintaan">Permintaan</option>
+                            <option value="perbaikan">Perbaikan</option>
+                        </select>
+                    </div>
 
-            <label class="form-check-label">Perbaikan</label>
-        </div>
+                </div> <!-- penutup row -->
 
-    </div>
+                <!-- BARIS KEDUA: Alasan Justifikasi, Dampak, & Manfaat -->
+                <div class="row g-3 mt-2">
+        
+                    <!-- Kolom 1: Alasan Justifikasi Pengadaan -->
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0 p-3 h-100">
+                            <label class="form-label fw-semibold small">
+                                <i class="bi bi-clipboard-check text-success me-2"></i>
+                                Alasan Justifikasi <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="alasan_justifikasi"
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="Jelaskan alasan dan justifikasi..."
+                                    required></textarea>
+                            <small class="text-muted mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Contoh: Meningkatkan efisiensi kerja, mengganti alat usang, dll.
+                            </small>
+                        </div>
+                    </div>
 
-    <label class="form-label fw-semibold small mb-1">
-        Nama Pengaju <span class="text-danger">*</span>
-    </label>
+                    <!-- Kolom 2: Dampak Jika Tidak Dilaksanakan -->
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0 p-3 h-100">
+                            <label class="form-label fw-semibold small">
+                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                                Dampak Jika Tidak Dilaksanakan <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="dampak_tidak_dilaksanakan"
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="Jelaskan dampak yang akan terjadi..."
+                                    required></textarea>
+                            <small class="text-muted mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Contoh: Terganggunya pelayanan, kerugian operasional, dll.
+                            </small>
+                        </div>
+                    </div>
 
-    <input type="text"
-           class="form-control bg-light"
-           value="{{ $authUser->karyawan->nama ?? $authUser->name ?? '' }}"
-           readonly>
-</div>
+                    <!-- Kolom 3: Manfaat yang Diharapkan -->
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0 p-3 h-100">
+                            <label class="form-label fw-semibold small">
+                                <i class="bi bi-star-fill text-primary me-2"></i>
+                                Manfaat yang Diharapkan <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="manfaat"
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="Jelaskan manfaat yang akan diperoleh..."
+                                    required></textarea>
+                            <small class="text-muted mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Contoh: Meningkatkan kualitas pelayanan, mempercepat proses kerja, dll.
+                            </small>
+                        </div>
+                    </div>
 
-<!-- Instalasi tetap kolom sebelah -->
-<div class="col-md-2">
+                </div> <!-- penutup row -->
 
-    <label class="form-label fw-semibold small">Instalasi</label>
-
-    <input type="text"
-           name="instalasi"
-           class="form-control bg-light"
-           value="{{ $authUser->karyawan->ruangan ?? '' }}"
-           readonly>
-</div>
+            </div> <!-- penutup step1 -->
 
             <!-- STEP 2 -->
             <div class="step-content d-none" id="step2">
@@ -165,44 +250,38 @@
 
                     <button type="button"
                             class="btn btn-sm btn-outline-primary"
-                            onclick="addItem()">
+                            onclick="tambahItem()">
                         <i class="bi bi-plus-circle me-1"></i>Tambah Item
                     </button>
                 </div>
 
                 <div id="itemsContainer">
-
+                    <!-- Item pertama -->
                     <div class="item-row card p-3 mb-3 bg-light">
                         <div class="row g-3 align-items-end">
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-semibold small">
                                     Nama Barang <span class="text-danger">*</span>
                                 </label>
-
                                 <input type="text"
                                        name="items[0][nama_barang]"
                                        class="form-control item-required"
                                        placeholder="Nama barang"
-                                       disabled>
+                                       required>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label fw-semibold small">Spesifikasi</label>
-
                                 <input type="text"
                                        name="items[0][spesifikasi]"
                                        class="form-control"
-                                       placeholder="Spesifikasi"
-                                       disabled>
+                                       placeholder="Spesifikasi">
                             </div>
 
                             <div class="col-md-2">
                                 <label class="form-label fw-semibold small">Satuan</label>
-
-                                <select name="items[0][satuan]"
-                                        class="form-select"
-                                        disabled>
+                                <select name="items[0][satuan]" class="form-select">
                                     <option value="Unit">Unit</option>
                                     <option value="Buah">Buah</option>
                                     <option value="Pcs">Pcs</option>
@@ -211,37 +290,142 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <label class="form-label fw-semibold small">
                                     Jumlah <span class="text-danger">*</span>
                                 </label>
-
                                 <input type="number"
                                        name="items[0][jumlah]"
-                                       class="form-control item-required"
+                                       class="form-control item-required hitung-total"
                                        placeholder="0"
                                        min="1"
-                                       disabled>
+                                       required
+                                       oninput="hitungTotalItem(this)">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold small">
+                                    Harga Satuan (Rp) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number"
+                                       name="items[0][harga_satuan]"
+                                       class="form-control item-required hitung-total"
+                                       placeholder="0"
+                                       min="0"
+                                       required
+                                       oninput="hitungTotalItem(this)">
+                            </div>
+
+                            <div class="col-md-1">
+                                <label class="form-label fw-semibold small">Total (Rp)</label>
+                                <input type="text"
+                                       name="items[0][total]"
+                                       class="form-control bg-light total-harga"
+                                       value="0"
+                                       readonly>
                             </div>
 
                             <div class="col-md-1">
                                 <button type="button"
-                                        class="btn btn-sm btn-outline-danger w-100"
-                                        onclick="removeItem(this)"
-                                        disabled>
+                                        class="btn btn-sm btn-outline-danger w-100 mt-4"
+                                        onclick="hapusItem(this)">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
 
                         </div>
-                    </div>
 
+                        <!-- BARIS KEDUA: Data Barang Tersedia -->
+                        <div class="row g-3 mt-3 pt-3 border-top">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           name="items[0][ada_barang_tersedia]" 
+                                           id="barang_tersedia_0"
+                                           value="1"
+                                           onchange="toggleBarangTersedia(this, 0)">
+                                    <label class="form-check-label fw-semibold text-success" for="barang_tersedia_0">
+                                        <i class="bi bi-box-seam me-1"></i>
+                                        Ada Barang Tersedia (Centang jika ada barang yang sudah tersedia)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Detail Barang Tersedia -->
+                            <div class="col-12" id="detail_barang_tersedia_0" style="display: none;">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold small">
+                                            Nama Barang Tersedia <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text"
+                                               name="items[0][nama_barang_tersedia]"
+                                               class="form-control"
+                                               placeholder="Nama barang yang sudah tersedia"
+                                               disabled>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold small">
+                                            Jumlah Tersedia <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number"
+                                               name="items[0][jumlah_tersedia]"
+                                               class="form-control"
+                                               placeholder="0"
+                                               min="0"
+                                               disabled>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold small">
+                                            Tahun Perolehan <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number"
+                                               name="items[0][tahun_perolehan_tersedia]"
+                                               class="form-control"
+                                               placeholder="2020"
+                                               min="1900"
+                                               max="{{ date('Y') }}"
+                                               disabled>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold small">
+                                            Kondisi <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="items[0][kondisi_tersedia]" class="form-select" disabled>
+                                            <option value="">Pilih Kondisi</option>
+                                            <option value="Baik">Baik</option>
+                                            <option value="Cukup Baik">Cukup Baik</option>
+                                            <option value="Rusak Ringan">Rusak Ringan</option>
+                                            <option value="Rusak Berat">Rusak Berat</option>
+                                            <option value="Usang">Usang</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
+                <!-- Ringkasan Total -->
                 <div class="bg-light p-3 rounded-3">
-                    <div class="d-flex justify-content-between">
-                        <span class="fw-semibold">Total Item:</span>
-                        <span id="totalItem">1</span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-semibold">Total Item:</span>
+                                <span id="totalItem">1</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-semibold">Grand Total (Rp):</span>
+                                <span id="grandTotal" class="fw-bold text-primary">0</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -295,7 +479,7 @@
                         <button type="button"
                                 class="btn btn-outline-primary rounded-pill px-4"
                                 id="btnPrevStep"
-                                onclick="goPrevStep()"
+                                onclick="keStepSebelumnya()"
                                 style="display:none;">
                             Sebelumnya
                         </button>
@@ -303,7 +487,7 @@
                         <button type="button"
                                 class="btn btn-primary rounded-pill px-4"
                                 id="btnNextStep"
-                                onclick="goNextStep()">
+                                onclick="keStepBerikutnya()">
                             Selanjutnya
                         </button>
 
@@ -321,7 +505,6 @@
         </form>
     </div>
 </div>
-
 
 </div>
 
@@ -365,14 +548,15 @@
     background:#0d6efd;
 }
 </style>
+
 <script>
-let itemIndex = 1;
-let currentStep = 1;
+let indeksItem = 1;
+let stepSekarang = 1;
 
 // =========================
 // TAMBAH ITEM
 // =========================
-function addItem() {
+function tambahItem() {
     const container = document.getElementById('itemsContainer');
 
     const itemRow = document.createElement('div');
@@ -381,31 +565,28 @@ function addItem() {
     itemRow.innerHTML = `
         <div class="row g-3 align-items-end">
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label fw-semibold small">
                     Nama Barang <span class="text-danger">*</span>
                 </label>
-
                 <input type="text"
-                       name="items[${itemIndex}][nama_barang]"
+                       name="items[${indeksItem}][nama_barang]"
                        class="form-control item-required"
                        placeholder="Nama barang"
                        required>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label fw-semibold small">Spesifikasi</label>
-
                 <input type="text"
-                       name="items[${itemIndex}][spesifikasi]"
+                       name="items[${indeksItem}][spesifikasi]"
                        class="form-control"
                        placeholder="Spesifikasi">
             </div>
 
             <div class="col-md-2">
                 <label class="form-label fw-semibold small">Satuan</label>
-
-                <select name="items[${itemIndex}][satuan]" class="form-select">
+                <select name="items[${indeksItem}][satuan]" class="form-select">
                     <option value="Unit">Unit</option>
                     <option value="Buah">Buah</option>
                     <option value="Pcs">Pcs</option>
@@ -414,67 +595,226 @@ function addItem() {
                 </select>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <label class="form-label fw-semibold small">
                     Jumlah <span class="text-danger">*</span>
                 </label>
-
                 <input type="number"
-                       name="items[${itemIndex}][jumlah]"
-                       class="form-control item-required"
+                       name="items[${indeksItem}][jumlah]"
+                       class="form-control item-required hitung-total"
                        placeholder="0"
                        min="1"
-                       required>
+                       required
+                       oninput="hitungTotalItem(this)">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small">
+                    Harga Satuan (Rp) <span class="text-danger">*</span>
+                </label>
+                <input type="number"
+                       name="items[${indeksItem}][harga_satuan]"
+                       class="form-control item-required hitung-total"
+                       placeholder="0"
+                       min="0"
+                       required
+                       oninput="hitungTotalItem(this)">
+            </div>
+
+            <div class="col-md-1">
+                <label class="form-label fw-semibold small">Total (Rp)</label>
+                <input type="text"
+                       name="items[${indeksItem}][total]"
+                       class="form-control bg-light total-harga"
+                       value="0"
+                       readonly>
             </div>
 
             <div class="col-md-1">
                 <button type="button"
-                        class="btn btn-sm btn-outline-danger w-100"
-                        onclick="removeItem(this)">
+                        class="btn btn-sm btn-outline-danger w-100 mt-4"
+                        onclick="hapusItem(this)">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
 
         </div>
+
+        <!-- BARIS KEDUA: Data Barang Tersedia -->
+        <div class="row g-3 mt-3 pt-3 border-top">
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           name="items[${indeksItem}][ada_barang_tersedia]" 
+                           id="barang_tersedia_${indeksItem}"
+                           value="1"
+                           onchange="toggleBarangTersedia(this, ${indeksItem})">
+                    <label class="form-check-label fw-semibold text-success" for="barang_tersedia_${indeksItem}">
+                        <i class="bi bi-box-seam me-1"></i>
+                        Ada Barang Tersedia (Centang jika ada barang yang sudah tersedia)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Detail Barang Tersedia -->
+            <div class="col-12" id="detail_barang_tersedia_${indeksItem}" style="display: none;">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">
+                            Nama Barang Tersedia <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="items[${indeksItem}][nama_barang_tersedia]"
+                               class="form-control"
+                               placeholder="Nama barang yang sudah tersedia"
+                               disabled>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold small">
+                            Jumlah Tersedia <span class="text-danger">*</span>
+                        </label>
+                        <input type="number"
+                               name="items[${indeksItem}][jumlah_tersedia]"
+                               class="form-control"
+                               placeholder="0"
+                               min="0"
+                               disabled>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">
+                            Tahun Perolehan <span class="text-danger">*</span>
+                        </label>
+                        <input type="number"
+                               name="items[${indeksItem}][tahun_perolehan_tersedia]"
+                               class="form-control"
+                               placeholder="2020"
+                               min="1900"
+                               max="${new Date().getFullYear()}"
+                               disabled>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">
+                            Kondisi <span class="text-danger">*</span>
+                        </label>
+                        <select name="items[${indeksItem}][kondisi_tersedia]" class="form-select" disabled>
+                            <option value="">Pilih Kondisi</option>
+                            <option value="Baik">Baik</option>
+                            <option value="Cukup Baik">Cukup Baik</option>
+                            <option value="Rusak Ringan">Rusak Ringan</option>
+                            <option value="Rusak Berat">Rusak Berat</option>
+                            <option value="Usang">Usang</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
     `;
 
     container.appendChild(itemRow);
 
-    itemIndex++;
+    indeksItem++;
 
-    updateTotalItem();
+    perbaruiTotalItem();
+}
+
+// =========================
+// TOGGLE BARANG TERSEDIA
+// =========================
+function toggleBarangTersedia(checkbox, index) {
+    const detailDiv = document.getElementById('detail_barang_tersedia_' + index);
+    const inputs = detailDiv.querySelectorAll('input, select');
+    
+    if (checkbox.checked) {
+        detailDiv.style.display = 'block';
+        inputs.forEach(input => {
+            input.disabled = false;
+        });
+    } else {
+        detailDiv.style.display = 'none';
+        inputs.forEach(input => {
+            input.disabled = true;
+            input.value = '';
+        });
+    }
+}
+
+// =========================
+// HITUNG TOTAL PER ITEM
+// =========================
+function hitungTotalItem(element) {
+    const row = element.closest('.item-row');
+    
+    const jumlahInput = row.querySelector('input[name*="[jumlah]"]');
+    const hargaInput = row.querySelector('input[name*="[harga_satuan]"]');
+    const totalInput = row.querySelector('input[name*="[total]"]');
+    
+    const jumlah = parseInt(jumlahInput.value) || 0;
+    const harga = parseInt(hargaInput.value) || 0;
+    
+    const total = jumlah * harga;
+    
+    totalInput.value = formatRupiah(total);
+    
+    // Hitung grand total
+    hitungGrandTotal();
+}
+
+// =========================
+// FORMAT RUPIAH
+// =========================
+function formatRupiah(angka) {
+    return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// =========================
+// HITUNG GRAND TOTAL
+// =========================
+function hitungGrandTotal() {
+    const totalInputs = document.querySelectorAll('.total-harga');
+    let grandTotal = 0;
+    
+    totalInputs.forEach(input => {
+        const value = input.value.replace(/\./g, '');
+        grandTotal += parseInt(value) || 0;
+    });
+    
+    document.getElementById('grandTotal').textContent = formatRupiah(grandTotal);
 }
 
 // =========================
 // HAPUS ITEM
 // =========================
-function removeItem(button) {
-
+function hapusItem(button) {
     const rows = document.querySelectorAll('.item-row');
 
     if (rows.length > 1) {
         button.closest('.item-row').remove();
-        updateTotalItem();
+        perbaruiTotalItem();
+        hitungGrandTotal();
     } else {
         alert('Minimal 1 item harus diisi!');
     }
 }
 
 // =========================
-// UPDATE TOTAL ITEM
+// PERBARUI TOTAL ITEM
 // =========================
-function updateTotalItem() {
-
-    document.getElementById('totalItem').textContent =
-        document.querySelectorAll('.item-row').length;
+function perbaruiTotalItem() {
+    const totalItem = document.querySelectorAll('.item-row').length;
+    document.getElementById('totalItem').textContent = totalItem;
+    hitungGrandTotal();
 }
 
 // =========================
 // VALIDASI STEP AKTIF
 // =========================
-function validateCurrentStep() {
+function validasiStepSekarang() {
 
-    const step = document.getElementById('step' + currentStep);
+    const step = document.getElementById('step' + stepSekarang);
 
     const requiredFields = step.querySelectorAll('[required]');
 
@@ -493,47 +833,62 @@ function validateCurrentStep() {
 }
 
 // =========================
-// NEXT STEP
+// KE STEP BERIKUTNYA
 // =========================
-function goNextStep() {
+function keStepBerikutnya() {
 
-    if (!validateCurrentStep()) return;
+    if (!validasiStepSekarang()) return;
 
-    if (currentStep < 3) {
-        currentStep++;
-        updateUI();
+    if (stepSekarang < 3) {
+        stepSekarang++;
+        perbaruiUI();
     }
 }
 
 // =========================
-// PREVIOUS STEP
+// KE STEP SEBELUMNYA
 // =========================
-function goPrevStep() {
+function keStepSebelumnya() {
 
-    if (currentStep > 1) {
-        currentStep--;
-        updateUI();
+    if (stepSekarang > 1) {
+        stepSekarang--;
+        perbaruiUI();
     }
 }
 
 // =========================
-// UPDATE UI STEP
+// PERBARUI UI STEP
 // =========================
-function updateUI() {
+function perbaruiUI() {
 
     // tampil/sembunyi step
     for (let i = 1; i <= 3; i++) {
 
         const step = document.getElementById('step' + i);
 
-        if (i === currentStep) {
+        if (i === stepSekarang) {
 
             step.classList.remove('d-none');
             step.style.display = 'block';
 
-            // aktifkan input step aktif
-            step.querySelectorAll('input, select, textarea').forEach(el => {
-                el.disabled = false;
+            // aktifkan semua input di step aktif (kecuali yang readonly)
+            step.querySelectorAll('input:not([readonly]), select, textarea, button').forEach(el => {
+                // Jangan aktifkan tombol hapus item jika step 2 dan item hanya 1
+                if (el.tagName === 'BUTTON' && el.closest('.item-row')) {
+                    const rows = document.querySelectorAll('.item-row');
+                    if (rows.length <= 1) {
+                        // Jika hanya 1 item, tombol hapus tetap disabled
+                        el.disabled = true;
+                    } else {
+                        el.disabled = false;
+                    }
+                } else if (el.tagName !== 'BUTTON') {
+                    el.disabled = false;
+                } else if (el.id === 'btnPrevStep' || el.id === 'btnNextStep' || el.id === 'submitBtn') {
+                    // Tombol navigasi tetap dikontrol terpisah
+                } else {
+                    el.disabled = false;
+                }
             });
 
         } else {
@@ -541,12 +896,17 @@ function updateUI() {
             step.classList.add('d-none');
             step.style.display = 'none';
 
-            // nonaktifkan input step lain
-            step.querySelectorAll('input, select, textarea').forEach(el => {
-
-                if (el.name !== '_token') {
-                    el.disabled = true;
+            // nonaktifkan semua input di step lain
+            step.querySelectorAll('input, select, textarea, button').forEach(el => {
+                // Jangan nonaktifkan tombol navigasi
+                if (el.id === 'btnPrevStep' || el.id === 'btnNextStep' || el.id === 'submitBtn') {
+                    return;
                 }
+                // Jangan nonaktifkan yang readonly
+                if (el.hasAttribute('readonly')) {
+                    return;
+                }
+                el.disabled = true;
             });
         }
     }
@@ -554,30 +914,57 @@ function updateUI() {
     // update indicator
     document.querySelectorAll('.step-indicator').forEach((el, index) => {
 
-        el.classList.toggle('active', index + 1 === currentStep);
+        el.classList.toggle('active', index + 1 === stepSekarang);
     });
 
-    // update tombol
-    document.getElementById('btnPrevStep').style.display =
-        currentStep === 1 ? 'none' : 'inline-block';
+    // update tombol navigasi
+    const btnPrev = document.getElementById('btnPrevStep');
+    const btnNext = document.getElementById('btnNextStep');
+    const btnSubmit = document.getElementById('submitBtn');
 
-    document.getElementById('btnNextStep').style.display =
-        currentStep === 3 ? 'none' : 'inline-block';
-
-    document.getElementById('submitBtn').style.display =
-        currentStep === 3 ? 'inline-block' : 'none';
+    if (stepSekarang === 1) {
+        btnPrev.style.display = 'none';
+        btnNext.style.display = 'inline-block';
+        btnSubmit.style.display = 'none';
+    } else if (stepSekarang === 2) {
+        btnPrev.style.display = 'inline-block';
+        btnNext.style.display = 'inline-block';
+        btnSubmit.style.display = 'none';
+        
+        // Pastikan tombol hapus item di step 2 diatur dengan benar
+        const rows = document.querySelectorAll('.item-row');
+        const deleteButtons = document.querySelectorAll('.item-row .btn-outline-danger');
+        deleteButtons.forEach((btn, index) => {
+            if (rows.length <= 1) {
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+            }
+        });
+        
+    } else if (stepSekarang === 3) {
+        btnPrev.style.display = 'inline-block';
+        btnNext.style.display = 'none';
+        btnSubmit.style.display = 'inline-block';
+    }
 }
 
 // =========================
-// INIT
+// INIT SAAT LOAD HALAMAN
 // =========================
 document.addEventListener('DOMContentLoaded', function () {
 
-    currentStep = 1;
+    stepSekarang = 1;
 
-    updateUI();
+    perbaruiUI();
 
-    updateTotalItem();
+    perbaruiTotalItem();
+
+    // Nonaktifkan tombol hapus pada item pertama (karena hanya 1 item)
+    const deleteButtons = document.querySelectorAll('.item-row .btn-outline-danger');
+    if (deleteButtons.length <= 1) {
+        deleteButtons.forEach(btn => btn.disabled = true);
+    }
 });
 </script>
 
