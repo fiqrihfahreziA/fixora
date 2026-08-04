@@ -222,6 +222,7 @@
                                         <small class="text-muted">{{ $pengajuan->bidang->nama_bidang ?? '-' }}</small>
                                     </td>
                                     <td>
+                                        {{-- PERBAIKAN: Format tanggal --}}
                                         {{ date('d/m/Y', strtotime($pengajuan->tanggal_pengajuan)) }}
                                     </td>
                                     <td>
@@ -268,9 +269,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
-                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3" 
-                                                    onclick="openModal({{ $pengajuan->id }})" 
-                                                    title="Detail">
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $pengajuan->id }}" title="Detail">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             @if($pengajuan->status == 'draft')
@@ -337,6 +336,7 @@
                                         <small class="text-muted">{{ $pengajuan->bidang->nama_bidang ?? '-' }}</small>
                                     </td>
                                     <td>
+                                        {{-- PERBAIKAN: Format tanggal --}}
                                         {{ date('d/m/Y', strtotime($pengajuan->tanggal_pengajuan)) }}
                                     </td>
                                     <td>
@@ -383,8 +383,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
-                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3" 
-                                                    onclick="openModal({{ $pengajuan->id }})">
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $pengajuan->id }}">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             @if($pengajuan->status == 'draft')
@@ -440,6 +439,7 @@
                                         <small class="text-muted">{{ $pengajuan->bidang->nama_bidang ?? '-' }}</small>
                                     </td>
                                     <td>
+                                        {{-- PERBAIKAN: Format tanggal --}}
                                         {{ date('d/m/Y', strtotime($pengajuan->tanggal_pengajuan)) }}
                                     </td>
                                     <td>
@@ -486,8 +486,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
-                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3" 
-                                                    onclick="openModal({{ $pengajuan->id }})">
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3" data-bs-toggle="modal" data-bs-target="#modalDetail{{ $pengajuan->id }}">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             @if($pengajuan->status == 'draft')
@@ -522,7 +521,7 @@
     </div>
 </div>
 
-{{-- ================= MODAL TANPA BACKDROP ================= --}}
+{{-- ================= MODAL DETAIL PENGAJUAN (MODERN) ================= --}}
 @foreach($allPengajuan as $pengajuan)
 @php
     $statusColor = [
@@ -548,16 +547,12 @@
     $steps = ['diajukan', 'disetujui_koordinator', 'disetujui_kabid', 'menunggu_direktur', 'disetujui'];
     $currentStepIndex = array_search($pengajuan->status, $steps);
 @endphp
-<div class="modal fade" id="modalDetail{{ $pengajuan->id }}" 
-     tabindex="-1" 
-     aria-hidden="true"
-     data-bs-backdrop="false"
-     data-bs-keyboard="true">
+<div class="modal fade" id="modalDetail{{ $pengajuan->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 rounded-4 overflow-hidden detail-modal-content">
 
             <!-- Header -->
-            <div class="modal-header-modern border-0 p-4" style="background: linear-gradient(135deg, #f8f9ff 0%, #e8edff 100%);">
+            <div class="modal-header-modern bg-{{ $statusColor }}-subtle border-0 p-4">
                 <button type="button" class="btn-close-modern" data-bs-dismiss="modal" aria-label="Close">
                     <i class="bi bi-x-lg"></i>
                 </button>
@@ -593,22 +588,6 @@
                         <div class="info-tile">
                             <span class="info-tile-label"><i class="bi bi-cash-coin me-1"></i>Total Pengajuan</span>
                             <span class="info-tile-value fw-bold text-primary">Rp {{ number_format($pengajuan->total_pengajuan, 0, ',', '.') }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Informasi Pemohon -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="info-tile">
-                            <span class="info-tile-label"><i class="bi bi-person me-1"></i>Pemohon</span>
-                            <span class="info-tile-value">{{ $pengajuan->karyawan->nama ?? $pengajuan->user->name ?? '-' }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="info-tile">
-                            <span class="info-tile-label"><i class="bi bi-briefcase me-1"></i>Jabatan</span>
-                            <span class="info-tile-value">{{ $pengajuan->karyawan->jabatan ?? '-' }}</span>
                         </div>
                     </div>
                 </div>
@@ -686,7 +665,7 @@
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
                 @if($pengajuan->status == 'draft')
                     <a href="#" class="btn btn-warning rounded-pill px-4 text-white">
-                        <i class="bi bi-pencil me-1"></i>....
+                        <i class="bi bi-pencil me-1"></i>Edit Pengajuan
                     </a>
                 @endif
                 @if($pengajuan->status == 'disetujui')
@@ -826,39 +805,16 @@
     }
 }
 
-/* ===== MODAL TANPA BACKDROP ===== */
-/* HAPUS BACKDROP */
-.modal-backdrop {
-    display: none !important;
-}
-
-/* MODAL TETAP DI ATAS */
-.modal {
-    background: rgba(0,0,0,0.01);
-    pointer-events: none;
-}
-.modal-dialog {
-    pointer-events: auto;
-    margin: 1.75rem auto;
-}
-.modal-content {
-    pointer-events: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+/* ===== MODAL DETAIL - MODERN STYLES ===== */
+.detail-modal-content {
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     animation: modalPopIn 0.25s ease;
 }
-
 @keyframes modalPopIn {
     from { opacity: 0; transform: translateY(12px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* HAPUS SCROLL LOCK */
-body.modal-open {
-    overflow: auto !important;
-    padding-right: 0 !important;
-}
-
-/* HEADER MODERN */
 .modal-header-modern {
     position: relative;
 }
@@ -870,13 +826,12 @@ body.modal-open {
     height: 36px;
     border: none;
     border-radius: 50%;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.7);
     color: #495057;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    z-index: 10;
 }
 .btn-close-modern:hover {
     background: #fff;
@@ -983,6 +938,9 @@ body.modal-open {
 .modal-content {
     border: none;
 }
+.modal-backdrop.show {
+    opacity: 0.55;
+}
 
 @media (max-width: 576px) {
     .status-tracker {
@@ -997,42 +955,10 @@ body.modal-open {
 </style>
 
 <script>
-// ===== FUNGSI OPEN MODAL MANUAL =====
-function openModal(id) {
-    var modalElement = document.getElementById('modalDetail' + id);
-    if (modalElement) {
-        var modal = new bootstrap.Modal(modalElement, {
-            backdrop: false,
-            keyboard: true
-        });
-        modal.show();
-    } else {
-        console.error('Modal not found for ID:', id);
-    }
-}
-
-// ===== TOOLTIP =====
 document.addEventListener('DOMContentLoaded', function() {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
-
-// ===== CLEANUP BACKDROP SAAT MODAL TUTUP =====
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.modal').forEach(function(modal) {
-        modal.addEventListener('hidden.bs.modal', function() {
-            // Hapus semua backdrop yang tersisa
-            document.querySelectorAll('.modal-backdrop').forEach(function(el) {
-                el.remove();
-            });
-            // Hapus class modal-open
-            document.body.classList.remove('modal-open');
-            // Reset scroll
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-        });
     });
 });
 </script>

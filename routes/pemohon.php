@@ -2,10 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\PenerimaController;
-use App\Http\Controllers\AtasanController;
+use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PemohonController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
@@ -40,11 +38,17 @@ Route::middleware(['auth', 'role:pemohon'])
 
         Route::get('permintaan/{id}/gambar', [PemohonController::class, 'lihatGambar'])->name('permintaan.gambar');
         
+        //pengadaan 
+        
         Route::get('/pengadaan', [PemohonController::class, 'showpengadaan'])
             ->name('pengadaan');
-            Route::get('pengadaan/create', [PemohonController::class, 'create'])->name('pengadaan.create');
+        Route::get('pengadaan/create', [PemohonController::class, 'create'])->name('pengadaan.create');
+      
 
-        // Route::put('/karyawan/{id}', [AdminController::class, 'update'])
+        Route::post('/pemohon/pengadaan/store', [PemohonController::class, 'storePengadaan'])
+            ->name('pengadaan.store');
+        
+            // Route::put('/karyawan/{id}', [AdminController::class, 'update'])
         //     ->name('karyawan.update');
         
         // Route::delete('/karyawan/{id}', [AdminController::class, 'destroy'])

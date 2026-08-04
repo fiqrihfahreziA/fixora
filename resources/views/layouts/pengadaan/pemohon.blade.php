@@ -411,7 +411,7 @@
             <ul class="navbar-nav ms-4 me-auto">
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pemohon/permintaan*') ? 'active' : '' }}"
-                       href="{{ route('pemohon.permintaan') }}">
+                       href="#">
                         <i class="bi bi-box"></i>
                         Permintaan Barang
                     </a>
@@ -419,14 +419,13 @@
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pemohon/dokumen*') ? 'active' : '' }}"
                        href="#">
-                        <i class="bi bi-file-earmark-text"></i>
-                        Dokumen CR Sample
-                    </a>
+                       
+                       
                 </li>
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-2" href="#">
-                        <i class="bi bi-clock-history"></i>
-                        Riwayat
+                    
+                      
                     </a>
                 </li>
             </ul>
