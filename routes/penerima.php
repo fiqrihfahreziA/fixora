@@ -24,11 +24,12 @@ Route::middleware(['auth', 'role:penerima'])
     ->name('penerima.')
     ->group(function () {
 
-    Route::get('/main', [PenerimaController::class, 'main'])
-            ->name('dashboard');
-
+    
         Route::get('/', [PenerimaController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('/chart', [PenerimaController::class, 'chart'])
+            ->name('chart');
 
          
         Route::get('/permintaann', [PenerimaController::class, 'showpermintaan'])
@@ -72,7 +73,11 @@ Route::middleware(['auth', 'role:penerima'])
             Route::get('permintaan/{id}/gambar', [PemohonController::class, 'lihatGambar'])
              ->name('permintaan.gambar');
 
+             Route::get('/chart/pengadaan', [PenerimaController::class, 'chartpengadaan'])
+            ->name('chartp');
 
-
+    // PENGADAAN
+    
+       
     });
 

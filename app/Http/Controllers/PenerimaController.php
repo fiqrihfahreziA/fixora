@@ -9,6 +9,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use App\Models\Karyawan;
 use App\Models\detail_barang;
+use App\Models\barang_tersedia;
+use App\Models\pengajuan;
+use App\Models\pengajuan_item;
+use Illuminate\Support\Facades\DB; 
 use App\Models\RequestModel;
 use App\Models\Penerima;
 use Illuminate\Support\Facades\Auth;
@@ -17,48 +21,18 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PenerimaController extends Controller
 {
-   // public function index(){
-   //  return view('penerima.dashboard');
-   // }
 
-//     public function index()
-// {
-//     $bidangId = Auth::user()->karyawan->bidang_id ?? null;
+public function index()
+    {
+        $authUser = Auth::user();
 
-//     if ($bidangId == 2) {
-//         $bidangFilter = [2, 4];
-//     } else {
-//         $bidangFilter = [$bidangId];
-//     }
+        
+        return view('penerima.dashboard', [
+            'authUser' => $authUser,
+        ]);
+    }
 
-//     $totalRequest = RequestModel::whereIn('bidang_id', $bidangFilter)->count();
-
-//     $totalPermintaan = RequestModel::whereIn('bidang_id', $bidangFilter)
-//         ->where('request_type', 'permintaan')
-//         ->count();
-
-//     $totalPerbaikan = RequestModel::whereIn('bidang_id', $bidangFilter)
-//         ->where('request_type', 'perbaikan')
-//         ->count();
-
-//     $pending = RequestModel::whereIn('bidang_id', $bidangFilter)
-//         ->where('status', 'pending')
-//         ->count();
-
-//     $approved = RequestModel::whereIn('bidang_id', $bidangFilter)
-//         ->where('status', 'approved')
-//         ->count();
-
-//     return view('penerima.dashboard', compact(
-//         'totalRequest',
-//         'totalPermintaan',
-//         'totalPerbaikan',
-//         'pending',
-//         'approved'
-//     ));
-// }
-
-    public function index()
+    public function chart()
 {
     $bidangId = Auth::user()->karyawan->bidang_id ?? null;
 
@@ -96,7 +70,7 @@ class PenerimaController extends Controller
     ->take(5)
     ->get();
 
-    return view('penerima.dashboard', compact(
+    return view('penerima.chart', compact(
         'totalRequest',
         'totalPermintaan',
         'totalPerbaikan',
@@ -568,6 +542,144 @@ public function exportCsv(Request $request)
     return response()->download($path)->deleteFileAfterSend(true);
 }
 
+//pengadaan
 
-   
+   public function chartpengadaan(Request $request)
+    {
+        $authUser = Auth::user();
+        
+        // Ambil bidang_id dari karyawan yang login (PENERIMA)
+        $bidangId = $authUser->karyawan->bidang_id ?? null;
+        $ruangan = $authUser->karyawan->ruangan ?? null;
+        
+        // Ambil bidang untuk filter
+        $bidangs = bidang::all();
+
+        // Ambil query pencarian
+        $search = $request->input('search');
+        $statusFilter = $request->input('status');
+        $bidangFilter = $request->input('bidang');
+        $typeFilter = $request->input('type');
+         $tahunAnggaran = $request->input('tahun_anggaran');
+
+        /**
+         * ============================
+         * QUERY DASAR PENGADAAN
+         * Filter berdasarkan bidang_id user (PENERIMA)
+         * ============================
+         */
+        $query = Pengajuan::with(['items', 'karyawan', 'bidang'])
+            ->where('bidang_id', $bidangId) // <-- FILTER BERDASARKAN BIDANG USER
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('no_pengajuan', 'like', "%{$search}%")
+                        ->orWhere('dasar_usulan', 'like', "%{$search}%")
+                        ->orWhereHas('items', function ($itemQuery) use ($search) {
+                            $itemQuery->where('nama_barang', 'like', "%{$search}%")
+                                ->orWhere('spesifikasi', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($statusFilter, function ($q) use ($statusFilter) {
+                $q->where('status', $statusFilter);
+            })
+            ->when($bidangFilter, function ($q) use ($bidangFilter) {
+                $q->where('bidang_id', $bidangFilter);
+            })
+            ->when($tahunAnggaran, function ($q) use ($tahunAnggaran) { // <-- TAMBAHKAN FILTER TAHUN
+            $q->where('tahun_anggaran', $tahunAnggaran);
+            });
+
+        /**
+         * ============================
+         * DATA UNTUK TABEL SEMUA PENGAJUAN
+         * ============================
+         */
+        $allPengajuan = clone $query;
+        $allPengajuan = $allPengajuan->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->all());
+
+        /**
+         * ============================
+         * DATA UNTUK TAB PERMINTAAN 
+         * ============================
+         */
+        $permintaanQuery = clone $query;
+        $permintaanPengajuan = $permintaanQuery->where(function($q) {
+                $q->where('dasar_usulan', 'LIKE', '%Program Kerja%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%Kebutuhan Operasional%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%Penambahan Kapasitas Pelayanan%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%Pemenuhan Standar Akreditasi%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%Keselamatan Pasien%')
+                  ->orWhereNull('dasar_usulan');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->all());
+
+        /**
+         * ============================
+         * DATA UNTUK TAB PERBAIKAN 
+         * ============================
+         */
+        $perbaikanQuery = clone $query;
+        $perbaikanPengajuan = $perbaikanQuery->where(function($q) {
+                $q->where('dasar_usulan', 'LIKE', '%Penggantian Barang Rusak%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%perbaikan%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%service%')
+                  ->orWhere('dasar_usulan', 'LIKE', '%repair%');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->all());
+
+        /**
+         * ============================
+         * STATISTIK DASHBOARD
+         * ============================
+         */
+        $stats = [
+            'total' => Pengajuan::where('bidang_id', $bidangId)->count(),
+            'draft' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'draft')->count(),
+            'diajukan' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'diajukan')->count(),
+            'disetujui' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'disetujui')->count(),
+            'ditolak' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'ditolak')->count(),
+            'menunggu_direktur' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'menunggu_direktur')->count(),
+            
+            'permintaan_count' => Pengajuan::where('bidang_id', $bidangId)
+                ->where(function($q) {
+                    $q->where('dasar_usulan', 'LIKE', '%Program Kerja%')
+                      ->orWhere('dasar_usulan', 'LIKE', '%Kebutuhan Operasional%')
+                      ->orWhere('dasar_usulan', 'LIKE', '%Penambahan Kapasitas Pelayanan%')
+                      ->orWhere('dasar_usulan', 'LIKE', '%Pemenuhan Standar Akreditasi%')
+                      ->orWhere('dasar_usulan', 'LIKE', '%Keselamatan Pasien%')
+                      ->orWhereNull('dasar_usulan');
+                })->count(),
+                
+            'perbaikan_count' => Pengajuan::where('bidang_id', $bidangId)
+                ->where(function($q) {
+                    $q->where('dasar_usulan', 'LIKE', '%Penggantian Barang Rusak%')
+                      ->orWhere('dasar_usulan', 'LIKE', '%perbaikan%')
+                      ->orWhere('dasar_usulan', 'LIKE', '%service%')
+                      ->orWhere('dasar_usulan', 'LIKE', '%repair%');
+                })->count(),
+        ];
+
+        return view('penerima.pengadaan.permintaan', compact(
+            'authUser',
+            'allPengajuan',
+            'permintaanPengajuan',
+            'perbaikanPengajuan',
+            'bidangs',
+            'search',
+            'statusFilter',
+            'bidangFilter',
+            'typeFilter',
+            'stats',
+            'tahunAnggaran', // <-- TAMBAHKAN INI
+            'bidangId',
+            'ruangan'
+        ));
+    }
 }

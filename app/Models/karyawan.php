@@ -15,6 +15,7 @@ class karyawan extends Model
         'jabatan',
         'ruangan',
         'ttd',
+        'bidang_id'
     ];
 
     // Relasi ke user
@@ -28,6 +29,11 @@ class karyawan extends Model
         return $this->hasOne(User::class, 'karyawan_id');
     }
 
-    /** @use HasFactory<\Database\Factories\KaryawanFactory> */
+      public function bidang()
+    {
+        return $this->belongsTo(bidang::class, 'bidang_id');
+    }
+
+
     use HasFactory;
 }

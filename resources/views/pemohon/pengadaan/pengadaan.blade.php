@@ -181,7 +181,7 @@
                         <span class="badge bg-primary rounded-pill ms-2">{{ $stats['total'] ?? 0 }}</span>
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
+                {{-- <li class="nav-item" role="presentation">
                     <button class="nav-link px-4 py-2" data-bs-toggle="tab" data-bs-target="#permintaan" type="button" role="tab">
                         <i class="bi bi-box me-2"></i>Permintaan
                         <span class="badge bg-success rounded-pill ms-2">{{ $stats['permintaan_count'] ?? 0 }}</span>
@@ -192,7 +192,7 @@
                         <i class="bi bi-tools me-2"></i>Perbaikan
                         <span class="badge bg-warning rounded-pill ms-2">{{ $stats['perbaikan_count'] ?? 0 }}</span>
                     </button>
-                </li>
+                </li> --}}
             </ul>
 
             <!-- Tab Content -->
@@ -274,9 +274,9 @@
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             @if($pengajuan->status == 'draft')
-                                                <a href="#" class="btn btn-sm btn-outline-warning rounded-3" data-bs-toggle="tooltip" title="Edit">
+                                                {{-- <a href="#" class="btn btn-sm btn-outline-warning rounded-3" data-bs-toggle="tooltip" title="Edit">
                                                     <i class="bi bi-pencil"></i>
-                                                </a>
+                                                </a> --}}
                                                 <button class="btn btn-sm btn-outline-danger rounded-3" data-bs-toggle="tooltip" title="Hapus">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
