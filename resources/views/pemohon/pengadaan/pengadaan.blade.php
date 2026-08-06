@@ -46,8 +46,8 @@
                             <i class="bi bi-pencil-square fs-4"></i>
                         </div>
                         <div>
-                            <h6 class="text-muted mb-0 small">Draft</h6>
-                            <h5 class="fw-bold mb-0">{{ $stats['draft'] ?? 0 }}</h5>
+                            <h6 class="text-muted mb-0 small">Draft / Revisi</h6>
+                            <h5 class="fw-bold mb-0">{{ ($stats['draft'] ?? 0) + ($stats['revisi'] ?? 0) }}</h5>
                         </div>
                     </div>
                 </div>
@@ -141,6 +141,7 @@
                     <select name="status" class="form-select bg-light border-0">
                         <option value="">Semua Status</option>
                         <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="revisi" {{ request('status') == 'revisi' ? 'selected' : '' }}>Revisi</option>
                         <option value="diajukan" {{ request('status') == 'diajukan' ? 'selected' : '' }}>Diajukan</option>
                         <option value="disetujui_koordinator" {{ request('status') == 'disetujui_koordinator' ? 'selected' : '' }}>Disetujui Koordinator</option>
                         <option value="disetujui_kabid" {{ request('status') == 'disetujui_kabid' ? 'selected' : '' }}>Disetujui Kabid</option>
@@ -181,18 +182,6 @@
                         <span class="badge bg-primary rounded-pill ms-2">{{ $stats['total'] ?? 0 }}</span>
                     </button>
                 </li>
-                {{-- <li class="nav-item" role="presentation">
-                    <button class="nav-link px-4 py-2" data-bs-toggle="tab" data-bs-target="#permintaan" type="button" role="tab">
-                        <i class="bi bi-box me-2"></i>Permintaan
-                        <span class="badge bg-success rounded-pill ms-2">{{ $stats['permintaan_count'] ?? 0 }}</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link px-4 py-2" data-bs-toggle="tab" data-bs-target="#perbaikan" type="button" role="tab">
-                        <i class="bi bi-tools me-2"></i>Perbaikan
-                        <span class="badge bg-warning rounded-pill ms-2">{{ $stats['perbaikan_count'] ?? 0 }}</span>
-                    </button>
-                </li> --}}
             </ul>
 
             <!-- Tab Content -->
@@ -240,6 +229,7 @@
                                         @php
                                             $statusColor = [
                                                 'draft' => 'secondary',
+                                                'revisi' => 'warning',
                                                 'diajukan' => 'warning',
                                                 'disetujui_koordinator' => 'info',
                                                 'disetujui_kabid' => 'primary',
@@ -250,6 +240,7 @@
                                             
                                             $statusLabel = [
                                                 'draft' => 'Draft',
+                                                'revisi' => 'Revisi',
                                                 'diajukan' => 'Diajukan',
                                                 'disetujui_koordinator' => 'Disetujui Koordinator',
                                                 'disetujui_kabid' => 'Disetujui Kabid',
@@ -268,19 +259,36 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-2 justify-content-center">
+                                            {{-- TOMBOL DETAIL --}}
                                             <button type="button" class="btn btn-sm btn-outline-primary rounded-3" 
                                                     onclick="openModal({{ $pengajuan->id }})" 
                                                     title="Detail">
                                                 <i class="bi bi-eye"></i>
                                             </button>
+                                            
+                                          
+                                            
+                                            {{-- TOMBOL AJUKAN - HANYA UNTUK DRAFT --}}
                                             @if($pengajuan->status == 'draft')
-                                                {{-- <a href="#" class="btn btn-sm btn-outline-warning rounded-3" data-bs-toggle="tooltip" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a> --}}
-                                                <button class="btn btn-sm btn-outline-danger rounded-3" data-bs-toggle="tooltip" title="Hapus">
-                                                    <i class="bi bi-trash"></i>
+                                                <button class="btn btn-sm btn-outline-warning rounded-3" 
+                                                        onclick="confirmAjukan({{ $pengajuan->id }})" 
+                                                        data-bs-toggle="tooltip" 
+                                                        title="Ajukan Pengajuan">
+                                                    <i class="bi bi-send"></i>
                                                 </button>
                                             @endif
+                                            
+                                            {{-- TOMBOL HAPUS - UNTUK DRAFT ATAU REVISI --}}
+                                            {{-- @if(in_array($pengajuan->status, ['draft', 'revisi']))
+                                                <button class="btn btn-sm btn-outline-danger rounded-3" 
+                                                        onclick="confirmDelete({{ $pengajuan->id }})" 
+                                                        data-bs-toggle="tooltip" 
+                                                        title="Hapus">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            @endif --}}
+                                            
+                                            {{-- TOMBOL CETAK - UNTUK DISETUJUI --}}
                                             @if($pengajuan->status == 'disetujui')
                                                 <a href="#" class="btn btn-sm btn-outline-success rounded-3" data-bs-toggle="tooltip" title="Cetak">
                                                     <i class="bi bi-printer"></i>
@@ -311,212 +319,6 @@
                         {{ $allPengajuan->links() }}
                     </div>
                 </div>
-
-                <!-- Tab Permintaan -->
-                <div class="tab-pane fade" id="permintaan" role="tabpanel">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="py-3 px-3" width="5%">#</th>
-                                    <th class="py-3 px-3" width="15%">No Pengajuan</th>
-                                    <th class="py-3 px-3" width="15%">Tanggal</th>
-                                    <th class="py-3 px-3" width="25%">Nama Barang</th>
-                                    <th class="py-3 px-3" width="15%">Status</th>
-                                    <th class="py-3 px-3" width="10%">Total</th>
-                                    <th class="py-3 px-3 text-center" width="15%">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($permintaanPengajuan as $pengajuan)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>
-                                        <span class="fw-semibold text-success">{{ $pengajuan->no_pengajuan }}</span>
-                                        <br>
-                                        <small class="text-muted">{{ $pengajuan->bidang->nama_bidang ?? '-' }}</small>
-                                    </td>
-                                    <td>
-                                        {{ date('d/m/Y', strtotime($pengajuan->tanggal_pengajuan)) }}
-                                    </td>
-                                    <td>
-                                        @foreach($pengajuan->items->take(2) as $item)
-                                            <div class="d-flex align-items-center gap-2 mb-1">
-                                                <i class="bi bi-dot text-success"></i>
-                                                <span class="small">{{ $item->nama_barang }}</span>
-                                                <span class="badge bg-light text-dark">x{{ $item->jumlah }}</span>
-                                            </div>
-                                        @endforeach
-                                        @if($pengajuan->items->count() > 2)
-                                            <small class="text-muted">+ {{ $pengajuan->items->count() - 2 }} item lainnya</small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @php
-                                            $statusColor = [
-                                                'draft' => 'secondary',
-                                                'diajukan' => 'warning',
-                                                'disetujui_koordinator' => 'info',
-                                                'disetujui_kabid' => 'primary',
-                                                'menunggu_direktur' => 'warning',
-                                                'disetujui' => 'success',
-                                                'ditolak' => 'danger'
-                                            ][$pengajuan->status] ?? 'secondary';
-                                            
-                                            $statusLabel = [
-                                                'draft' => 'Draft',
-                                                'diajukan' => 'Diajukan',
-                                                'disetujui_koordinator' => 'Disetujui Koordinator',
-                                                'disetujui_kabid' => 'Disetujui Kabid',
-                                                'menunggu_direktur' => 'Menunggu Direktur',
-                                                'disetujui' => 'Disetujui',
-                                                'ditolak' => 'Ditolak'
-                                            ][$pengajuan->status] ?? $pengajuan->status;
-                                        @endphp
-                                        <span class="badge bg-{{ $statusColor }}-subtle text-{{ $statusColor }} px-3 py-2 rounded-pill">
-                                            <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>
-                                            {{ $statusLabel }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold">Rp {{ number_format($pengajuan->total_pengajuan, 0, ',', '.') }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3" 
-                                                    onclick="openModal({{ $pengajuan->id }})">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                            @if($pengajuan->status == 'draft')
-                                                <a href="#" class="btn btn-sm btn-outline-warning rounded-3">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-5">
-                                        <i class="bi bi-box text-muted fs-1 d-block mb-3"></i>
-                                        <h6 class="text-muted">Belum ada pengajuan permintaan</h6>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <div class="text-muted small">
-                            Menampilkan {{ $permintaanPengajuan->firstItem() ?? 0 }} - {{ $permintaanPengajuan->lastItem() ?? 0 }} 
-                            dari {{ $permintaanPengajuan->total() }} data
-                        </div>
-                        {{ $permintaanPengajuan->links() }}
-                    </div>
-                </div>
-
-                <!-- Tab Perbaikan -->
-                <div class="tab-pane fade" id="perbaikan" role="tabpanel">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="py-3 px-3" width="5%">#</th>
-                                    <th class="py-3 px-3" width="15%">No Pengajuan</th>
-                                    <th class="py-3 px-3" width="15%">Tanggal</th>
-                                    <th class="py-3 px-3" width="25%">Nama Barang</th>
-                                    <th class="py-3 px-3" width="15%">Status</th>
-                                    <th class="py-3 px-3" width="10%">Total</th>
-                                    <th class="py-3 px-3 text-center" width="15%">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($perbaikanPengajuan as $pengajuan)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>
-                                        <span class="fw-semibold text-warning">{{ $pengajuan->no_pengajuan }}</span>
-                                        <br>
-                                        <small class="text-muted">{{ $pengajuan->bidang->nama_bidang ?? '-' }}</small>
-                                    </td>
-                                    <td>
-                                        {{ date('d/m/Y', strtotime($pengajuan->tanggal_pengajuan)) }}
-                                    </td>
-                                    <td>
-                                        @foreach($pengajuan->items->take(2) as $item)
-                                            <div class="d-flex align-items-center gap-2 mb-1">
-                                                <i class="bi bi-dot text-warning"></i>
-                                                <span class="small">{{ $item->nama_barang }}</span>
-                                                <span class="badge bg-light text-dark">x{{ $item->jumlah }}</span>
-                                            </div>
-                                        @endforeach
-                                        @if($pengajuan->items->count() > 2)
-                                            <small class="text-muted">+ {{ $pengajuan->items->count() - 2 }} item lainnya</small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @php
-                                            $statusColor = [
-                                                'draft' => 'secondary',
-                                                'diajukan' => 'warning',
-                                                'disetujui_koordinator' => 'info',
-                                                'disetujui_kabid' => 'primary',
-                                                'menunggu_direktur' => 'warning',
-                                                'disetujui' => 'success',
-                                                'ditolak' => 'danger'
-                                            ][$pengajuan->status] ?? 'secondary';
-                                            
-                                            $statusLabel = [
-                                                'draft' => 'Draft',
-                                                'diajukan' => 'Diajukan',
-                                                'disetujui_koordinator' => 'Disetujui Koordinator',
-                                                'disetujui_kabid' => 'Disetujui Kabid',
-                                                'menunggu_direktur' => 'Menunggu Direktur',
-                                                'disetujui' => 'Disetujui',
-                                                'ditolak' => 'Ditolak'
-                                            ][$pengajuan->status] ?? $pengajuan->status;
-                                        @endphp
-                                        <span class="badge bg-{{ $statusColor }}-subtle text-{{ $statusColor }} px-3 py-2 rounded-pill">
-                                            <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>
-                                            {{ $statusLabel }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold">Rp {{ number_format($pengajuan->total_pengajuan, 0, ',', '.') }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3" 
-                                                    onclick="openModal({{ $pengajuan->id }})">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                            @if($pengajuan->status == 'draft')
-                                                <a href="#" class="btn btn-sm btn-outline-warning rounded-3">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-5">
-                                        <i class="bi bi-tools text-muted fs-1 d-block mb-3"></i>
-                                        <h6 class="text-muted">Belum ada pengajuan perbaikan</h6>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <div class="text-muted small">
-                            Menampilkan {{ $perbaikanPengajuan->firstItem() ?? 0 }} - {{ $perbaikanPengajuan->lastItem() ?? 0 }} 
-                            dari {{ $perbaikanPengajuan->total() }} data
-                        </div>
-                        {{ $perbaikanPengajuan->links() }}
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -527,6 +329,7 @@
 @php
     $statusColor = [
         'draft' => 'secondary',
+        'revisi' => 'warning',
         'diajukan' => 'warning',
         'disetujui_koordinator' => 'info',
         'disetujui_kabid' => 'primary',
@@ -537,6 +340,7 @@
 
     $statusLabel = [
         'draft' => 'Draft',
+        'revisi' => 'Revisi',
         'diajukan' => 'Diajukan',
         'disetujui_koordinator' => 'Disetujui Koordinator',
         'disetujui_kabid' => 'Disetujui Kabid',
@@ -563,7 +367,7 @@
                 </button>
                 <div class="d-flex align-items-center gap-3">
                     <div class="modal-icon-badge bg-{{ $statusColor }} text-white">
-                        <i class="bi bi-{{ $pengajuan->jenis == 'perbaikan' ? 'tools' : 'box-seam' }}"></i>
+                        <i class="bi bi-box-seam"></i>
                     </div>
                     <div>
                         <h5 class="fw-bold mb-1 text-dark">{{ $pengajuan->no_pengajuan }}</h5>
@@ -602,7 +406,7 @@
                     <div class="col-md-6">
                         <div class="info-tile">
                             <span class="info-tile-label"><i class="bi bi-person me-1"></i>Pemohon</span>
-                            <span class="info-tile-value">{{ $pengajuan->karyawan->nama ?? $pengajuan->user->name ?? '-' }}</span>
+                            <span class="info-tile-value">{{ $pengajuan->karyawan->nama ?? '-' }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -613,8 +417,24 @@
                     </div>
                 </div>
 
+                <!-- Alasan & Manfaat -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="info-tile">
+                            <span class="info-tile-label"><i class="bi bi-clipboard-check me-1"></i>Alasan Justifikasi</span>
+                            <span class="info-tile-value">{{ $pengajuan->alasan_justifikasi ?? '-' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-tile">
+                            <span class="info-tile-label"><i class="bi bi-star me-1"></i>Manfaat</span>
+                            <span class="info-tile-value">{{ $pengajuan->manfaat ?? '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Progress Status -->
-                @if($pengajuan->status !== 'ditolak' && $pengajuan->status !== 'draft')
+                @if(!in_array($pengajuan->status, ['draft', 'revisi', 'ditolak']))
                 <div class="mb-4">
                     <h6 class="fw-semibold small text-muted mb-3">
                         <i class="bi bi-signpost-split me-1"></i>Progres Persetujuan
@@ -632,7 +452,7 @@
                 @elseif($pengajuan->status == 'ditolak')
                 <div class="alert alert-danger-subtle bg-danger-subtle border-0 rounded-3 d-flex align-items-center gap-2 mb-4">
                     <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
-                    <span class="small text-danger fw-semibold">Pengajuan ini ditolak{{ isset($pengajuan->catatan_penolakan) ? ': '.$pengajuan->catatan_penolakan : '.' }}</span>
+                    <span class="small text-danger fw-semibold">Pengajuan ini ditolak</span>
                 </div>
                 @endif
 
@@ -655,8 +475,8 @@
                             <tr>
                                 <td class="px-3">
                                     <span class="fw-semibold small d-block">{{ $item->nama_barang }}</span>
-                                    @if(!empty($item->keterangan))
-                                        <span class="text-muted" style="font-size: 0.75rem;">{{ $item->keterangan }}</span>
+                                    @if(!empty($item->spesifikasi))
+                                        <span class="text-muted" style="font-size: 0.75rem;">{{ $item->spesifikasi }}</span>
                                     @endif
                                 </td>
                                 <td class="px-3 text-center small">{{ $item->jumlah }} {{ $item->satuan ?? '' }}</td>
@@ -674,21 +494,49 @@
                     </table>
                 </div>
 
-                @if(!empty($pengajuan->catatan))
+                <!-- Dampak -->
+                @if(!empty($pengajuan->dampak))
                 <div class="mt-4">
-                    <h6 class="fw-semibold small text-muted mb-2"><i class="bi bi-chat-square-text me-1"></i>Catatan</h6>
-                    <div class="bg-light rounded-3 p-3 small text-muted">{{ $pengajuan->catatan }}</div>
+                    <h6 class="fw-semibold small text-muted mb-2">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Dampak Jika Tidak Dilaksanakan
+                    </h6>
+                    <div class="bg-light rounded-3 p-3 small">{{ $pengajuan->dampak }}</div>
+                </div>
+                @endif
+
+                <!-- Kondisi Barang Lama -->
+                @if(!empty($pengajuan->kondisi_barang_lama) || !empty($pengajuan->ket_barang_lama))
+                <div class="mt-4">
+                    <h6 class="fw-semibold small text-muted mb-2">
+                        <i class="bi bi-info-circle me-1"></i>Kondisi Barang Lama
+                    </h6>
+                    <div class="bg-light rounded-3 p-3 small">
+                        @if(!empty($pengajuan->kondisi_barang_lama))
+                            <span class="fw-semibold">Kondisi:</span> {{ $pengajuan->kondisi_barang_lama }}
+                        @endif
+                        @if(!empty($pengajuan->ket_barang_lama))
+                            <br><span class="fw-semibold">Keterangan:</span> {{ $pengajuan->ket_barang_lama }}
+                        @endif
+                    </div>
                 </div>
                 @endif
             </div>
 
             <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
-                @if($pengajuan->status == 'draft')
-                    <a href="#" class="btn btn-warning rounded-pill px-4 text-white">
-                        <i class="bi bi-pencil me-1"></i>....
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Tutup
+                </button>
+                
+                {{-- TOMBOL EDIT - UNTUK DRAFT ATAU REVISI --}}
+                @if(in_array($pengajuan->status, ['draft', 'revisi']))
+                    <a href="{{ route('pemohon.pengadaan.edit', $pengajuan->id) }}" 
+                       class="btn {{ $pengajuan->status == 'revisi' ? 'btn-warning' : 'btn-primary' }} rounded-pill px-4 text-white">
+                        <i class="bi bi-{{ $pengajuan->status == 'revisi' ? 'pencil-square' : 'pencil' }} me-1"></i>
+                        {{ $pengajuan->status == 'revisi' ? 'Revisi' : 'Edit' }}
                     </a>
                 @endif
+                
+                {{-- TOMBOL CETAK - UNTUK DISETUJUI --}}
                 @if($pengajuan->status == 'disetujui')
                     <a href="#" class="btn btn-success rounded-pill px-4">
                         <i class="bi bi-printer me-1"></i>Cetak
@@ -700,6 +548,9 @@
 </div>
 @endforeach
 
+<!-- ============================================
+STYLES
+============================================ -->
 <style>
 /* ===== BASE STYLES ===== */
 .bg-purple {
@@ -826,13 +677,11 @@
     }
 }
 
-/* ===== MODAL TANPA BACKDROP ===== */
-/* HAPUS BACKDROP */
+/* ===== MODAL ===== */
 .modal-backdrop {
     display: none !important;
 }
 
-/* MODAL TETAP DI ATAS */
 .modal {
     background: rgba(0,0,0,0.01);
     pointer-events: none;
@@ -852,13 +701,11 @@
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* HAPUS SCROLL LOCK */
 body.modal-open {
     overflow: auto !important;
     padding-right: 0 !important;
 }
 
-/* HEADER MODERN */
 .modal-header-modern {
     position: relative;
 }
@@ -980,10 +827,6 @@ body.modal-open {
     color: #0d6efd;
 }
 
-.modal-content {
-    border: none;
-}
-
 @media (max-width: 576px) {
     .status-tracker {
         overflow-x: auto;
@@ -996,8 +839,11 @@ body.modal-open {
 }
 </style>
 
+<!-- ============================================
+SCRIPTS
+============================================ -->
 <script>
-// ===== FUNGSI OPEN MODAL MANUAL =====
+// ===== FUNGSI OPEN MODAL =====
 function openModal(id) {
     var modalElement = document.getElementById('modalDetail' + id);
     if (modalElement) {
@@ -1006,8 +852,84 @@ function openModal(id) {
             keyboard: true
         });
         modal.show();
-    } else {
-        console.error('Modal not found for ID:', id);
+    }
+}
+
+// ===== FUNGSI CONFIRM AJUKAN =====
+function confirmAjukan(id) {
+    if (confirm('Apakah Anda yakin ingin mengajukan pengajuan ini?')) {
+        
+        const url = `/pemohon/pengadaan/${id}/submit`;
+        
+        console.log('URL:', url);
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.text();
+        })
+        .then(text => {
+            console.log('Response text:', text);
+            
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    window.location.reload();
+                } else {
+                    alert('❌ Gagal mengajukan: ' + data.message);
+                }
+            } catch (e) {
+                console.error('Bukan JSON:', text);
+                alert('❌ Server mengembalikan HTML, cek log error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Terjadi kesalahan: ' + error.message);
+        });
+    }
+}
+
+// ===== FUNGSI CONFIRM DELETE =====
+function confirmDelete(id) {
+    if (confirm('Apakah Anda yakin ingin menghapus pengajuan ini?')) {
+        const url = `/pemohon/pengadaan/${id}`;
+        
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    window.location.reload();
+                } else {
+                    alert('❌ Gagal menghapus: ' + data.message);
+                }
+            } catch (e) {
+                console.error('Bukan JSON:', text);
+                alert('❌ Server mengembalikan HTML, cek log error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Terjadi kesalahan: ' + error.message);
+        });
     }
 }
 
@@ -1019,17 +941,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// ===== CLEANUP BACKDROP SAAT MODAL TUTUP =====
+// ===== CLEANUP BACKDROP =====
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.modal').forEach(function(modal) {
         modal.addEventListener('hidden.bs.modal', function() {
-            // Hapus semua backdrop yang tersisa
             document.querySelectorAll('.modal-backdrop').forEach(function(el) {
                 el.remove();
             });
-            // Hapus class modal-open
             document.body.classList.remove('modal-open');
-            // Reset scroll
             document.body.style.overflow = '';
             document.body.style.paddingRight = '';
         });

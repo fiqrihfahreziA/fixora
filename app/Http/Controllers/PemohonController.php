@@ -520,128 +520,6 @@ public function create()
     return view('pemohon.pengadaan.create', compact('bidangs', 'authUser'));
 }
 
-
-
-// public function storePengadaan(Request $request)
-//     {
-//         // Log data masuk untuk debug
-//         Log::info('📤 DATA MASUK:', $request->all());
-
-//         // VALIDASI
-//         $validated = $request->validate([
-//             'karyawan_id'        => 'required|exists:karyawans,id',
-//             'tanggal_pengajuan'  => 'required|date',
-//             'bidang_id'          => 'nullable|exists:bidangs,id',
-//             'dasar_usulan'       => 'required|string',
-//             'instalasi'          => 'nullable|string',
-//             'alasan_justifikasi' => 'required|string',
-//             'manfaat'            => 'required|string',
-//             'dampak'             => 'required|string',
-//             'tahun_anggaran'     => 'nullable|integer|min:2000|max:' . (date('Y') + 1),
-//             'kondisi_barang_lama' => 'nullable|string',
-//             'ket_barang_lama'    => 'nullable|string',
-
-//             'items' => 'required|array|min:1',
-//             'items.*.nama_barang'  => 'required|string',
-//             'items.*.jumlah'       => 'required|integer|min:1',
-//             'items.*.harga_satuan' => 'required|numeric|min:0',
-//             'items.*.spesifikasi'  => 'nullable|string',
-//             'items.*.satuan'       => 'nullable|string',
-//         ]);
-
-//         DB::beginTransaction();
-
-//         try {
-//             // Hitung total pengajuan
-//             $totalPengajuan = 0;
-//             foreach ($request->items as $item) {
-//                 $totalPengajuan += $item['jumlah'] * $item['harga_satuan'];
-//             }
-
-//             // Generate nomor pengajuan unik
-//             $noPengajuan = 'PGD-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-//             while (pengajuan::where('no_pengajuan', $noPengajuan)->exists()) {
-//                 $noPengajuan = 'PGD-' . date('Ymd') . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-//             }
-
-//             // CREATE PENGAJUAN
-//             $pengajuan = pengajuan::create([
-//                 'karyawan_id'        => $request->karyawan_id,
-//                 'bidang_id'          => $request->bidang_id,
-//                 'tanggal_pengajuan'  => $request->tanggal_pengajuan,
-//                 'instalasi'          => $request->instalasi ?? '-',
-//                 'dasar_usulan'       => $request->dasar_usulan,
-//                 'alasan_justifikasi' => $request->alasan_justifikasi,
-//                 'manfaat'            => $request->manfaat,
-//                 'dampak'             => $request->dampak,
-//                 'tahun_anggaran'     => $request->tahun_anggaran ?? date('Y'),
-//                 'kondisi_barang_lama' => $request->kondisi_barang_lama,
-//                 'ket_barang_lama'    => $request->ket_barang_lama,
-//                 'total_pengajuan'    => $totalPengajuan,
-//                 'no_pengajuan'       => $noPengajuan,
-//                 'foto_barang'        => $request->has('foto_barang') ? 1 : 0,
-//                 'data_kerusakan'     => $request->has('data_kerusakan') ? 1 : 0,
-//                 'penawaran_harga'    => $request->has('penawaran_harga') ? 1 : 0,
-//             ]);
-
-//             Log::info('✅ PENGAJUAN TERSIMPAN:', $pengajuan->toArray());
-
-//             // CREATE ITEMS
-//             foreach ($request->items as $item) {
-//                 $totalItem = $item['jumlah'] * $item['harga_satuan'];
-
-//                 $pengajuanItem = pengajuan_item::create([
-//                     'pengajuan_id' => $pengajuan->id,
-//                     'nama_barang'  => $item['nama_barang'],
-//                     'spesifikasi'  => $item['spesifikasi'] ?? null,
-//                     'satuan'       => $item['satuan'] ?? 'Unit',
-//                     'jumlah'       => $item['jumlah'],
-//                     'harga_satuan' => $item['harga_satuan'],
-//                     'harga'        => $totalItem, // <-- PERHATIKAN: pakai 'harga' bukan 'total'
-//                     'jumlah_disetujui' => $item['jumlah'],
-//                 ]);
-
-//                 Log::info('✅ ITEM TERSIMPAN:', $pengajuanItem->toArray());
-
-//                 // CREATE BARANG TERSEDIA JIKA ADA
-//                 if (!empty($item['ada_barang_tersedia']) && !empty($item['barang_tersedia'])) {
-//                     $bt = $item['barang_tersedia'];
-                    
-//                     barang_tersedia::create([
-//                         'pengajuan_item_id' => $pengajuanItem->id,
-//                         'nama_barang'       => $bt['nama_barang'] ?? $item['nama_barang'],
-//                         'jumlah'            => $bt['jumlah'] ?? 0,
-//                         'tahun_perolehan'   => $bt['tahun_perolehan'] ?? null,
-//                         'kondisi'           => $bt['kondisi'] ?? 'Baik',
-//                         'keterangan'        => $bt['keterangan'] ?? null,
-//                     ]);
-                    
-//                     Log::info('✅ BARANG TERSEDIA TERSIMPAN');
-//                 }
-//             }
-
-//             DB::commit();
-
-//             return redirect()
-//                 ->route('pemohon.pengadaan')
-//                 ->with('success', '✅ Pengajuan berhasil disimpan! Nomor: ' . $noPengajuan);
-
-//         } catch (\Exception $e) {
-//             DB::rollBack();
-            
-//             Log::error('❌ ERROR SAVE PENGAJUAN:', [
-//                 'message' => $e->getMessage(),
-//                 'file' => $e->getFile(),
-//                 'line' => $e->getLine(),
-//                 'trace' => $e->getTraceAsString()
-//             ]);
-
-//             return back()
-//                 ->withInput()
-//                 ->with('error', '❌ Gagal menyimpan pengajuan: ' . $e->getMessage());
-//         }
-//     }
-
 public function storePengadaan(Request $request)
 {
     // Log data masuk untuk debug
@@ -786,7 +664,231 @@ private function uploadFile($request, $fieldName, $folderName)
     }
     return null;
 }
+
+public function submit($id)
+{
+    try {
+        $authUser = Auth::user();
+        $karyawanId = $authUser->karyawan->id ?? null;
+        
+        $pengajuan = pengajuan::where('karyawan_id', $karyawanId)
+            ->where('status', 'draft')
+            ->findOrFail($id);
+
+        $pengajuan->update([
+            'status' => 'diajukan',
+            'diajukan_at' => now(),
+        ]);
+
+        // ✅ PASTIKAN RETURN JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengajuan berhasil diajukan!'
+        ]);
+
+    } catch (\Exception $e) {
+        // ✅ PASTIKAN RETURN JSON
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
     
+public function edittt($id)
+{
+    $authUser = Auth::user();
+    $karyawanId = $authUser->karyawan->id ?? null;
+    
+    $pengajuan = pengajuan::with(['items', 'items.barangTersedia'])
+        ->where('karyawan_id', $karyawanId)
+        ->whereIn('status', ['draft', 'revisi']) // <-- TAMBAHKAN 'revisi'
+        ->findOrFail($id);
+    
+    $bidangs = bidang::all();
+
+    return view('pemohon.pengadaan.edit', compact('pengajuan', 'bidangs', 'authUser'));
+}
+
+/**
+ * Update the specified resource in storage.
+ */
+public function updatePengadaan(Request $request, $id)
+{
+    $authUser = Auth::user();
+    $karyawanId = $authUser->karyawan->id ?? null;
+    
+    // Cek apakah pengajuan milik user dan status draft/revisi
+    $pengajuan = pengajuan::where('karyawan_id', $karyawanId)
+        ->whereIn('status', ['draft', 'revisi'])
+        ->findOrFail($id);
+
+    // Log data masuk untuk debug
+    Log::info('📤 DATA UPDATE MASUK:', $request->all());
+
+    // VALIDASI
+    $validated = $request->validate([
+        'tanggal_pengajuan'  => 'required|date',
+        'bidang_id'          => 'nullable|exists:bidangs,id',
+        'dasar_usulan'       => 'required|string',
+        'instalasi'          => 'nullable|string',
+        'alasan_justifikasi' => 'required|string',
+        'manfaat'            => 'required|string',
+        'dampak'             => 'required|string',
+        'tahun_anggaran'     => 'nullable|integer|min:2000|max:' . (date('Y') + 1),
+        'kondisi_barang_lama' => 'nullable|string',
+        'ket_barang_lama'    => 'nullable|string',
+
+        'items' => 'required|array|min:1',
+        'items.*.nama_barang'  => 'required|string',
+        'items.*.jumlah'       => 'required|integer|min:1',
+        'items.*.harga_satuan' => 'required|numeric|min:0',
+        'items.*.spesifikasi'  => 'nullable|string',
+        'items.*.satuan'       => 'nullable|string',
+
+        // HANYA DATA KERUSAKAN (PDF)
+        'data_kerusakan'     => 'nullable|file|mimes:pdf|max:5120',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        // Hitung total pengajuan
+        $totalPengajuan = 0;
+        foreach ($request->items as $item) {
+            $totalPengajuan += $item['jumlah'] * $item['harga_satuan'];
+        }
+
+        // UPLOAD DATA KERUSAKAN (jika ada file baru)
+        $dataKerusakanPath = $pengajuan->data_kerusakan; // retain existing
+        if ($request->hasFile('data_kerusakan')) {
+            // Hapus file lama jika ada
+            if ($pengajuan->data_kerusakan && Storage::disk('public')->exists($pengajuan->data_kerusakan)) {
+                Storage::disk('public')->delete($pengajuan->data_kerusakan);
+            }
+            
+            $file = $request->file('data_kerusakan');
+            $fileName = time() . '_data_kerusakan.' . $file->getClientOriginalExtension();
+            $dataKerusakanPath = $file->storeAs('pengajuan/data_kerusakan', $fileName, 'public');
+        }
+
+        // UPDATE PENGAJUAN
+        $pengajuan->update([
+            'tanggal_pengajuan'  => $request->tanggal_pengajuan,
+            'bidang_id'          => $request->bidang_id,
+            'instalasi'          => $request->instalasi ?? '-',
+            'dasar_usulan'       => $request->dasar_usulan,
+            'alasan_justifikasi' => $request->alasan_justifikasi,
+            'manfaat'            => $request->manfaat,
+            'dampak'             => $request->dampak,
+            'tahun_anggaran'     => $request->tahun_anggaran ?? date('Y'),
+            'kondisi_barang_lama' => $request->kondisi_barang_lama,
+            'ket_barang_lama'    => $request->ket_barang_lama,
+            'total_pengajuan'    => $totalPengajuan,
+            'data_kerusakan'     => $dataKerusakanPath,
+            // Jika status revisi, ubah kembali ke draft setelah diedit
+            'status' => $pengajuan->status == 'revisi' ? 'draft' : $pengajuan->status,
+        ]);
+
+        Log::info('✅ PENGAJUAN UPDATED:', $pengajuan->toArray());
+
+        // HAPUS ITEMS LAMA
+        pengajuan_item::where('pengajuan_id', $pengajuan->id)->delete();
+
+        // CREATE ITEMS BARU
+        foreach ($request->items as $item) {
+            $totalItem = $item['jumlah'] * $item['harga_satuan'];
+
+            $pengajuanItem = pengajuan_item::create([
+                'pengajuan_id' => $pengajuan->id,
+                'nama_barang'  => $item['nama_barang'],
+                'spesifikasi'  => $item['spesifikasi'] ?? null,
+                'satuan'       => $item['satuan'] ?? 'Unit',
+                'jumlah'       => $item['jumlah'],
+                'harga_satuan' => $item['harga_satuan'],
+                'harga'        => $totalItem,
+                'jumlah_disetujui' => $item['jumlah'],
+            ]);
+
+            Log::info('✅ ITEM TERSIMPAN:', $pengajuanItem->toArray());
+
+            // CREATE BARANG TERSEDIA JIKA ADA
+            if (!empty($item['ada_barang_tersedia']) && !empty($item['barang_tersedia'])) {
+                $bt = $item['barang_tersedia'];
+                
+                barang_tersedia::create([
+                    'pengajuan_item_id' => $pengajuanItem->id,
+                    'nama_barang'       => $bt['nama_barang'] ?? $item['nama_barang'],
+                    'jumlah'            => $bt['jumlah'] ?? 0,
+                    'tahun_perolehan'   => $bt['tahun_perolehan'] ?? null,
+                    'kondisi'           => $bt['kondisi'] ?? 'Baik',
+                    'keterangan'        => $bt['keterangan'] ?? null,
+                ]);
+                
+                Log::info('✅ BARANG TERSEDIA TERSIMPAN');
+            }
+        }
+
+        DB::commit();
+
+        $message = $pengajuan->status == 'revisi' 
+            ? '✅ Pengajuan berhasil direvisi dan dikembalikan ke draft!' 
+            : '✅ Pengajuan berhasil diperbarui!';
+
+        return redirect()
+            ->route('pemohon.pengadaan')
+            ->with('success', $message);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        Log::error('❌ ERROR UPDATE PENGAJUAN:', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return back()
+            ->withInput()
+            ->with('error', '❌ Gagal memperbarui pengajuan: ' . $e->getMessage());
+    }
+}
+/**
+ * Submit pengajuan (ubah status dari draft ke diajukan)
+ *//**
+ * Submit pengajuan (ubah status dari draft ke diajukan)
+ */
+// public function submit(Request $request)
+// {
+//     try {
+//         $authUser = Auth::user();
+//         $karyawanId = $authUser->karyawan->id ?? null;
+        
+//         // Ambil ID dari request body
+//         $id = $request->input('id');
+        
+//         $pengajuan = pengajuan::where('karyawan_id', $karyawanId)
+//             ->where('status', 'draft')
+//             ->findOrFail($id);
+
+//         $pengajuan->update([
+//             'status' => 'diajukan',
+//             'diajukan_at' => now(),
+//         ]);
+
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Pengajuan berhasil diajukan!'
+//         ]);
+
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => $e->getMessage()
+//         ], 500);
+//     }
+// }
 
 }
 // gansharing99@gmail.com

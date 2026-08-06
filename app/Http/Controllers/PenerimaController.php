@@ -568,8 +568,9 @@ public function exportCsv(Request $request)
          * Filter berdasarkan bidang_id user (PENERIMA)
          * ============================
          */
-        $query = Pengajuan::with(['items', 'karyawan', 'bidang'])
-            ->where('bidang_id', $bidangId) // <-- FILTER BERDASARKAN BIDANG USER
+            $query = pengajuan::with(['items', 'karyawan', 'bidang'])
+            ->where('bidang_id', $bidangId)
+            ->where('status', '!=', 'draft')
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('no_pengajuan', 'like', "%{$search}%")

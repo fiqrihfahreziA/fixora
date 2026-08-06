@@ -48,6 +48,18 @@ Route::middleware(['auth', 'role:pemohon'])
         Route::post('/pemohon/pengadaan/store', [PemohonController::class, 'storePengadaan'])
             ->name('pengadaan.store');
         
+             // Submit pengajuan (draft -> diajukan)
+             // ✅ ROUTE SUBMIT - PASTIKAN INI ADA
+             Route::post('/pengadaan/{id}/submit', [PemohonController::class, 'submit'])
+        ->name('pengadaan.submit');
+
+         Route::get('/pengadaan/{id}/edit', [PemohonController::class, 'edittt'])
+        ->name('pengadaan.edit');
+    
+    Route::put('/pengadaan/{id}', [PemohonController::class, 'updatePengadaan'])
+        ->name('pengadaan.update');
+    // Route::post('/pengadaan/submit', [PemohonController::class, 'submit'])->name('pengadaan.submit');
+        
             // Route::put('/karyawan/{id}', [AdminController::class, 'update'])
         //     ->name('karyawan.update');
         

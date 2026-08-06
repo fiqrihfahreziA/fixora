@@ -19,6 +19,7 @@ class pengajuan extends Model
     'no_pengajuan',
     'tanggal_pengajuan',
     'instalasi',
+    'status',
     'dasar_usulan',
     'alasan_justifikasi',
     'manfaat',
