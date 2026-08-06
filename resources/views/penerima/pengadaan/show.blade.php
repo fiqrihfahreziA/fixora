@@ -199,6 +199,92 @@
                 </div>
             </div>
         </div>
+
+        <!-- ===== DATA KERUSAKAN (PDF) ===== -->
+        @if($pengajuan->data_kerusakan)
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h6 class="fw-bold mb-0 text-danger">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Data Kerusakan
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="font-size: 40px; color: #dc3545;">
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            </div>
+                            <div>
+                                <p class="fw-semibold mb-1">{{ basename($pengajuan->data_kerusakan) }}</p>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    Diupload: {{ date('d M Y H:i', strtotime($pengajuan->created_at)) }}
+                                </small>
+                                @php
+                                    $fileSize = Storage::disk('public')->exists($pengajuan->data_kerusakan) 
+                                        ? Storage::disk('public')->size($pengajuan->data_kerusakan) 
+                                        : 0;
+                                @endphp
+                                @if($fileSize > 0)
+                                <br>
+                                <small class="text-muted">
+                                    <i class="bi bi-filetype-pdf me-1"></i>
+                                    Ukuran: {{ number_format($fileSize / 1024, 2) }} KB
+                                </small>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
+                           target="_blank" 
+                           class="btn btn-danger btn-sm rounded-pill px-3">
+                            <i class="bi bi-eye me-1"></i> Lihat
+                        </a>
+                        <a href="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
+                           download 
+                           class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                            <i class="bi bi-download me-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Preview PDF -->
+                <div class="mt-3">
+                    <div class="border rounded-3 p-2" style="background: #f8f9fa;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">Preview</small>
+                            <a href="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
+                               target="_blank" 
+                               class="btn btn-sm btn-link text-primary">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Buka baru
+                            </a>
+                        </div>
+                        <embed src="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
+                               type="application/pdf" 
+                               width="100%" 
+                               height="350px" 
+                               style="border-radius: 6px;">
+                        <small class="text-muted d-block text-center mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Jika tidak muncul, klik tombol "Lihat"
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @else
+        <!-- Jika tidak ada data kerusakan -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold text-muted mb-0">
+                    <i class="bi bi-file-earmark me-2"></i>
+                    Tidak ada dokumen data kerusakan
+                </h6>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- ===== KOLOM KANAN: FORM RESPON ===== -->
@@ -306,53 +392,51 @@
         </div>
         @endif
 
-      <!-- ===== INFO PENERIMA + FORM VERIFIKASI ===== -->
-<div class="card border-0 shadow-sm mt-3">
-    <div class="card-header bg-transparent">
-        <h6 class="fw-bold mb-0">
-            <i class="bi bi-person-check me-2 text-primary"></i>Verifikasi Penerima
-        </h6>
-    </div>
-    <div class="card-body">
-        <!-- Info Penerima -->
-        <div class="mb-3">
-            <p class="mb-1 fw-semibold">{{ $authUser->name }}</p>
-            <small class="text-muted">{{ $authUser->email }}</small>
-            <hr>
+        <!-- ===== INFO PENERIMA + FORM VERIFIKASI ===== -->
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-header bg-transparent">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-person-check me-2 text-primary"></i>Verifikasi Penerima
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <p class="mb-1 fw-semibold">{{ $authUser->name }}</p>
+                    <small class="text-muted">{{ $authUser->email }}</small>
+                    <hr>
+                </div>
+
+                <form action="#" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="id_penerima" value="{{ $authUser->id }}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">
+                            Status Verifikasi <span class="text-danger">*</span>
+                        </label>
+                        <select name="status_verifikasi" class="form-select" required>
+                            <option value="">-- Pilih Status --</option>
+                            <option value="diverifikasi">✅ Diverifikasi</option>
+                            <option value="ditolak">❌ Ditolak</option>
+                            <option value="revisi">📝 Perlu Revisi</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">
+                            Catatan Verifikasi <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="catatan_verifikasi" class="form-control" rows="3" 
+                                  placeholder="Tuliskan catatan verifikasi..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-circle me-1"></i> Verifikasi
+                    </button>
+                </form>
+            </div>
         </div>
-
-        <!-- ===== FORM VERIFIKASI ===== -->
-        <form action="#" method="POST">
-            @csrf
-            @method('PUT')
-
-            <!-- ID PENERIMA (HIDDEN) -->
-            <input type="hidden" name="id_penerima" value="{{ $authUser->id }}">
-
-            <div class="mb-3">
-                <label class="form-label fw-semibold small">
-                    Status Verifikasi <span class="text-danger">*</span>
-                </label>
-                <select name="status_verifikasi" class="form-select" required>
-                    <option value="">-- Pilih Status --</option>
-                    <option value="diverifikasi">✅ Diverifikasi</option>
-                    <option value="ditolak">❌ Ditolak</option>
-                    <option value="revisi">📝 Perlu Revisi</option>
-                </select>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label fw-semibold small">
-                    Catatan Verifikasi <span class="text-danger">*</span>
-                </label>
-                <textarea name="catatan_verifikasi" class="form-control" rows="3" 
-                          placeholder="Tuliskan catatan verifikasi..." required></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-check-circle me-1"></i> Verifikasi
-            </button>
-        </form>
     </div>
 </div>
 

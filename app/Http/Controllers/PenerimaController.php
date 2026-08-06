@@ -646,7 +646,7 @@ public function exportCsv(Request $request)
             'diajukan' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'diajukan')->count(),
             'disetujui' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'disetujui')->count(),
             'ditolak' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'ditolak')->count(),
-            'revisi' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'rvisi')->count(),
+            'revisi' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'revisi')->count(),
             'menunggu_direktur' => Pengajuan::where('bidang_id', $bidangId)->where('status', 'menunggu_direktur')->count(),
             
             'permintaan_count' => Pengajuan::where('bidang_id', $bidangId)
