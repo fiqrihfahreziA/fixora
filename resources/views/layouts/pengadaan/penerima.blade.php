@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'penerima' }} | Aplikasi Permintaan & Perbaikan Barang</title>
+    <title>{{ $title ?? 'Pemohon' }} | Aplikasi Permintaan & Perbaikan Barang</title>
     <link rel="icon" href="{{ asset('gambar/rsmz.png') }}" type="image/png">
     
     <!-- Bootstrap CSS -->
@@ -30,12 +30,19 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
         body {
             min-height: 100vh;
             background: var(--primary-gradient);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             position: relative;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Animated Background */
@@ -82,6 +89,7 @@
             padding: 12px 0;
             position: relative;
             z-index: 1050;
+            flex-shrink: 0;
         }
 
         .navbar-glass .navbar-brand {
@@ -255,7 +263,7 @@
         }
 
         .user-dropdown-toggle::after {
-            display: none; /* Hilangkan default caret */
+            display: none;
         }
 
         .user-avatar {
@@ -289,6 +297,13 @@
             transform: rotate(180deg);
         }
 
+        /* ===== CONTENT WRAPPER ===== */
+        .content-wrapper {
+            flex: 1 0 auto;
+            padding: 20px 0;
+            width: 100%;
+        }
+
         /* Content Card */
         .content-card-glass {
             background: rgba(255,255,255,0.95);
@@ -298,7 +313,7 @@
             box-shadow: var(--card-shadow);
             border: 1px solid rgba(255,255,255,0.3);
             animation: slideUp 0.6s ease-out;
-            min-height: 500px;
+            min-height: 400px;
         }
 
         @keyframes slideUp {
@@ -312,31 +327,57 @@
             }
         }
 
-        /* Footer */
+        /* ===== FOOTER GLASS ===== */
         .footer-glass {
+            flex-shrink: 0;
             background: var(--glass-bg) !important;
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--glass-border);
             color: rgba(255,255,255,0.8) !important;
             padding: 20px 0;
-            margin-top: 40px;
+            width: 100%;
+            margin-top: auto;
         }
 
         .footer-glass a {
             color: rgba(255,255,255,0.8);
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .footer-glass a:hover {
             color: white;
+            transform: translateY(-2px);
         }
 
-        /* Responsive */
+        .footer-glass .social-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .footer-glass .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .footer-glass .social-icons a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .content-card-glass {
                 padding: 20px;
                 border-radius: 16px;
+                min-height: 300px;
             }
             
             .brand-icon {
@@ -357,6 +398,21 @@
                 min-width: 200px;
                 margin-top: 8px !important;
             }
+
+            .content-wrapper {
+                padding: 10px 0;
+            }
+
+            .footer-glass {
+                padding: 15px 0;
+                font-size: 0.85rem;
+            }
+
+            .footer-glass .social-icons a {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
         }
 
         @media (max-width: 576px) {
@@ -372,6 +428,37 @@
                 margin: 0 !important;
                 border-radius: 16px;
             }
+
+            .content-card-glass {
+                padding: 15px;
+                border-radius: 12px;
+            }
+
+            .app-title-main {
+                font-size: 0.9rem;
+            }
+
+            .app-subtitle-main {
+                font-size: 0.65rem;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
         }
     </style>
 </head>
@@ -382,7 +469,7 @@
 <div class="particle"></div>
 <div class="particle"></div>
 
-<!-- Navbar -->
+<!-- ===== NAVBAR ===== -->
 <nav class="navbar navbar-expand-lg navbar-glass">
     <div class="container">
         <!-- Brand -->
@@ -410,27 +497,22 @@
             <!-- Navigation -->
             <ul class="navbar-nav ms-4 me-auto">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pemohon/permintaan*') ? 'active' : '' }}"
-                       href="#">
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('pemohon.pengadaan*') ? 'active' : '' }}" 
+                       href="{{ route('pemohon.pengadaan') }}">
                         <i class="bi bi-box"></i>
                         Permintaan Barang
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pemohon/dokumen*') ? 'active' : '' }}"
-                       href="#">
-                       
-                       
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2" href="#">
-                    
-                      
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('pemohon.pengadaan.create') ? 'active' : '' }}" 
+                       href="{{ route('pemohon.pengadaan.create') }}">
+                        <i class="bi bi-plus-circle"></i>
+                        Buat Pengajuan
                     </a>
                 </li>
             </ul>
 
-            <!-- ===== USER DROPDOWN YANG DIPERBAIKI ===== -->
+            <!-- User Dropdown -->
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link user-dropdown-toggle d-flex align-items-center gap-2" 
@@ -481,23 +563,29 @@
     </div>
 </nav>
 
-<!-- Content -->
-<div class="container my-4">
-    <div class="content-card-glass">
-        @yield('content')
+<!-- ===== CONTENT WRAPPER ===== -->
+<div class="content-wrapper">
+    <div class="container">
+        <div class="content-card-glass">
+            @yield('content')
+        </div>
     </div>
 </div>
 
-<!-- Footer -->
+<!-- ===== FOOTER ===== -->
 <footer class="footer-glass">
-    <div class="container text-center">
+    <div class="container">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <span>© 2026 RSMZ - All Rights Reserved</span>
-            <div class="d-flex gap-3 mt-2 mt-md-0">
-                <a href="#"><i class="bi bi-twitter"></i></a>
-                <a href="#"><i class="bi bi-facebook"></i></a>
-                <a href="#"><i class="bi bi-instagram"></i></a>
-                <a href="#"><i class="bi bi-youtube"></i></a>
+            <div class="d-flex align-items-center gap-2">
+                <img src="{{ asset('gambar/rsmz.png') }}" alt="RSMZ" style="height: 24px; width: 24px; object-fit: contain;">
+                <span>© 2026 RSMZ - All Rights Reserved</span>
+            </div>
+            <div class="social-icons mt-2 mt-md-0">
+                <a href="#" class="text-white"><i class="bi bi-twitter"></i></a>
+                <a href="#" class="text-white"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="text-white"><i class="bi bi-instagram"></i></a>
+                <a href="#" class="text-white"><i class="bi bi-youtube"></i></a>
+                <a href="#" class="text-white"><i class="bi bi-github"></i></a>
             </div>
         </div>
     </div>
@@ -506,18 +594,33 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Optional: Close dropdown on outside click -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Auto close dropdown when clicking outside
     document.addEventListener('click', function(e) {
-        const dropdown = document.querySelector('.dropdown');
-        if (dropdown && !dropdown.contains(e.target)) {
-            const dropdownMenu = dropdown.querySelector('.dropdown-menu');
-            if (dropdownMenu && dropdownMenu.classList.contains('show')) {
-                bootstrap.Dropdown.getInstance(dropdown.querySelector('.dropdown-toggle'))?.hide();
+        const dropdowns = document.querySelectorAll('.dropdown');
+        dropdowns.forEach(dropdown => {
+            if (dropdown && !dropdown.contains(e.target)) {
+                const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+                if (dropdownMenu && dropdownMenu.classList.contains('show')) {
+                    bootstrap.Dropdown.getInstance(dropdown.querySelector('.dropdown-toggle'))?.hide();
+                }
             }
-        }
+        });
+    });
+
+    // Navbar collapse on mobile
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    const navbarCollapse = document.getElementById('navbarPemohon');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 992) {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) {
+                    bsCollapse.hide();
+                }
+            }
+        });
     });
 });
 </script>

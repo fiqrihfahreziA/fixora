@@ -682,4 +682,19 @@ public function exportCsv(Request $request)
             'ruangan'
         ));
     }
+
+   public function showpengadaan($id)
+{
+    $authUser = Auth::user();
+    
+    $pengajuan = pengajuan::with([
+        'karyawan',
+        'bidang',
+        'items',
+        'items.barangTersedia',
+    ])->findOrFail($id); // <-- HAPUS where('penerima_id', $authUser->id)
+
+    return view('penerima.pengadaan.show', compact('pengajuan', 'authUser'));
+}
+
 }

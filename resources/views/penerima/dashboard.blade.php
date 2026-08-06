@@ -4,7 +4,7 @@
 <div class="row g-4">
     <!-- Card Kiri - Pengadaan -->
     <div class="col-md-6">
-        <a href="route{{ route('penerima.chartp') }}" class="text-decoration-none d-block">
+        <a href="{{ route('penerima.chartp') }}" class="text-decoration-none d-block">
             <div class="card card-menu card-pengadaan h-100">
                 <div class="card-body text-center p-5">
                     <div class="icon-box mb-4">
@@ -19,6 +19,7 @@
             </div>
         </a>
     </div>
+    
 
     <!-- Card Kanan - Pemeliharaan -->
     <div class="col-md-6">

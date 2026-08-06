@@ -57,7 +57,7 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
 
-            <form action="{{ route('pemohon.pengadaan.store') }}" method="POST" id="formPengajuan">
+            <form action="{{ route('pemohon.pengadaan.store') }}" method="POST" id="formPengajuan" enctype="multipart/form-data">
                 @csrf
 
                 <!-- Step Indicator -->
@@ -461,35 +461,34 @@
                 </div>
 
                 <!-- STEP 3 -->
-                <div class="step-content d-none" id="step3">
-                    <h6 class="fw-bold text-primary mb-3">
-                        <i class="bi bi-paperclip me-2"></i>Dokumen Pendukung
-                    </h6>
+                <!-- STEP 3 -->
+<!-- STEP 3 -->
+<div class="step-content d-none" id="step3">
+    <h6 class="fw-bold text-primary mb-3">
+        <i class="bi bi-paperclip me-2"></i>Dokumen Pendukung
+    </h6>
 
-                    <div class="form-check mb-2">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="foto_barang"
-                               value="1">
-                        <label class="form-check-label">Foto Barang</label>
-                    </div>
-
-                    <div class="form-check mb-2">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="data_kerusakan"
-                               value="1">
-                        <label class="form-check-label">Data Kerusakan</label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="penawaran_harga"
-                               value="1">
-                        <label class="form-check-label">Penawaran Harga</label>
+    <div class="row g-3">
+        <!-- Data Kerusakan (PDF only) -->
+        <div class="col-md-12">
+            <div class="card p-3 border-0 bg-light">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <i class="bi bi-file-earmark-pdf fs-4 text-danger"></i>
+                    <div>
+                        <label class="fw-semibold mb-0">Data Kerusakan</label>
+                        <small class="text-muted d-block">Upload dokumentasi kerusakan (opsional)</small>
                     </div>
                 </div>
+                <input type="file" 
+                       name="data_kerusakan" 
+                       class="form-control" 
+                       accept=".pdf">
+                <small class="text-muted mt-1">Format: PDF (Max: 5MB)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
 
                 <!-- ACTION BUTTONS -->
                 <div class="mt-4 pt-3 border-top">

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\karyawan;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
@@ -11,6 +12,16 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
+        karyawan::updateOrCreate(
+            [
+                'nama' => 'Asministrator',
+                'ruangan' => 'admin', // Admin tidak punya karyawan_id
+                'nip' => '000',
+                'jabatan' => 'null',
+                'bidang_id' => NULL,
+            ]
+        );
+
         User::updateOrCreate(
             ['email' => 'admin@rsmz.com'],
             [

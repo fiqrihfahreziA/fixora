@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->unsignedBigInteger('harga')->nullable();
             $table->unsignedInteger('jumlah_disetujui')->nullable();
+            $table->unsignedBigInteger('harga_disetujui')->nullable();
             $table->decimal('harga_satuan', 15, 2);
             
             $table->timestamps();

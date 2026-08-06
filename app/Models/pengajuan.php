@@ -38,6 +38,7 @@ class pengajuan extends Model
     'catatan_farmasi',
     'catatan_direktur',
     'catatan_keuangan',
+    'total_disetujui'
 
 
 ];
@@ -55,6 +56,9 @@ class pengajuan extends Model
     public function bidang()
     {
         return $this->belongsTo(bidang::class);
-   
-}
+   }
+   public function peberima()
+    {
+        return $this->belongsTo(karyawan::class);
+   }
 }

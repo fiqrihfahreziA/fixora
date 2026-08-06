@@ -40,6 +40,7 @@ return new class extends Migration
             $table->foreignId('direktur_id')->nullable()->constrained('karyawans')->nullOnDelete();
 
              $table->decimal('total_pengajuan', 15, 2)->default(0);
+             $table->decimal('total_disetujui', 15, 2)->default(0);
              $table->enum('status', [
                 'draft',
                 'diajukan',

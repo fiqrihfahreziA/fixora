@@ -73,11 +73,18 @@ Route::middleware(['auth', 'role:penerima'])
             Route::get('permintaan/{id}/gambar', [PemohonController::class, 'lihatGambar'])
              ->name('permintaan.gambar');
 
-             Route::get('/chart/pengadaan', [PenerimaController::class, 'chartpengadaan'])
-            ->name('chartp');
+           
 
     // PENGADAAN
+      Route::get('/chart/pengadaan', [PenerimaController::class, 'chartpengadaan'])
+            ->name('chartp');
+       // Detail pengajuan
+    // Detail pengajuan
+    Route::get('/pengadaan/{id}', [PenerimaController::class, 'showpengadaan'])->name('pengadaan.show');
     
+    // ===== UPDATE PENGAJUAN (TERIMA/TOLAK) =====
+    Route::put('/pengadaan/{id}', [PenerimaController::class, 'update'])->name('pengadaan.update');
+
        
     });
 
