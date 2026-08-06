@@ -46,7 +46,7 @@
                             <i class="bi bi-pencil-square fs-4"></i>
                         </div>
                         <div>
-                            <h6 class="text-muted mb-0 small">Draft / Revisi</h6>
+                            <h6 class="text-muted mb-0 small">Draft </h6>
                             <h5 class="fw-bold mb-0">{{ ($stats['draft'] ?? 0) + ($stats['revisi'] ?? 0) }}</h5>
                         </div>
                     </div>
@@ -229,7 +229,7 @@
                                         @php
                                             $statusColor = [
                                                 'draft' => 'secondary',
-                                                'revisi' => 'warning',
+                                                'revisi' => 'purple',
                                                 'diajukan' => 'warning',
                                                 'disetujui_koordinator' => 'info',
                                                 'disetujui_kabid' => 'primary',
