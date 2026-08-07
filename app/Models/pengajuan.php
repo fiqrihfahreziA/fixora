@@ -58,7 +58,7 @@ class pengajuan extends Model
     {
         return $this->belongsTo(bidang::class);
    }
-   public function peberima()
+   public function penerima()
     {
         return $this->belongsTo(karyawan::class);
    }

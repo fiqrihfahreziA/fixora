@@ -497,8 +497,9 @@ MODAL DETAIL
 
             <div class="modal-footer border-0 p-4 pt-0">
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+                {{-- @if($pengajuan->status == 'diajukan' || $pengajuan->status == 'disetujui_koordinator') --}}
                 @if($pengajuan->status == 'diajukan')
-                    <a href="{{ route('penerima.pengadaan.show', $pengajuan->id) }}" class="btn btn-warning rounded-pill px-4 text-white">
+                    <a href="{{ route('penerima.pengadaan.show', $pengajuan->id) }}" class="btn btn-warning rounded-pill px-4 text-white" target="_blank" >
                         <i class="bi bi-pencil me-1"></i>Respon
                     </a>
                 @endif

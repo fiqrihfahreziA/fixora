@@ -9,7 +9,7 @@
         </h4>
         <span class="text-muted">{{ $pengajuan->no_pengajuan }}</span>
     </div>
-    <a href="#" class="btn btn-outline-secondary">
+    <a href="{{ route('penerima.chartp') }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i> Kembali
     </a>
 </div>
@@ -19,18 +19,49 @@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <span class="badge bg-{{ $pengajuan->status_badge }} fs-6 px-3 py-2">
-                    <i class="{{ $pengajuan->status_icon }} me-1"></i>
-                    {{ $pengajuan->status_label }}
+                @php
+                    $statusBadge = [
+                        'draft' => 'secondary',
+                        'diajukan' => 'warning',
+                        'revisi' => 'warning',
+                        'disetujui_koordinator' => 'info',
+                        'disetujui_kabid' => 'primary',
+                        'menunggu_direktur' => 'warning',
+                        'disetujui' => 'success',
+                        'ditolak' => 'danger',
+                        'diterima' => 'success',
+                        'menunggu_diterima' => 'warning',
+                        'ditolak_penerima' => 'danger',
+                        'diverifikasi' => 'success'
+                    ][$pengajuan->status] ?? 'secondary';
+                    
+                    $statusLabel = [
+                        'draft' => 'Draft',
+                        'diajukan' => 'Diajukan',
+                        'revisi' => 'Revisi',
+                        'disetujui_koordinator' => 'Disetujui Koordinator',
+                        'disetujui_kabid' => 'Disetujui Kabid',
+                        'menunggu_direktur' => 'Menunggu Direktur',
+                        'disetujui' => 'Disetujui',
+                        'ditolak' => 'Ditolak',
+                        'diterima' => 'Diterima',
+                        'menunggu_diterima' => 'Menunggu Diterima',
+                        'ditolak_penerima' => 'Ditolak Penerima',
+                        'diverifikasi' => 'Diverifikasi'
+                    ][$pengajuan->status] ?? $pengajuan->status;
+                @endphp
+                <span class="badge bg-{{ $statusBadge }} fs-6 px-3 py-2">
+                    <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i>
+                    {{ $statusLabel }}
                 </span>
                 <small class="text-muted ms-3">
                     <i class="bi bi-calendar3 me-1"></i>
-                    {{ $pengajuan->created_at->format('d M Y H:i') }}
+                    {{ date('d M Y H:i', strtotime($pengajuan->created_at)) }}
                 </small>
                 @if($pengajuan->diterima_at)
                 <small class="text-success ms-3">
                     <i class="bi bi-check-circle me-1"></i>
-                    Diterima: {{ $pengajuan->diterima_at->format('d M Y H:i') }}
+                    Diterima: {{ date('d M Y H:i', strtotime($pengajuan->diterima_at)) }}
                 </small>
                 @endif
             </div>
@@ -287,155 +318,67 @@
         @endif
     </div>
 
-    <!-- ===== KOLOM KANAN: FORM RESPON ===== -->
-    <div class="col-md-4">
-        @if($pengajuan->status == 'menunggu')
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <h6 class="fw-bold mb-0">
-                    <i class="bi bi-reply me-2"></i>Respon Pengajuan
-                </h6>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('penerima.pengadaan.update', $pengajuan->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    
-                    <!-- ===== DROPDOWN KEPUTUSAN ===== -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">
-                            Keputusan <span class="text-danger">*</span>
-                        </label>
-                        <select name="status" class="form-select" required id="statusSelect" onchange="toggleRespon()">
-                            <option value="">-- Pilih Keputusan --</option>
-                            <option value="diajukan">✅ Setujui</option>
-                            <option value="ditolak">❌ Tolak</option>
-                        </select>
-                    </div>
+    <!-- ===== KOLOM KANAN: FORM VERIFIKASI SAJA ===== -->
+<div class="col-md-4">
+    <!-- ===== PETUNJUK (Tetap ada) ===== -->
+    <div class="card border-0 shadow-sm bg-light mb-4">
+        <div class="card-body">
+            <h6 class="fw-bold mb-2">
+                <i class="bi bi-lightbulb text-warning me-2"></i>Petunjuk
+            </h6>
+            <ul class="small text-muted mb-0 ps-3">
+                <li class="mb-1">📌 <strong>Setujui</strong> = Pengajuan diteruskan</li>
+                <li class="mb-1">❌ <strong>Tolak</strong> = Pengajuan ditolak</li>
+                <li>📝 <strong>Minta Revisi</strong> = Kembali ke pemohon</li>
+            </ul>
+        </div>
+    </div>
 
-                    <!-- ===== TEXTAREA KETERANGAN ===== -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">
-                            Keterangan <span class="text-danger">*</span>
-                            <span id="keteranganLabel" class="text-muted fw-normal">(alasan keputusan)</span>
-                        </label>
-                        <textarea name="catatan_unit" class="form-control" rows="4" 
-                                  placeholder="Tuliskan alasan keputusan Anda..." 
-                                  required id="keteranganText"></textarea>
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Berikan alasan yang jelas
-                        </small>
-                    </div>
-
-                    <!-- ===== TOMBOL SUBMIT ===== -->
-                    <button type="submit" class="btn btn-primary w-100" id="submitBtn">
-                        <i class="bi bi-send me-1"></i> Kirim Respon
-                    </button>
-                </form>
-
+    <!-- ===== INFO PENERIMA + FORM VERIFIKASI (Tetap ada) ===== -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+            <h6 class="fw-bold mb-0">
+                <i class="bi bi-person-check me-2 text-primary"></i>Verifikasi Penerima
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <p class="mb-1 fw-semibold">{{ $authUser->name }}</p>
+                <small class="text-muted">{{ $authUser->email }}</small>
                 <hr>
+            </div>
 
-                <!-- ===== FORM REVISI ===== -->
+            {{-- FORM VERIFIKASI --}}
+            <form action="{{ route('penerima.pengadaan.verifikasi', $pengajuan->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <input type="hidden" name="id_penerima" value="{{ $authUser->id }}">
+
                 <div class="mb-3">
-                    <label class="form-label fw-semibold small text-warning">
-                        <i class="bi bi-pencil me-1"></i> Atau Minta Revisi?
+                    <label class="form-label fw-semibold small">
+                        Status Verifikasi <span class="text-danger">*</span>
                     </label>
-                    <p class="small text-muted">Jika ada yang perlu diperbaiki</p>
+                    <select name="status_verifikasi" class="form-select" required>
+                        <option value="">-- Pilih Status --</option>
+                        <option value="disetujui_koordinator">✅ Setujui</option>
+                        <option value="ditolak">❌ Ditolak</option>
+                        <option value="revisi">📝 Perlu Revisi</option>
+                    </select>
                 </div>
-                <form action="#" method="POST">
-                    @csrf
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">
-                            Catatan Revisi <span class="text-danger">*</span>
-                        </label>
-                        <textarea name="catatan_revisi" class="form-control" rows="3" 
-                                  placeholder="Jelaskan apa yang perlu direvisi..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-warning w-100">
-                        <i class="bi bi-arrow-return-left me-1"></i> Minta Revisi
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ===== PETUNJUK ===== -->
-        <div class="card border-0 shadow-sm bg-light">
-            <div class="card-body">
-                <h6 class="fw-bold mb-2">
-                    <i class="bi bi-lightbulb text-warning me-2"></i>Petunjuk
-                </h6>
-                <ul class="small text-muted mb-0 ps-3">
-                    <li class="mb-1">📌 <strong>Setujui</strong> = Pengajuan diteruskan</li>
-                    <li class="mb-1">❌ <strong>Tolak</strong> = Pengajuan ditolak</li>
-                    <li>📝 <strong>Minta Revisi</strong> = Kembali ke pemohon</li>
-                </ul>
-            </div>
-        </div>
-        @else
-        <!-- ===== STATUS SUDAH DIRESPON ===== -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center py-5">
-                <i class="bi bi-check-circle fs-1 text-success"></i>
-                <h6 class="mt-3">Pengajuan sudah direspon</h6>
-                <p class="text-muted small">Status: {{ $pengajuan->status_label }}</p>
-                @if($pengajuan->diterima_at)
-                <small class="text-muted">Diterima: {{ $pengajuan->diterima_at->format('d M Y H:i') }}</small>
-                @endif
-                @if($pengajuan->catatan_unit)
-                <div class="mt-3 p-3 bg-light rounded text-start">
-                    <small class="text-muted fw-semibold">Keterangan:</small>
-                    <p class="mb-0 small text-secondary">{{ $pengajuan->catatan_unit }}</p>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        <!-- ===== INFO PENERIMA + FORM VERIFIKASI ===== -->
-        <div class="card border-0 shadow-sm mt-3">
-            <div class="card-header bg-transparent">
-                <h6 class="fw-bold mb-0">
-                    <i class="bi bi-person-check me-2 text-primary"></i>Verifikasi Penerima
-                </h6>
-            </div>
-            <div class="card-body">
+                
                 <div class="mb-3">
-                    <p class="mb-1 fw-semibold">{{ $authUser->name }}</p>
-                    <small class="text-muted">{{ $authUser->email }}</small>
-                    <hr>
+                    <label class="form-label fw-semibold small">
+                        Catatan Verifikasi <span class="text-danger">*</span>
+                    </label>
+                    <textarea name="catatan_verifikasi" class="form-control" rows="3" 
+                            placeholder="Tuliskan catatan verifikasi..." required></textarea>
                 </div>
 
-                <form action="#" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="id_penerima" value="{{ $authUser->id }}">
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">
-                            Status Verifikasi <span class="text-danger">*</span>
-                        </label>
-                        <select name="status_verifikasi" class="form-select" required>
-                            <option value="">-- Pilih Status --</option>
-                            <option value="diverifikasi">✅ Diverifikasi</option>
-                            <option value="ditolak">❌ Ditolak</option>
-                            <option value="revisi">📝 Perlu Revisi</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">
-                            Catatan Verifikasi <span class="text-danger">*</span>
-                        </label>
-                        <textarea name="catatan_verifikasi" class="form-control" rows="3" 
-                                  placeholder="Tuliskan catatan verifikasi..." required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-check-circle me-1"></i> Verifikasi
-                    </button>
-                </form>
-            </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-check-circle me-1"></i> Verifikasi
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -447,7 +390,7 @@ function toggleRespon() {
     const keteranganLabel = document.getElementById('keteranganLabel');
     const submitBtn = document.getElementById('submitBtn');
     
-    if (status === 'diajukan') {
+    if (status === 'disetujui') {
         keteranganLabel.textContent = '(alasan menyetujui)';
         keteranganText.placeholder = 'Tuliskan alasan pengajuan ini disetujui...';
         submitBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Setujui';
@@ -457,6 +400,11 @@ function toggleRespon() {
         keteranganText.placeholder = 'Tuliskan alasan pengajuan ini ditolak...';
         submitBtn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Tolak';
         submitBtn.className = 'btn btn-danger w-100';
+    } else if (status === 'revisi') {
+        keteranganLabel.textContent = '(catatan revisi)';
+        keteranganText.placeholder = 'Tuliskan apa yang perlu direvisi...';
+        submitBtn.innerHTML = '<i class="bi bi-arrow-return-left me-1"></i> Minta Revisi';
+        submitBtn.className = 'btn btn-warning w-100';
     } else {
         keteranganLabel.textContent = '(alasan keputusan)';
         keteranganText.placeholder = 'Tuliskan alasan keputusan Anda...';

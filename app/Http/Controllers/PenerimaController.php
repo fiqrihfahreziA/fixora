@@ -699,4 +699,40 @@ public function exportCsv(Request $request)
     return view('penerima.pengadaan.show', compact('pengajuan', 'authUser'));
 }
 
+public function verifikasi(Request $request, $id)
+{
+    $request->validate([
+        'status_verifikasi' => 'required|in:disetujui_koordinator,ditolak,revisi',
+        'catatan_verifikasi' => 'required|string|min:5',
+    ]);
+
+    try {
+        $pengajuan = pengajuan::findOrFail($id);
+        
+        $statusMap = [
+            'disetujui_koordinator' => 'disetujui_koordinator',
+            'ditolak' => 'ditolak_penerima',
+            'revisi' => 'revisi',
+        ];
+        
+        $pengajuan->update([
+            'status' => $statusMap[$request->status_verifikasi],
+            'penerima_id' => Auth::id(),
+            'catatan_unit' => $request->catatan_verifikasi,
+            'diterima_at' => $request->status_verifikasi == 'disetujui_koordinator' ? now() : null,
+        ]);
+
+        // ✅ Redirect ke index dengan pesan sukses
+        return redirect()
+            ->route('penerima.chartp')
+            ->with('success', '✅ Pengajuan berhasil diverifikasi!');
+
+    } catch (\Exception $e) {
+        return back()
+            ->withInput()
+            ->with('error', '❌ Gagal verifikasi: ' . $e->getMessage());
+    }
+}
+
+
 }

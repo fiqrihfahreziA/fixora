@@ -83,7 +83,9 @@ Route::middleware(['auth', 'role:penerima'])
     Route::get('/pengadaan/{id}', [PenerimaController::class, 'showpengadaan'])->name('pengadaan.show');
     
     // ===== UPDATE PENGAJUAN (TERIMA/TOLAK) =====
-    Route::put('/pengadaan/{id}', [PenerimaController::class, 'update'])->name('pengadaan.update');
+    // Route::put('/pengadaan/{id}', [PenerimaController::class, 'update'])->name('pengadaan.update');
+     Route::put('/pengadaan/{id}/verifikasi', [PenerimaController::class, 'verifikasi'])
+        ->name('pengadaan.verifikasi');
 
        
     });
