@@ -473,7 +473,7 @@
 <nav class="navbar navbar-expand-lg navbar-glass">
     <div class="container">
         <!-- Brand -->
-        <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('penerima.dashboard') }}">
+        <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('atasan.dashboard') }}">
             <div class="brand-icon animate__animated animate__fadeInDown">
                 <img src="{{ asset('gambar/rsmz.png') }}" alt="Logo RSMZ">
             </div>

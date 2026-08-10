@@ -31,11 +31,16 @@ Route::middleware(['auth', 'role:atasan'])
       
         Route::get('/atasan/permintaan/{id}/view', [AtasanController::class, 'view'])
             ->name('permintaan.view');
-            Route::get('permintaan/{id}/gambar', [AtasanController::class, 'lihatGambar'])->name('permintaan.gambar');
+        Route::get('permintaan/{id}/gambar', [AtasanController::class, 'lihatGambar'])->name('permintaan.gambar');
         // Route::delete('/permintaan-penerima/{id}',[PenerimaController::class, 'destroy'])->name('permintaan.destroyy');
 
+        // pengadaan
+        Route::get('/chart/pengadaan', [AtasanController::class, 'pengadaanshow'])
+            ->name('pengadaan');
         
-
+        Route::get('/pengadaan/{id}', [AtasanController::class, 'showpengadaan'])->name('pengadaan.show');
+        Route::put('/pengadaan/{id}/verifikasi', [AtasanController::class, 'verifikasi'])
+            ->name('pengadaan.verifikasi');
 
     });
 

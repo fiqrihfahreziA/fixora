@@ -672,7 +672,7 @@ public function submit($id)
         $karyawanId = $authUser->karyawan->id ?? null;
         
         $pengajuan = pengajuan::where('karyawan_id', $karyawanId)
-            ->where('status', 'draft')
+            ->whereIn('status', ['draft', 'revisi'])
             ->findOrFail($id);
 
         $pengajuan->update([
