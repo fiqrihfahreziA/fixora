@@ -51,4 +51,5 @@ require __DIR__.'/admin.php';
 require __DIR__.'/pemohon.php';
 require __DIR__.'/penerima.php';
 require __DIR__.'/atasan.php';
+require __DIR__.'/keuangan.php';
 require __DIR__.'/dualrole.php';

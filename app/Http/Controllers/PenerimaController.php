@@ -715,14 +715,23 @@ public function verifikasi(Request $request, $id)
             'revisi' => 'revisi',
         ];
         
+        // Mapping untuk log_penerima (CUKUP STATUS SAJA)
+        $logMap = [
+            'disetujui_koordinator' => 'disetujui',
+            'ditolak' => 'ditolak',
+            'revisi' => 'revisi',
+        ];
+        
+        $newStatus = $statusMap[$request->status_verifikasi];
+        
         $pengajuan->update([
-            'status' => $statusMap[$request->status_verifikasi],
+            'status' => $newStatus,
             'penerima_id' => Auth::id(),
             'catatan_unit' => $request->catatan_verifikasi,
             'diterima_at' => $request->status_verifikasi == 'disetujui_koordinator' ? now() : null,
+            'log_status_penerima' => $newStatus, // ✅ CUKUP STATUS
         ]);
 
-        // ✅ Redirect ke index dengan pesan sukses
         return redirect()
             ->route('penerima.chartp')
             ->with('success', '✅ Pengajuan berhasil diverifikasi!');
@@ -733,6 +742,45 @@ public function verifikasi(Request $request, $id)
             ->with('error', '❌ Gagal verifikasi: ' . $e->getMessage());
     }
 }
+
+
+
+// public function verifikasi(Request $request, $id)
+// {
+//     $request->validate([
+//         'status_verifikasi' => 'required|in:disetujui_koordinator,ditolak,revisi',
+//         'catatan_verifikasi' => 'required|string|min:5',
+//     ]);
+
+//     try {
+//         $pengajuan = pengajuan::findOrFail($id);
+        
+//         $statusMap = [
+//             'disetujui_koordinator' => 'disetujui_koordinator',
+//             'ditolak' => 'ditolak_penerima',
+//             'revisi' => 'revisi',
+//         ];
+        
+//         $pengajuan->update([
+//             'status' => $statusMap[$request->status_verifikasi],
+//             'penerima_id' => Auth::id(),
+//             'catatan_unit' => $request->catatan_verifikasi,
+//             'diterima_at' => $request->status_verifikasi == 'disetujui_koordinator' ? now() : null,
+//         ]);
+
+//         // ✅ Redirect ke index dengan pesan sukses
+//         return redirect()
+//             ->route('penerima.chartp')
+//             ->with('success', '✅ Pengajuan berhasil diverifikasi!');
+
+//     } catch (\Exception $e) {
+//         return back()
+//             ->withInput()
+//             ->with('error', '❌ Gagal verifikasi: ' . $e->getMessage());
+//     }
+// }
+
+
 
 
 }

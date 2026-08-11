@@ -138,6 +138,8 @@
                                                 <option value="pemohon" {{ $user->role == 'pemohon' ? 'selected' : '' }}>Pemohon</option>
                                                 <option value="penerima" {{ $user->role == 'penerima' ? 'selected' : '' }}>Penerima</option>
                                                 <option value="atasan"  {{ $user->role == 'atasan' ? 'selected' : '' }}>Atasan</option>
+                                                <option value="keuangan"  {{ $user->role == 'keuangan' ? 'selected' : '' }}>Keuangan</option>
+                                                <option value="direktur"  {{ $user->role == 'direktur' ? 'selected' : '' }}>Direktur</option>
                                                 <option value="admin"   {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
                                             </select>
                                         </div>
@@ -307,6 +309,8 @@
                             <option value="pemohon">Pemohon</option>
                             <option value="penerima">Penerima</option>
                             <option value="atasan">Atasan</option>
+                            <option value="keuangan">Keuangan</option>
+                            <option value="direktur">Direktur</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>

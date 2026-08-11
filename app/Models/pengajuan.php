@@ -39,7 +39,8 @@ class pengajuan extends Model
     'catatan_farmasi',
     'catatan_direktur',
     'catatan_keuangan',
-    'total_disetujui'
+    'total_disetujui',
+    'log_status_penerima'
 
 
 ];

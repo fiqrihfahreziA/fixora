@@ -22,6 +22,10 @@ return new class extends Migration
             $table->string('instalasi');
              // dasar usulan
             $table->string('dasar_usulan')->nullable();
+            $table->string('log_status_penerima')->nullable();
+            $table->string('log_status_atasan')->nullable();
+            $table->string('log_status_keuangan')->nullable();
+            $table->string('log_status_direktur')->nullable();
                     // uraian umum
             $table->text('alasan_justifikasi')->nullable();
             $table->text('manfaat')->nullable();
@@ -30,14 +34,16 @@ return new class extends Migration
             $table->text('kondisi_barang_lama')->nullable();
             $table->text('ket_barang_lama')->nullable();
                // dokumen pendukung (opsional checkbox sederhana)
-            $table->boolean('foto_barang')->default(false);
-            $table->boolean('data_kerusakan')->default(false);
-            $table->boolean('penawaran_harga')->default(false);
-
+            $table->string('foto_barang')->nullable();
+            $table->string('penawaran_harga')->nullable();
+            $table->string('data_kerusakan')->nullable();
             // approval sederhana
             $table->foreignId('penerima_id')->nullable()->constrained('karyawans')->nullOnDelete();
             $table->foreignId('atasan_id')->nullable()->constrained('karyawans')->nullOnDelete();
-            $table->foreignId('direktur_id')->nullable()->constrained('karyawans')->nullOnDelete();
+             $table->foreignId('keungan_id')->nullable()->constrained('karyawans')->nullOnDelete();
+          
+           
+           
 
              $table->decimal('total_pengajuan', 15, 2)->default(0);
              $table->decimal('total_disetujui', 15, 2)->default(0);
@@ -54,7 +60,9 @@ return new class extends Migration
             // waktu approval
             $table->timestamp('diterima_at')->nullable();
             $table->timestamp('disetujui_kabid_at')->nullable();
+            $table->timestamp('disetujui_keuangan_at')->nullable();
             $table->timestamp('disetujui_direktur_at')->nullable();
+          
              $table->text('catatan_unit')->nullable();
 
             // Kepala Bidang
