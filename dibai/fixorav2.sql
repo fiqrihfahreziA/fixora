@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 03, 2026 at 09:00 AM
+-- Generation Time: Aug 12, 2026 at 10:03 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,6 +39,13 @@ CREATE TABLE `barang_tersedias` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `barang_tersedias`
+--
+
+INSERT INTO `barang_tersedias` (`id`, `pengajuan_item_id`, `nama_barang`, `jumlah`, `tahun_perolehan`, `kondisi`, `keterangan`, `created_at`, `updated_at`) VALUES
+(3, 6, 'sdfdsfds', 5, '2019', 'Rusak Berat', NULL, '2026-08-06 05:30:02', '2026-08-06 05:30:02');
+
 -- --------------------------------------------------------
 
 --
@@ -57,9 +64,9 @@ CREATE TABLE `bidangs` (
 --
 
 INSERT INTO `bidangs` (`id`, `nama_bidang`, `created_at`, `updated_at`) VALUES
-(1, 'Alat kesehatan', '2026-08-03 02:24:04', '2026-08-03 02:24:04'),
-(2, 'Komputer', '2026-08-03 02:24:12', '2026-08-03 02:24:12'),
-(3, 'ATK', '2026-08-03 02:24:25', '2026-08-03 02:24:25');
+(1, 'Alat Kesehatan', '2026-08-06 01:02:22', '2026-08-06 01:02:22'),
+(2, 'Komputer', '2026-08-06 01:02:30', '2026-08-06 01:02:30'),
+(3, 'ATK', '2026-08-06 01:02:36', '2026-08-06 01:02:36');
 
 -- --------------------------------------------------------
 
@@ -132,9 +139,12 @@ CREATE TABLE `karyawans` (
 --
 
 INSERT INTO `karyawans` (`id`, `bidang_id`, `nip`, `nama`, `jabatan`, `ruangan`, `ttd`, `created_at`, `updated_at`) VALUES
-(1, NULL, '-', 'Administrator', 'admin', 'admin', NULL, NULL, NULL),
-(2, 2, '001', 'Riza Rahardina', 'Kepala Ruangan', 'SIMRS', '1785723948_ach wahyudi.png', '2026-08-03 02:25:48', '2026-08-03 02:28:45'),
-(3, NULL, '002', 'Dinda Steffany', 'Kepala Ruangan', 'RUANG TERATAI', '1785724054_ani ratmono.png', '2026-08-03 02:27:34', '2026-08-03 02:27:34');
+(1, NULL, '000', 'Asministrator', 'null', 'admin', NULL, '2026-08-06 01:01:02', '2026-08-06 01:01:02'),
+(2, 2, '001', 'Riza Rahardina', 'Kepala Ruangan', 'SIMRS', '1785978252_anis sulala.png', '2026-08-06 01:04:13', '2026-08-06 01:07:48'),
+(3, NULL, '002', 'dinda', 'Kepala Ruangan', 'RUANG BOUGENVILE', '1785978310_holisotul hoiria.png', '2026-08-06 01:05:10', '2026-08-06 01:05:10'),
+(4, 2, '003', 'Dita Auni', 'Kepala Bidang', 'MANAJEMEN', '1785978350_siti julaeha.png', '2026-08-06 01:05:50', '2026-08-06 01:07:10'),
+(5, 2, '006', 'dr aini manarul', 'Kepala Bidang', 'MANAJEMEN', '1786324572_putri alvianita.png', '2026-08-10 01:16:12', '2026-08-10 01:16:37'),
+(6, NULL, '007', 'dina mrshella', 'Kepala Bidang', 'KEUANGAN', '1786413286_murniawati.png', '2026-08-11 01:54:46', '2026-08-11 01:54:46');
 
 -- --------------------------------------------------------
 
@@ -162,7 +172,10 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (7, '2026_07_31_083548_create_pengadaan_barangs_table', 1),
 (8, '2026_07_31_085008_create_pengajuans_table', 1),
 (9, '2026_07_31_085839_create_pengajuan_items_table', 1),
-(10, '2026_08_03_132656_create_barang_tersedias_table', 2);
+(10, '2026_08_03_132656_create_barang_tersedias_table', 1),
+(11, '2026_08_06_083304_update_pengajuans_file_columns_nullable', 2),
+(12, '2026_08_06_093951_add_log_status_columns_to_pengajuans', 3),
+(13, '2026_08_11_081650_add_keuangan_to_status_enum_on_pengajuan_table', 4);
 
 -- --------------------------------------------------------
 
@@ -219,27 +232,43 @@ CREATE TABLE `pengajuans` (
   `dampak` text DEFAULT NULL,
   `kondisi_barang_lama` text DEFAULT NULL,
   `ket_barang_lama` text DEFAULT NULL,
-  `foto_barang` tinyint(1) DEFAULT 0,
-  `data_kerusakan` tinyint(1) DEFAULT 0,
-  `penawaran_harga` tinyint(1) DEFAULT 0,
+  `foto_barang` varchar(255) DEFAULT NULL,
+  `data_kerusakan` varchar(255) DEFAULT NULL,
+  `penawaran_harga` varchar(255) DEFAULT NULL,
   `penerima_id` bigint(20) UNSIGNED DEFAULT NULL,
   `atasan_id` bigint(20) UNSIGNED DEFAULT NULL,
   `direktur_id` bigint(20) UNSIGNED DEFAULT NULL,
   `total_pengajuan` decimal(15,2) NOT NULL DEFAULT 0.00,
-  `status` enum('draft','diajukan','disetujui_koordinator','disetujui_kabid','menunggu_direktur','disetujui','ditolak') NOT NULL DEFAULT 'draft',
+  `total_disetujui` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `status` enum('draft','diajukan','disetujui_koordinator','disetujui_kabid','menunggu_direktur','disetujui','ditolak','revisi') NOT NULL DEFAULT 'draft',
+  `id_keuangan` bigint(20) UNSIGNED DEFAULT NULL,
+  `disetujui_keuangan_at` timestamp NULL DEFAULT NULL,
   `diterima_at` timestamp NULL DEFAULT NULL,
   `disetujui_kabid_at` timestamp NULL DEFAULT NULL,
   `disetujui_direktur_at` timestamp NULL DEFAULT NULL,
   `catatan_unit` text DEFAULT NULL,
+  `log_status_penerima` varchar(255) DEFAULT NULL,
+  `log_status_atasan` varchar(255) DEFAULT NULL,
+  `log_status_direktur` varchar(255) DEFAULT NULL,
   `catatan_bidang` text DEFAULT NULL,
   `catatan_perencanaan` text DEFAULT NULL,
   `catatan_ipsrs` text DEFAULT NULL,
   `catatan_farmasi` text DEFAULT NULL,
   `catatan_keuangan` text DEFAULT NULL,
+  `status_keuangan` int(11) DEFAULT NULL,
+  `log_status_keuangan` varchar(255) DEFAULT NULL,
   `catatan_direktur` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `pengajuans`
+--
+
+INSERT INTO `pengajuans` (`id`, `karyawan_id`, `bidang_id`, `no_pengajuan`, `tanggal_pengajuan`, `tahun_anggaran`, `instalasi`, `dasar_usulan`, `alasan_justifikasi`, `manfaat`, `dampak`, `kondisi_barang_lama`, `ket_barang_lama`, `foto_barang`, `data_kerusakan`, `penawaran_harga`, `penerima_id`, `atasan_id`, `direktur_id`, `total_pengajuan`, `total_disetujui`, `status`, `id_keuangan`, `disetujui_keuangan_at`, `diterima_at`, `disetujui_kabid_at`, `disetujui_direktur_at`, `catatan_unit`, `log_status_penerima`, `log_status_atasan`, `log_status_direktur`, `catatan_bidang`, `catatan_perencanaan`, `catatan_ipsrs`, `catatan_farmasi`, `catatan_keuangan`, `status_keuangan`, `log_status_keuangan`, `catatan_direktur`, `created_at`, `updated_at`) VALUES
+(1, 3, 2, 'PGD-20260806-6194', '2026-08-06', '2026', 'RUANG BOUGENVILE', 'Kebutuhan Operasional', 'dsfsdfsdfds', 'sdfsdfsfsdf', 'fdsfsdfdsf', 'Rusak Ringan', 'sdsdsds', NULL, 'pengajuan/data_kerusakan/1785980117_data_kerusakan.pdf', NULL, 4, 5, NULL, 307032.00, 0.00, 'disetujui_kabid', NULL, NULL, '2026-08-11 01:48:41', '2026-08-12 02:28:36', NULL, 'jggjyfdydryhdryhd', 'disetujui_koordinator', 'disetujui_kabid', NULL, 'asdafsdfsffsdfsfsdfsd', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-08-06 01:35:17', '2026-08-12 02:28:36'),
+(2, 3, 2, 'PGD-20260806-8737', '2026-08-06', '2026', 'RUANG BOUGENVILE', 'Penggantian Barang Rusak', 'dasdasdas', 'dasdadasdas', 'dadadas', NULL, 'asdasdas', NULL, 'pengajuan/data_kerusakan/1785985267_data_kerusakan.pdf', NULL, 4, 5, NULL, 181780.00, 0.00, 'disetujui_kabid', NULL, NULL, '2026-08-07 01:47:24', '2026-08-12 02:26:21', NULL, 'adadadasdasdasdadadqwdqwakb\r\nfjlljlhjkls\r\nk\'klfkl\'fkl;dfsjl;fdsjl;\r\nfjdfl;sj;dfsjk;dfsj;kefs', NULL, NULL, NULL, 'aDQDASDASDASDSADSA', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-08-06 03:01:08', '2026-08-12 02:26:21');
 
 -- --------------------------------------------------------
 
@@ -256,10 +285,20 @@ CREATE TABLE `pengajuan_items` (
   `jumlah` int(11) NOT NULL,
   `harga` bigint(20) UNSIGNED DEFAULT NULL,
   `jumlah_disetujui` int(10) UNSIGNED DEFAULT NULL,
+  `harga_disetujui` bigint(20) UNSIGNED DEFAULT NULL,
   `harga_satuan` decimal(15,2) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `pengajuan_items`
+--
+
+INSERT INTO `pengajuan_items` (`id`, `pengajuan_id`, `nama_barang`, `spesifikasi`, `satuan`, `jumlah`, `harga`, `jumlah_disetujui`, `harga_disetujui`, `harga_satuan`, `created_at`, `updated_at`) VALUES
+(3, 2, 'adasdasdas', 'dsadasdasdas', 'Pcs', 4, 181780, 4, NULL, 45445.00, '2026-08-06 03:01:08', '2026-08-06 03:01:08'),
+(6, 1, 'sdfdsfds', 'sdfsdfsd', 'Unit', 4, 280032, 4, NULL, 70008.00, '2026-08-06 05:30:02', '2026-08-06 05:30:02'),
+(7, 1, 'asdasdasdsa', 'dadasd', 'Pcs', 3, 27000, 3, NULL, 9000.00, '2026-08-06 05:30:02', '2026-08-06 05:30:02');
 
 -- --------------------------------------------------------
 
@@ -300,12 +339,8 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('1Xv1ND9IztHaMVVWlSLTI471cAkE5z4STA6oJUof', NULL, '10.10.9.241', 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5.2 Mobile/15E148 Safari/604.1', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiY3lGWHhNOTJwN0JNam95TGlDUHI3V1J0VVpzZlJSN3BHSWdYRVJOViI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MjM6Imh0dHA6Ly8xMC4xMC45LjI0MToyMjIyIjtzOjU6InJvdXRlIjtzOjk6ImRhc2hib2FyZCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1785724252),
-('5XEJhEScMx8nyVrPKRY4mMa7CJEjLpUalXRuj5Zh', 2, '10.10.10.5', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiVlAxbzlXSFJQd1VtRndVM1VuVjVRWXE1aTFhMGozamhzaUN1UzdOWSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDg6Imh0dHA6Ly8xMC4xMC45LjI0MToyMjIyL3BlbW9ob24vcGVuZ2FkYWFuL2NyZWF0ZSI7czo1OiJyb3V0ZSI7czoyNDoicGVtb2hvbi5wZW5nYWRhYW4uY3JlYXRlIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6Mjt9', 1785731956),
-('eW68XV3oYocqnODM27AU5YUrv0g0x1wrUrI50eDT', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.131.0 Chrome/148.0.7778.280 Electron/42.7.0 Safari/537.36', 'YToyOntzOjY6Il90b2tlbiI7czo0MDoidWNSWVdFb0dtYWt0bnhjQlpuQmdUS0lCTXFVUFdsSWxjcFVMREx4cyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1785739219),
-('KvZ42Zl8JHjzFTlx1Eb0yrS7XBiRw3pYZ8ZrpBqL', NULL, '10.10.11.168', 'Mozilla/5.0 (X11; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiSlVQd2IyU0RsSFV4UUlMTDRrcGdqOXJucExXQ3owWlp4V3haNGZHaCI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MjM6Imh0dHA6Ly8xMC4xMC45LjI0MToyMjIyIjtzOjU6InJvdXRlIjtzOjk6ImRhc2hib2FyZCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1785727704),
-('lklBJX5Tfyl6PY8pWIgmh1dMHihlNzNAIWDUaDwv', 2, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiMWdEeTFNWFNZVWIzSXJuclNBTm5FZUN4cjMzdVRTVU9Rc3AwTUZOYSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDY6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9wZW1vaG9uL3BlbmdhZGFhbi9jcmVhdGUiO3M6NToicm91dGUiO3M6MjQ6InBlbW9ob24ucGVuZ2FkYWFuLmNyZWF0ZSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjI7fQ==', 1785731892),
-('zLwQtD8FMzDsJNxnIUYRegJ4sRcy3EtRps89rVtt', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.131.0 Chrome/148.0.7778.280 Electron/42.7.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoienc1QVFLcDVZdG5NS3Y4VE9SZm1Ndm1lUkFPbDFrUllTMHpibW1JeiI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMCI7czo1OiJyb3V0ZSI7czo5OiJkYXNoYm9hcmQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1785724908);
+('5B1QvJqT1MURbnThzdMxFgKysucwZyMIQRdZn4SZ', 6, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoia3Q1b29rZGtrVEZBUXlzM1p6RWFUc0M2N2FKSkZPdGZlNFNQWW5NTyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDk6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9rZXVhbmdhbi9wZW5nYWRhYW4vMi9kZXRhaWwiO3M6NToicm91dGUiO3M6MjU6ImtldWFuZ2FuLnBlbmdhZGFhbi5kZXRhaWwiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo2O30=', 1786504438),
+('eX0J7P3BNQfoDcqi7q0hRPGleQC5I9xReGZg64NB', 6, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.132.1 Chrome/148.0.7778.280 Electron/42.7.1 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaVFtbUF1UGo3dlpmTmlVZjB3dWFuZ2dYVVA3NE5NTG1PaGFFbWVsQSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9rZXVhbmdhbi9wZXJtaW50YWFubiI7czo1OiJyb3V0ZSI7czoxODoia2V1YW5nYW4ucGVuZ2FkYWFuIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6Njt9', 1786500600);
 
 -- --------------------------------------------------------
 
@@ -333,9 +368,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `karyawan_id`, `email`, `email_verified_at`, `password`, `role`, `role2`, `is_active`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Admin RSMZ', 1, 'admin@rsmz.com', '2026-08-03 02:22:12', '$2y$12$BPMhE2Hw.p7d6ET3ZAYQde.H8MTZUmko.q/TRRci087ZjEoypngY6', 'admin', NULL, 1, NULL, '2026-08-03 02:22:12', '2026-08-03 02:22:12'),
-(2, 'Dinda Steffany', 3, 'dinda@rsmz.com', NULL, '$2y$12$TTIwMYaX7g1PhgU1K9.uFei/1o2pZeuYUOGosjqVEnEo1FqJEMwxO', 'pemohon', NULL, 1, NULL, '2026-08-03 02:28:27', '2026-08-03 02:28:27'),
-(3, 'Riza Rahardina', 2, 'riza@rsmz.com', NULL, '$2y$12$asGtLecEs1Y3aB9FkFcfieVjYerOGqudPT0nNLhrStTZJfaneVpIa', 'penerima', NULL, 1, NULL, '2026-08-03 02:28:46', '2026-08-03 02:28:46');
+(1, 'Admin RSMZ', 1, 'admin@rsmz.com', '2026-08-06 01:01:03', '$2y$12$a2MJNRMSw2TvbJCD88K/IeSDyMJHwb1agBrKv9HEG5IRUoDcsrk8K', 'admin', NULL, 1, NULL, '2026-08-06 01:01:03', '2026-08-06 01:01:03'),
+(2, 'dinda', 3, 'dinda@rsmz.com', NULL, '$2y$12$ARwFfDuva1Al8umlgz6Qw.pq.vdQZAZolozx7MugsnpbdXKrc928C', 'pemohon', NULL, 1, NULL, '2026-08-06 01:06:35', '2026-08-06 01:06:35'),
+(3, 'Dita Auni', 4, 'dita@rsmz.com', NULL, '$2y$12$Xh1a6UZKAlhPnXt.6QtEH.0eTcoPx7b3RcMP2MvFcFQ90uUg1gYNW', 'atasan', NULL, 1, NULL, '2026-08-06 01:07:11', '2026-08-06 01:07:11'),
+(4, 'Riza Rahardina', 2, 'riza@rsmz.com', NULL, '$2y$12$Pwr9Sv8EFF4pRB2dAAWqWuBk20j5LsI5cRmeKVYK1EzlwdBIdEkum', 'penerima', NULL, 1, NULL, '2026-08-06 01:07:48', '2026-08-06 01:07:48'),
+(5, 'dr aini manarul', 5, 'drmanarul@rsmz.com', NULL, '$2y$12$g.s0eg35pqNt9bKn/4BaFu9JlPXa7unze3G8Ml1DyyAudleqNtgU.', 'atasan', NULL, 1, NULL, '2026-08-10 01:16:38', '2026-08-10 01:16:38'),
+(6, 'dina mrshella', 6, 'dina@rsmz.com', NULL, '$2y$12$taJjnUVXHf9lCAbzZeVR3.Gf39ciO02.2NfQlkeyFsj75lNYEeFK.', 'keuangan', NULL, 1, NULL, '2026-08-11 01:58:45', '2026-08-11 01:58:45');
 
 --
 -- Indexes for dumped tables
@@ -411,7 +449,8 @@ ALTER TABLE `pengajuans`
   ADD KEY `pengajuans_bidang_id_foreign` (`bidang_id`),
   ADD KEY `pengajuans_penerima_id_foreign` (`penerima_id`),
   ADD KEY `pengajuans_atasan_id_foreign` (`atasan_id`),
-  ADD KEY `pengajuans_direktur_id_foreign` (`direktur_id`);
+  ADD KEY `pengajuans_direktur_id_foreign` (`direktur_id`),
+  ADD KEY `pengajuans_id_keuangan_foreign` (`id_keuangan`);
 
 --
 -- Indexes for table `pengajuan_items`
@@ -454,7 +493,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `barang_tersedias`
 --
 ALTER TABLE `barang_tersedias`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `bidangs`
@@ -472,13 +511,13 @@ ALTER TABLE `detail_barangs`
 -- AUTO_INCREMENT for table `karyawans`
 --
 ALTER TABLE `karyawans`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `pengadaan_barangs`
@@ -490,13 +529,13 @@ ALTER TABLE `pengadaan_barangs`
 -- AUTO_INCREMENT for table `pengajuans`
 --
 ALTER TABLE `pengajuans`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `pengajuan_items`
 --
 ALTER TABLE `pengajuan_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `requests`
@@ -508,7 +547,7 @@ ALTER TABLE `requests`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
@@ -539,6 +578,7 @@ ALTER TABLE `pengajuans`
   ADD CONSTRAINT `pengajuans_atasan_id_foreign` FOREIGN KEY (`atasan_id`) REFERENCES `karyawans` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `pengajuans_bidang_id_foreign` FOREIGN KEY (`bidang_id`) REFERENCES `bidangs` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `pengajuans_direktur_id_foreign` FOREIGN KEY (`direktur_id`) REFERENCES `karyawans` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `pengajuans_id_keuangan_foreign` FOREIGN KEY (`id_keuangan`) REFERENCES `karyawans` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `pengajuans_karyawan_id_foreign` FOREIGN KEY (`karyawan_id`) REFERENCES `karyawans` (`id`),
   ADD CONSTRAINT `pengajuans_penerima_id_foreign` FOREIGN KEY (`penerima_id`) REFERENCES `karyawans` (`id`) ON DELETE SET NULL;
 

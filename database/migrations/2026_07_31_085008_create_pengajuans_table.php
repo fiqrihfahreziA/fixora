@@ -40,7 +40,7 @@ return new class extends Migration
             // approval sederhana
             $table->foreignId('penerima_id')->nullable()->constrained('karyawans')->nullOnDelete();
             $table->foreignId('atasan_id')->nullable()->constrained('karyawans')->nullOnDelete();
-             $table->foreignId('keungan_id')->nullable()->constrained('karyawans')->nullOnDelete();
+             $table->foreignId('keuangan_id')->nullable()->constrained('karyawans')->nullOnDelete();
           
            
            

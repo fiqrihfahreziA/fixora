@@ -376,10 +376,27 @@ public function verifikasi(Request $request, $id)
     try {
         $pengajuan = pengajuan::findOrFail($id);
         
+        // Mapping status untuk konsistensi
+        $statusMap = [
+            'disetujui_kabid' => 'disetujui_kabid',
+            'ditolak' => 'ditolak_bidang',
+            'revisi' => 'revisi_bidang',
+        ];
+        
+        // Mapping untuk log (CUKUP STATUS SAJA)
+        $logMap = [
+            'disetujui_kabid' => 'disetujui_bidang',
+            'ditolak' => 'ditolak_bidang',
+            'revisi' => 'revisi_bidang',
+        ];
+        
+        $newStatus = $statusMap[$request->status_verifikasi];
+        
         $data = [
-            'status' => $request->status_verifikasi,
+            'status' => $newStatus,
             'atasan_id' => Auth::id(),
             'catatan_bidang' => $request->catatan_verifikasi,
+            'log_status_atasan' => $newStatus, // ✅ CUKUP STATUS
         ];
 
         // Hanya set tanggal jika statusnya disetujui

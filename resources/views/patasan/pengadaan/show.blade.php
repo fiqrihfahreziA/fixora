@@ -1,305 +1,575 @@
-@extends('layouts.pengadaan.keuangan')
+@extends('layouts.pengadaan.atasan')
 
 @section('content')
-<div class="container-fluid px-0">
-    <!-- Header -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div>
-                    <h4 class="mb-1 fw-bold text-dark">
-                        <i class="bi bi-box-seam text-primary me-2"></i>Verifikasi Pengadaan
-                    </h4>
-                    <p class="text-muted mb-0">Verifikasi pengajuan yang sudah disetujui Kabid</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold text-dark">
+            <i class="bi bi-file-earmark-text text-primary me-2"></i>
+            Detail Pengajuan
+        </h4>
+        <span class="text-muted">{{ $pengajuan->no_pengajuan }}</span>
+    </div>
+    <a href="{{ route('atasan.pengadaan') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Kembali
+    </a>
+</div>
+
+<!-- Status -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                @php
+                    $statusBadge = [
+                        'draft' => 'secondary',
+                        'diajukan' => 'warning',
+                        'revisi' => 'warning',
+                        'disetujui_koordinator' => 'info',
+                        'disetujui_kabid' => 'primary',
+                        'menunggu_direktur' => 'warning',
+                        'disetujui' => 'success',
+                        'ditolak' => 'danger',
+                        'diterima' => 'success',
+                        'menunggu_diterima' => 'warning',
+                        'ditolak_penerima' => 'danger',
+                        'diverifikasi' => 'success'
+                    ][$pengajuan->status] ?? 'secondary';
+                    
+                    $statusLabel = [
+                        'draft' => 'Draft',
+                        'diajukan' => 'Diajukan',
+                        'revisi' => 'Revisi',
+                        'disetujui_koordinator' => 'Disetujui Koordinator',
+                        'disetujui_kabid' => 'Disetujui Kabid',
+                        'menunggu_direktur' => 'Menunggu Direktur',
+                        'disetujui' => 'Disetujui',
+                        'ditolak' => 'Ditolak',
+                        'diterima' => 'Diterima',
+                        'menunggu_diterima' => 'Menunggu Diterima',
+                        'ditolak_penerima' => 'Ditolak Penerima',
+                        'diverifikasi' => 'Diverifikasi'
+                    ][$pengajuan->status] ?? $pengajuan->status;
+                @endphp
+                <span class="badge bg-{{ $statusBadge }} fs-6 px-3 py-2">
+                    <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i>
+                    {{ $statusLabel }}
+                </span>
+                <small class="text-muted ms-3">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    {{ date('d M Y H:i', strtotime($pengajuan->created_at)) }}
+                </small>
+                @if($pengajuan->diterima_at)
+                <small class="text-success ms-3">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Diterima: {{ date('d M Y H:i', strtotime($pengajuan->diterima_at)) }}
+                </small>
+                @endif
+            </div>
+            <div>
+                <span class="fw-bold">Total: </span>
+                <span class="text-primary fw-bold fs-5">
+                    Rp {{ number_format($pengajuan->total_pengajuan, 0, ',', '.') }}
+                </span>
+            </div>
+        </div>
+        @if($pengajuan->catatan_unit)
+        <div class="mt-3 p-3 bg-light rounded">
+            <small class="text-muted fw-semibold">Catatan Penerima:</small>
+            <p class="mb-0 text-secondary">{{ $pengajuan->catatan_unit }}</p>
+        </div>
+        @endif
+
+        {{-- TAMPILAN LOG STATUS BIDANG --}}
+        @if($pengajuan->log_status_bidang)
+        <div class="mt-2 p-2 bg-info bg-opacity-10 rounded">
+            <small class="text-muted">
+                <i class="bi bi-clock-history me-1"></i>
+                Log Verifikasi Bidang: 
+                <span class="fw-bold text-primary">{{ $pengajuan->log_status_bidang }}</span>
+            </small>
+        </div>
+        @endif
+    </div>
+</div>
+
+<div class="row">
+    <!-- Kolom Kiri: Informasi -->
+    <div class="col-md-8">
+        <!-- Info Grid -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+                <h6 class="fw-bold mb-0"><i class="bi bi-info-circle me-2"></i>Informasi Pengajuan</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="label">Pemohon</div>
+                            <div class="value">{{ $pengajuan->karyawan->nama ?? '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="label">Jabatan</div>
+                            <div class="value">{{ $pengajuan->karyawan->jabatan ?? '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="label">Bidang</div>
+                            <div class="value">{{ $pengajuan->bidang->nama_bidang ?? '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="label">Instalasi</div>
+                            <div class="value">{{ $pengajuan->instalasi ?? '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="label">Dasar Usulan</div>
+                            <div class="value">{{ $pengajuan->dasar_usulan ?? '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="label">Tahun Anggaran</div>
+                            <div class="value">{{ $pengajuan->tahun_anggaran ?? '-' }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Alasan & Manfaat -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-primary mb-2">
+                            <i class="bi bi-clipboard-check me-2"></i>Alasan Justifikasi
+                        </h6>
+                        <p class="mb-0 text-secondary" style="word-wrap: break-word; max-height: 150px; overflow-y: auto;">
+                            {{ $pengajuan->alasan_justifikasi ?? '-' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-success mb-2">
+                            <i class="bi bi-star-fill me-2"></i>Manfaat
+                        </h6>
+                        <p class="mb-0 text-secondary" style="word-wrap: break-word; max-height: 150px; overflow-y: auto;">
+                            {{ $pengajuan->manfaat ?? '-' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dampak -->
+        <div class="card border-warning shadow-sm mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold text-warning mb-2">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Dampak Jika Tidak Dilaksanakan
+                </h6>
+                <p class="mb-0 text-secondary" style="word-wrap: break-word; max-height: 100px; overflow-y: auto;">
+                    {{ $pengajuan->dampak ?? '-' }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Kondisi Barang Lama -->
+        @if($pengajuan->kondisi_barang_lama)
+        <div class="card border-info shadow-sm mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold text-info mb-2">
+                    <i class="bi bi-box-seam me-2"></i>Kondisi Barang Lama
+                </h6>
+                <div class="d-flex gap-3">
+                    <span class="badge bg-warning text-dark">{{ $pengajuan->kondisi_barang_lama }}</span>
+                    <small class="text-muted">{{ $pengajuan->ket_barang_lama ?? '-' }}</small>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Daftar Barang -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+                <h6 class="fw-bold mb-0"><i class="bi bi-list-check me-2"></i>Daftar Barang</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nama Barang</th>
+                                <th class="text-center">Jumlah</th>
+                                <th class="text-end">Harga Satuan</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($pengajuan->items as $item)
+                            <tr>
+                                <td>
+                                    <strong>{{ $item->nama_barang }}</strong>
+                                    <br>
+                                    <small class="text-muted">Spesifikasi: {{ $item->spesifikasi ?? '-' }}</small>
+                                </td>
+                                <td class="text-center">{{ $item->jumlah }} {{ $item->satuan ?? 'Unit' }}</td>
+                                <td class="text-end">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
+                                <td class="text-end fw-bold text-primary">
+                                    Rp {{ number_format($item->harga, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="3" class="text-end fw-bold">Total</td>
+                                <td class="text-end fw-bold text-primary">
+                                    Rp {{ number_format($pengajuan->total_pengajuan, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DATA KERUSAKAN (PDF) ===== -->
+        @if($pengajuan->data_kerusakan)
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h6 class="fw-bold mb-0 text-danger">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Data Kerusakan
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="font-size: 40px; color: #dc3545;">
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            </div>
+                            <div>
+                                <p class="fw-semibold mb-1">{{ basename($pengajuan->data_kerusakan) }}</p>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    Diupload: {{ date('d M Y H:i', strtotime($pengajuan->created_at)) }}
+                                </small>
+                                @php
+                                    $fileSize = Storage::disk('public')->exists($pengajuan->data_kerusakan) 
+                                        ? Storage::disk('public')->size($pengajuan->data_kerusakan) 
+                                        : 0;
+                                @endphp
+                                @if($fileSize > 0)
+                                <br>
+                                <small class="text-muted">
+                                    <i class="bi bi-filetype-pdf me-1"></i>
+                                    Ukuran: {{ number_format($fileSize / 1024, 2) }} KB
+                                </small>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
+                           target="_blank" 
+                           class="btn btn-danger btn-sm rounded-pill px-3">
+                            <i class="bi bi-eye me-1"></i> Lihat
+                        </a>
+                        <a href="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
+                           download 
+                           class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                            <i class="bi bi-download me-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Preview PDF -->
+                <div class="mt-3">
+                    <div class="border rounded-3 p-2" style="background: #f8f9fa;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">Preview</small>
+                            <a href="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
+                               target="_blank" 
+                               class="btn btn-sm btn-link text-primary">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Buka baru
+                            </a>
+                        </div>
+                        <embed src="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
+                               type="application/pdf" 
+                               width="100%" 
+                               height="350px" 
+                               style="border-radius: 6px;">
+                        <small class="text-muted d-block text-center mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Jika tidak muncul, klik tombol "Lihat"
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @else
+        <!-- Jika tidak ada data kerusakan -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold text-muted mb-0">
+                    <i class="bi bi-file-earmark me-2"></i>
+                    Tidak ada dokumen data kerusakan
+                </h6>
+            </div>
+        </div>
+        @endif
     </div>
 
-    <!-- Statistik -->
-    <div class="row g-3 mb-4">
-        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
-            <div class="card border-0 shadow-sm hover-shadow transition-all rounded-4">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stats-icon bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-grid-3x3-gap-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">Total</h6>
-                            <h5 class="fw-bold mb-0">{{ $stats['total'] ?? 0 }}</h5>
-                        </div>
-                    </div>
-                </div>
+    <!-- ===== KOLOM KANAN: FORM VERIFIKASI ===== -->
+    <div class="col-md-4">
+        <!-- ===== PETUNJUK ===== -->
+        <div class="card border-0 shadow-sm bg-light mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-2">
+                    <i class="bi bi-lightbulb text-warning me-2"></i>Petunjuk Verifikasi
+                </h6>
+                <ul class="small text-muted mb-0 ps-3">
+                    <li class="mb-1">✅ <strong>Setujui</strong> = Pengajuan diteruskan</li>
+                    <li class="mb-1">❌ <strong>Tolak</strong> = Pengajuan ditolak</li>
+                    <li>📝 <strong>Minta Revisi</strong> = Kembali ke pemohon</li>
+                </ul>
             </div>
         </div>
-        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
-            <div class="card border-0 shadow-sm hover-shadow transition-all rounded-4">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stats-icon bg-info bg-opacity-10 text-info rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-check2-circle fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">Disetujui Kabid</h6>
-                            <h5 class="fw-bold mb-0">{{ $stats['disetujui_kabid'] ?? 0 }}</h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
-            <div class="card border-0 shadow-sm hover-shadow transition-all rounded-4">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stats-icon bg-purple bg-opacity-10 text-purple rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-hourglass-split fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">Menunggu</h6>
-                            <h5 class="fw-bold mb-0">{{ $stats['menunggu_direktur'] ?? 0 }}</h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
-            <div class="card border-0 shadow-sm hover-shadow transition-all rounded-4">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stats-icon bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-check-circle-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">Disetujui</h6>
-                            <h5 class="fw-bold mb-0">{{ $stats['disetujui'] ?? 0 }}</h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-3 col-md-4 col-6">
-            <div class="card border-0 shadow-sm hover-shadow transition-all rounded-4">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="stats-icon bg-danger bg-opacity-10 text-danger rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-x-circle-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0 small">Ditolak</h6>
-                            <h5 class="fw-bold mb-0">{{ $stats['ditolak'] ?? 0 }}</h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Filter -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
-        <div class="card-body p-4">
-            <form action="{{ route('keuangan.pengadaan') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label fw-semibold small text-muted">
-                        <i class="bi bi-search me-1"></i> Cari
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-0">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" 
-                               name="search" 
-                               class="form-control border-0 bg-light" 
-                               placeholder="Cari no pengajuan, nama barang..." 
-                               value="{{ request('search') }}">
-                    </div>
+        <!-- ===== FORM VERIFIKASI ===== -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-person-check me-2 text-primary"></i>Verifikasi Penerima
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <p class="mb-1 fw-semibold">{{ $authUser->name }}</p>
+                    <small class="text-muted">{{ $authUser->email }}</small>
+                    <hr>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold small text-muted">
-                        <i class="bi bi-filter me-1"></i> Status
-                    </label>
-                    <select name="status" class="form-select bg-light border-0">
-                        <option value="">Semua Status</option>
-                        <option value="disetujui_kabid" {{ request('status') == 'disetujui_kabid' ? 'selected' : '' }}>Disetujui Kabid</option>
-                        <option value="menunggu_direktur" {{ request('status') == 'menunggu_direktur' ? 'selected' : '' }}>Menunggu Direktur</option>
-                        <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                        <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                        <option value="ditolak_penerima" {{ request('status') == 'ditolak_penerima' ? 'selected' : '' }}>Ditolak Penerima</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill">
-                        <i class="bi bi-funnel me-1"></i> Filter
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Tabel -->
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-0">
-            <div class="tab-content p-4">
-                <div class="tab-pane fade show active">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="py-3 px-3" width="5%">#</th>
-                                    <th class="py-3 px-3" width="15%">No Pengajuan</th>
-                                    <th class="py-3 px-3" width="15%">Tanggal</th>
-                                    <th class="py-3 px-3" width="20%">Nama Barang</th>
-                                    <th class="py-3 px-3" width="15%">Status</th>
-                                    <th class="py-3 px-3" width="10%">Total</th>
-                                    <th class="py-3 px-3 text-center" width="20%">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($allPengajuan as $pengajuan)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>
-                                        <span class="fw-semibold text-primary">{{ $pengajuan->no_pengajuan }}</span>
-                                        <br>
-                                        <small class="text-muted">{{ $pengajuan->bidang->nama_bidang ?? '-' }}</small>
-                                    </td>
-                                    <td>
-                                        {{ date('d/m/Y', strtotime($pengajuan->tanggal_pengajuan)) }}
-                                    </td>
-                                    <td>
-                                        @foreach($pengajuan->items->take(2) as $item)
-                                            <div class="d-flex align-items-center gap-2 mb-1">
-                                                <i class="bi bi-dot text-primary"></i>
-                                                <span class="small">{{ $item->nama_barang }}</span>
-                                                <span class="badge bg-light text-dark">x{{ $item->jumlah }}</span>
-                                            </div>
-                                        @endforeach
-                                        @if($pengajuan->items->count() > 2)
-                                            <small class="text-muted">+ {{ $pengajuan->items->count() - 2 }} item lainnya</small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @php
-                                            $statusColor = [
-                                                'draft' => 'secondary',
-                                                'revisi' => 'purple',
-                                                'diajukan' => 'warning',
-                                                'disetujui_koordinator' => 'info',
-                                                'disetujui_kabid' => 'primary',
-                                                'menunggu_direktur' => 'warning',
-                                                'disetujui' => 'success',
-                                                'ditolak' => 'danger',
-                                                'ditolak_penerima' => 'danger'
-                                            ][$pengajuan->status] ?? 'secondary';
-                                            
-                                            $statusLabel = [
-                                                'draft' => 'Draft',
-                                                'revisi' => 'Revisi',
-                                                'diajukan' => 'Diajukan',
-                                                'disetujui_koordinator' => 'Disetujui Koordinator',
-                                                'disetujui_kabid' => 'Disetujui Kabid',
-                                                'menunggu_direktur' => 'Menunggu Direktur',
-                                                'disetujui' => 'Disetujui',
-                                                'ditolak' => 'Ditolak',
-                                                'ditolak_penerima' => 'Ditolak Penerima'
-                                            ][$pengajuan->status] ?? $pengajuan->status;
-                                        @endphp
-                                        <span class="badge bg-{{ $statusColor }}-subtle text-{{ $statusColor }} px-3 py-2 rounded-pill">
-                                            <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>
-                                            {{ $statusLabel }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold">Rp {{ number_format($pengajuan->total_pengajuan, 0, ',', '.') }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            {{-- TOMBOL DETAIL - KE HALAMAN DETAIL --}}
-                                            <a href="{{ route('keuangan.pengadaan.detail', $pengajuan->id) }}" 
-                                               class="btn btn-sm btn-outline-primary rounded-3" 
-                                               title="Detail">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            
-                                            {{-- TOMBOL CETAK - UNTUK DISETUJUI --}}
-                                            @if($pengajuan->status == 'disetujui')
-                                                <a href="#" class="btn btn-sm btn-outline-success rounded-3" title="Cetak">
-                                                    <i class="bi bi-printer"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-5">
-                                        <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
-                                        <h6 class="text-muted">Belum ada data pengajuan</h6>
-                                        <p class="text-muted small">Tidak ada pengajuan yang perlu diverifikasi</p>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                {{-- FORM VERIFIKASI --}}
+                <form action="{{ route('atasan.pengadaan.verifikasi', $pengajuan->id) }}" method="POST" id="verifikasiForm">
+                    @csrf
+                    @method('PUT')
+                    
+                    <input type="hidden" name="id_penerima" value="{{ $authUser->id }}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">
+                            Status Verifikasi <span class="text-danger">*</span>
+                        </label>
+                        <select name="status_verifikasi" class="form-select" id="statusSelect" required>
+                            <option value="">-- Pilih Status --</option>
+                            <option value="disetujui_kabid">✅ Setujui</option>
+                            <option value="ditolak">❌ Ditolak</option>
+                            <option value="revisi">📝 Perlu Revisi</option>
+                        </select>
+                        <small class="text-muted">Status akan disimpan sebagai: 
+                            <span id="statusPreview" class="fw-bold text-primary">-</span>
+                        </small>
                     </div>
                     
-                    <!-- Pagination -->
-                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <div class="text-muted small">
-                            Menampilkan {{ $allPengajuan->firstItem() ?? 0 }} - {{ $allPengajuan->lastItem() ?? 0 }} 
-                            dari {{ $allPengajuan->total() }} data
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">
+                            Catatan Verifikasi <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="catatan_verifikasi" id="catatanVerifikasi" 
+                                  class="form-control" rows="3" 
+                                  placeholder="Tuliskan catatan verifikasi minimal 5 karakter..." 
+                                  required></textarea>
+                        <small class="text-muted">Minimal 5 karakter</small>
+                        <div id="catatanError" class="text-danger small mt-1" style="display: none;">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            Catatan harus diisi minimal 5 karakter
                         </div>
-                        {{ $allPengajuan->links() }}
                     </div>
+
+                    <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                        <i class="bi bi-check-circle me-1"></i> Verifikasi
+                    </button>
+                </form>
+
+                {{-- TAMPILAN LOG STATUS --}}
+                @if($pengajuan->log_status_bidang)
+                <div class="mt-3 p-2 bg-light rounded">
+                    <small class="text-muted d-block">
+                        <i class="bi bi-clock-history me-1"></i>
+                        Status Terakhir: <span class="fw-bold text-primary">{{ $pengajuan->log_status_bidang }}</span>
+                    </small>
                 </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
 
 <style>
-.hover-shadow {
-    transition: all 0.3s ease;
+.info-item {
+    background: #f8f9fa;
+    padding: 10px 14px;
+    border-radius: 8px;
 }
-.hover-shadow:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+.info-item .label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
-.transition-all {
+.info-item .value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1a1a2e;
+    margin-top: 2px;
+}
+
+/* Styling form */
+#statusSelect:focus, #catatanVerifikasi:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+#statusPreview {
     transition: all 0.3s ease;
 }
 
-.stats-icon {
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
+#submitBtn {
+    transition: all 0.3s ease;
+    font-weight: 600;
 }
-.bg-purple {
-    background-color: #6f42c1;
+#submitBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
 }
-.bg-purple-subtle {
-    background-color: #e7d8f5 !important;
+#submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
-.text-purple {
-    color: #6f42c1 !important;
-}
-.bg-success-subtle {
-    background-color: #d4edda !important;
-}
-.bg-danger-subtle {
-    background-color: #f8d7da !important;
-}
-.bg-warning-subtle {
-    background-color: #fff3cd !important;
-}
-.bg-info-subtle {
-    background-color: #d1ecf1 !important;
-}
-.bg-secondary-subtle {
-    background-color: #e2e3e5 !important;
-}
-.bg-primary-subtle {
-    background-color: #cfe2ff !important;
+
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.getElementById('statusSelect');
+    const catatanInput = document.getElementById('catatanVerifikasi');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusPreview = document.getElementById('statusPreview');
+    const catatanError = document.getElementById('catatanError');
+    const form = document.getElementById('verifikasiForm');
+
+    // Mapping status untuk preview
+    const statusMap = {
+        'disetujui_kabid': '✅ Disetujui Kabid',
+        'ditolak': '❌ Ditolak',
+        'revisi': '📝 Revisi'
+    };
+
+    // Update preview status
+    function updateStatusPreview() {
+        const selected = statusSelect.value;
+        if (selected && statusMap[selected]) {
+            statusPreview.textContent = statusMap[selected];
+            statusPreview.className = 'fw-bold text-primary';
+        } else {
+            statusPreview.textContent = '-';
+            statusPreview.className = 'fw-bold text-muted';
+        }
+    }
+
+    statusSelect.addEventListener('change', updateStatusPreview);
+    updateStatusPreview();
+
+    // Validate catatan
+    function validateCatatan() {
+        const value = catatanInput.value.trim();
+        if (value.length < 5) {
+            catatanError.style.display = 'block';
+            catatanInput.classList.add('is-invalid');
+            return false;
+        } else {
+            catatanError.style.display = 'none';
+            catatanInput.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
+    catatanInput.addEventListener('input', validateCatatan);
+    catatanInput.addEventListener('blur', validateCatatan);
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validasi status
+        if (!statusSelect.value) {
+            alert('⚠️ Silakan pilih status verifikasi terlebih dahulu!');
+            statusSelect.focus();
+            return false;
+        }
+
+        // Validasi catatan
+        if (!validateCatatan()) {
+            alert('⚠️ Catatan verifikasi harus diisi minimal 5 karakter!');
+            catatanInput.focus();
+            return false;
+        }
+
+        // Konfirmasi
+        let confirmMsg = 'Apakah Anda yakin akan ';
+        const selectedStatus = statusSelect.value;
+        if (selectedStatus === 'disetujui_kabid') {
+            confirmMsg += 'MENYETUJUI pengajuan ini?';
+        } else if (selectedStatus === 'ditolak') {
+            confirmMsg += 'MENOLAK pengajuan ini?';
+        } else {
+            confirmMsg += 'MEMINTA REVISI pengajuan ini?';
+        }
+
+        if (!confirm(confirmMsg)) {
+            return false;
+        }
+
+        // Submit form dengan loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Memproses...';
+        submitBtn.classList.add('btn-loading');
+
+        // Submit form
+        this.submit();
+    });
+
+    // Reset button state jika terjadi error
+    if (sessionStorage.getItem('formError')) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Verifikasi';
+        submitBtn.classList.remove('btn-loading');
+        sessionStorage.removeItem('formError');
+    }
+});
+
+// Tampilkan error dari session jika ada
+@if(session('error'))
+    alert('❌ {{ session('error') }}');
+@endif
+
+@if(session('success'))
+    alert('✅ {{ session('success') }}');
+@endif
+</script>
 @endsection

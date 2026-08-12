@@ -13,6 +13,7 @@ class pengajuan extends Model
     'karyawan_id', 
     'penerima_id', 
     'atasan_id',
+    'id_keuangan',
     'direktur_id',
     'total_pengajuan',
     'bidang_id',
@@ -40,7 +41,11 @@ class pengajuan extends Model
     'catatan_direktur',
     'catatan_keuangan',
     'total_disetujui',
-    'log_status_penerima'
+    'log_status_penerima',
+     'log_status_atasan',
+     'log_status_keuangan',
+     'disetujui_keuangan_at',
+     'status_keuangan',
 
 
 ];
@@ -60,6 +65,11 @@ class pengajuan extends Model
         return $this->belongsTo(bidang::class);
    }
    public function penerima()
+    {
+        return $this->belongsTo(karyawan::class);
+   }
+   
+   public function keuangan()
     {
         return $this->belongsTo(karyawan::class);
    }

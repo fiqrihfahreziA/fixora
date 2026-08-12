@@ -21,7 +21,7 @@
     </div>
 
     <!-- Card Kanan - Pemeliharaan -->
-    <div class="col-md-6">
+    {{-- <div class="col-md-6">
         <a href="{{ route('pemohon.permintaan') }}" class="text-decoration-none d-block">
             <div class="card card-menu card-pemeliharaan h-100">
                 <div class="card-body text-center p-5">
@@ -36,7 +36,7 @@
                 </div>
             </div>
         </a>
-    </div>
+    </div> --}}
 </div>
 
 @endsection

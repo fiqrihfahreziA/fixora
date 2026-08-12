@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Pemohon' }} | Aplikasi Permintaan & Perbaikan Barang</title>
+    <title>{{ $title ?? 'Keuangan' }} | Aplikasi Permintaan & Perbaikan Barang</title>
     <link rel="icon" href="{{ asset('gambar/rsmz.png') }}" type="image/png">
     
     <!-- Bootstrap CSS -->
@@ -473,7 +473,7 @@
 <nav class="navbar navbar-expand-lg navbar-glass">
     <div class="container">
         <!-- Brand -->
-        <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('penerima.dashboard') }}">
+        <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('keuangan.dashboard') }}">
             <div class="brand-icon animate__animated animate__fadeInDown">
                 <img src="{{ asset('gambar/rsmz.png') }}" alt="Logo RSMZ">
             </div>
