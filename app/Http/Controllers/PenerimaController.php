@@ -704,6 +704,7 @@ public function verifikasi(Request $request, $id)
     $request->validate([
         'status_verifikasi' => 'required|in:disetujui_koordinator,ditolak,revisi',
         'catatan_verifikasi' => 'required|string|min:5',
+        'penerima_id' => 'required'
     ]);
 
     try {
@@ -713,6 +714,7 @@ public function verifikasi(Request $request, $id)
             'disetujui_koordinator' => 'disetujui_koordinator',
             'ditolak' => 'ditolak_penerima',
             'revisi' => 'revisi',
+            
         ];
         
         // Mapping untuk log_penerima (CUKUP STATUS SAJA)
@@ -726,7 +728,7 @@ public function verifikasi(Request $request, $id)
         
         $pengajuan->update([
             'status' => $newStatus,
-            'penerima_id' => Auth::id(),
+            'penerima_id' => $request->penerima_id,
             'catatan_unit' => $request->catatan_verifikasi,
             'diterima_at' => $request->status_verifikasi == 'disetujui_koordinator' ? now() : null,
             'log_status_penerima' => $newStatus, // ✅ CUKUP STATUS

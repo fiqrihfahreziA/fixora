@@ -371,6 +371,7 @@ public function verifikasi(Request $request, $id)
     $request->validate([
         'status_verifikasi' => 'required|in:disetujui_kabid,ditolak,revisi',
         'catatan_verifikasi' => 'required|string|min:5',
+        'atasan_id' => 'required',
     ]);
 
     try {
@@ -394,7 +395,7 @@ public function verifikasi(Request $request, $id)
         
         $data = [
             'status' => $newStatus,
-            'atasan_id' => Auth::id(),
+            'atasan_id' => $request->atasan_id,
             'catatan_bidang' => $request->catatan_verifikasi,
             'log_status_atasan' => $newStatus, // ✅ CUKUP STATUS
         ];
@@ -417,39 +418,5 @@ public function verifikasi(Request $request, $id)
     }
 }
 
-// public function verifikasi(Request $request, $id)
-// {
-//     $request->validate([
-//         'status_verifikasi' => 'required|in:disetujui_kabid,ditolak,revisi',
-//         'catatan_verifikasi' => 'required|string|min:5',
-//     ]);
-
-//     try {
-//         $pengajuan = pengajuan::findOrFail($id);
-        
-//         $statusMap = [
-//             'disetujui_kabid' => 'disetujui_kabid',
-//             'ditolak' => 'ditolak',
-//             'revisi' => 'revisi',
-//         ];
-        
-//         $pengajuan->update([
-//             'status' => $statusMap[$request->status_verifikasi],
-//             'atasan_id' => Auth::id(),
-//             'catatan_bidang' => $request->catatan_verifikasi,
-//             'disetujui_kabid_at' => $request->status_verifikasi == 'disetujui_kabid_at' ? now() : null,
-//         ]);
-
-//         // ✅ Redirect ke index dengan pesan sukses
-//         return redirect()
-//             ->route('atasan.pengadaan')
-//             ->with('success', '✅ Pengajuan berhasil diverifikasi!');
-
-//     } catch (\Exception $e) {
-//         return back()
-//             ->withInput()
-//             ->with('error', '❌ Gagal verifikasi: ' . $e->getMessage());
-//     }
-// }
 
 }

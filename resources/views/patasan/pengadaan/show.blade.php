@@ -364,7 +364,7 @@
                     @csrf
                     @method('PUT')
                     
-                    <input type="hidden" name="id_penerima" value="{{ $authUser->id }}">
+                    <input type="hidden" name="atasan_id" value="{{ $authUser->karyawan->id }}">
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold small">

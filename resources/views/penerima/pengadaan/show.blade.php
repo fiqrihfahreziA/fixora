@@ -292,6 +292,7 @@
                                 <i class="bi bi-box-arrow-up-right me-1"></i>Buka baru
                             </a>
                         </div>
+
                         <embed src="{{ asset('storage/' . $pengajuan->data_kerusakan) }}" 
                                type="application/pdf" 
                                width="100%" 
@@ -353,7 +354,7 @@
                 @csrf
                 @method('PUT')
                 
-                <input type="hidden" name="id_penerima" value="{{ $authUser->id }}">
+                <input type="hidden" name="penerima_id" value="{{ $authUser->karyawan->id }}">
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold small">

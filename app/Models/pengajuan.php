@@ -64,13 +64,19 @@ class pengajuan extends Model
     {
         return $this->belongsTo(bidang::class);
    }
+
+     public function atasan()
+    {
+        return $this->belongsTo(karyawan::class, 'atasan_id');
+   }
+
    public function penerima()
     {
-        return $this->belongsTo(karyawan::class);
+        return $this->belongsTo(karyawan::class, 'penerima_id',);
    }
    
    public function keuangan()
     {
-        return $this->belongsTo(karyawan::class);
+        return $this->belongsTo(karyawan::class, 'id_keuangan');
    }
 }
