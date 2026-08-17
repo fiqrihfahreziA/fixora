@@ -25,6 +25,9 @@ Route::middleware(['auth', 'role:keuangan'])
         Route::get('/permintaann', [keuanganController::class, 'showpengadaan'])
             ->name('pengadaan');
         Route::get('/pengadaan/{id}/detail', [KeuanganController::class, 'detail'])->name('pengadaan.detail');
+        Route::put('keuangan/verifikasi/lengkap/{id}', [KeuanganController::class, 'verifikasiLengkap'])->name('verifikasi.lengkap');
+        Route::put('keuangan/verifikasi/sebagian/{id}', [KeuanganController::class, 'verifikasiSebagian'])->name('verifikasi.sebagian');
+        Route::put('keuangan/tolak/{id}', [KeuanganController::class, 'tolak'])->name('tolak');
         // Route::get('/permintaann/edit/{id}', [AtasanController::class, 'edit'])->name('permintaan.edit');
         // Route::put('/permintaannea/update/{id}', [AtasanController::class, 'update'])->name('permintaan.update');   
       

@@ -101,6 +101,58 @@ class keuanganController extends Controller
     }
 
 
-
+    public function verifikasiLengkap(Request $request, $id)
+{
+    $request->validate([
+        // 'status_verifikasi' => 'required|in:disetujui_koordinator,ditolak,revisi',
+        // 'catatan_verifikasi' => 'required|string|min:5',
+        'id_keuangan' => 'required'
+    ]);
     
+    $pengajuan = Pengajuan::findOrFail($id);
+    $pengajuan->update([
+        'status' => 'menunggu_direktur',
+        'total_disetujui' => $pengajuan->total_pengajuan,
+        'id_keuangan' =>  $request->id_keuangan,
+        'disetujui_keuangan_at' => now(),
+        'catatan_keuangan' => request('catatan_keuangan')
+    ]);
+    return redirect()->route('keuangan.pengadaan')->with('success', 'Pengajuan berhasil diverifikasi (anggaran tersedia penuh).');
 }
+
+public function verifikasiSebagian(Request $request, $id)
+{
+    request()->validate([
+        'total_disetujui' => 'required|numeric|min:1|max:' . Pengajuan::find($id)->total_pengajuan,
+        'id_keuangan' => 'required'
+    ]);
+    
+    $pengajuan = Pengajuan::findOrFail($id);
+    $pengajuan->update([
+        'status' => 'menunggu_direktur',
+        'total_disetujui' => request('total_disetujui'),
+        'id_keuangan' =>  $request->id_keuangan,
+        'disetujui_keuangan_at' => now(),
+        'catatan_keuangan' => request('catatan_keuangan')
+    ]);
+    return redirect()->route('keuangan.pengadaan')->with('success', 'Pengajuan berhasil diverifikasi (anggaran sebagian).');
+}
+
+public function tolak(Request $request, $id)
+{
+    request()->validate([
+        'alasan_tolak' => 'required|min:5'
+    ]);
+    
+    $pengajuan = Pengajuan::findOrFail($id);
+    $pengajuan->update([
+        'status' => 'ditolak',
+        'id_keuangan' =>  $request->id_keuangan,
+        'disetujui_keuangan_at' => now(),
+        'catatan_keuangan' => $request->alasan_tolak,
+    ]);
+ return redirect()->route('keuangan.pengadaan')->with('success', 'Pengajuan ditolak oleh Keuangan.');
+}
+}
+    
+
