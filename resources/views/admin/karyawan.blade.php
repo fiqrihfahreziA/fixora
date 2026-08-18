@@ -164,7 +164,7 @@
                             <select name="jabatan" class="form-select" required>
                                 <option value="">-- Pilih Jabatan --</option>
                                 <option value="Administrator">Admin</option>
-                                {{-- <option value="Staff">Staff</option> --}}
+                                <option value="Direktur">Direktur</option>
                                 <option value="Wakil Direktur">Wadir</option>
                                 <option value="Kepala Bidang">Kepala Bidang</option>
                                 <option value="Kepala Ruangan">Kepala Ruangan</option>

@@ -55,7 +55,8 @@ return new class extends Migration
                 'menunggu_direktur',
                 'disetujui',
                 'ditolak',
-                'revisi'
+                'revisi',
+                'ditunda',
             ])->default('draft');
             // waktu approval
             $table->timestamp('diterima_at')->nullable();

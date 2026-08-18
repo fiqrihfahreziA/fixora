@@ -58,6 +58,7 @@ class AuthenticatedSessionController extends Controller
         'penerima' => redirect('/penerima'),
         'atasan'   => redirect('/atasan'),
         'keuangan'   => redirect('/keuangan'),
+        'direktur'   => redirect('/direktur'),
         default    => redirect('/pemohon'),
     };
 }

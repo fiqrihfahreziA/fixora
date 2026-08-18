@@ -45,7 +45,9 @@ class pengajuan extends Model
      'log_status_atasan',
      'log_status_keuangan',
      'disetujui_keuangan_at',
+     'log_status_direktur',
      'status_keuangan',
+     'total_disetujui_direktur'
 
 
 ];
