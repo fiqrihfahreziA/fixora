@@ -232,7 +232,7 @@
                                             
                                             {{-- TOMBOL CETAK - UNTUK DISETUJUI --}}
                                             @if($pengajuan->status == 'disetujui')
-                                                <a href="#" class="btn btn-sm btn-outline-success rounded-3" data-bs-toggle="tooltip" title="Cetak">
+                                                <a href="{{ route('direktur.pengadaan.cetak', $pengajuan->id) }}" class="btn btn-sm btn-outline-success rounded-3" data-bs-toggle="tooltip" title="Cetak"  target="_blank" >
                                                     <i class="bi bi-printer"></i>
                                                 </a>
                                             @endif
@@ -553,8 +553,10 @@
                 
                 {{-- TOMBOL CETAK - UNTUK DISETUJUI --}}
                 @if($pengajuan->status == 'disetujui')
-                    <a href="#" class="btn btn-success rounded-pill px-4">
-                        <i class="bi bi-printer me-1"></i>Cetak
+                    <a href="{{ route('direktur.pengadaan.cetak', $pengajuan->id) }}" 
+                    target="_blank" 
+                    class="btn btn-primary">
+                        <i class="bi bi-printer me-1"></i> Cetak Formulir
                     </a>
                 @endif
             </div>

@@ -281,11 +281,11 @@
     
                                             
                                             {{-- TOMBOL CETAK - UNTUK DISETUJUI --}}
-                                            @if($pengajuan->status == 'disetujui')
-                                                <a href="#" class="btn btn-sm btn-outline-success rounded-3" data-bs-toggle="tooltip" title="Cetak">
+                                            {{-- @if($pengajuan->status == 'disetujui')
+                                                <a href="{{ route('pemohon.pengadaan.cetak', $pengajuan->id) }}" class="btn btn-sm btn-outline-success rounded-3" data-bs-toggle="tooltip" title="Cetak">
                                                     <i class="bi bi-printer"></i>
                                                 </a>
-                                            @endif
+                                            @endif --}}
                                         </div>
                                     </td>
                                 </tr>
@@ -530,7 +530,7 @@
                 
                 {{-- TOMBOL CETAK - UNTUK DISETUJUI --}}
                 @if($pengajuan->status == 'disetujui')
-                    <a href="#" class="btn btn-success rounded-pill px-4">
+                    <a href="{{ route('pemohon.pengadaan.cetak', $pengajuan->id) }}" class="btn btn-success rounded-pill px-4">
                         <i class="bi bi-printer me-1"></i>Cetak
                     </a>
                 @endif

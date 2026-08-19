@@ -112,6 +112,7 @@ class keuanganController extends Controller
     $pengajuan = Pengajuan::findOrFail($id);
     $pengajuan->update([
         'status' => 'menunggu_direktur',
+        'log_status_keuangan' => 'disetujui_keuangan',
         'total_disetujui' => $pengajuan->total_pengajuan,
         'id_keuangan' =>  $request->id_keuangan,
         'disetujui_keuangan_at' => now(),
@@ -123,17 +124,19 @@ class keuanganController extends Controller
 public function verifikasiSebagian(Request $request, $id)
 {
     request()->validate([
-        'total_disetujui' => 'required|numeric|min:1|max:' . Pengajuan::find($id)->total_pengajuan,
-        'id_keuangan' => 'required'
+        'total_disetujui' => 'required',
+        'id_keuangan' => 'required',
+        'catatan_keuangan' => 'nullable'
     ]);
     
     $pengajuan = Pengajuan::findOrFail($id);
     $pengajuan->update([
         'status' => 'menunggu_direktur',
-        'total_disetujui' => request('total_disetujui'),
+         'log_status_keuangan' => 'disetujui_keuangan',
+        'total_disetujui' => $request->total_disetujui,
         'id_keuangan' =>  $request->id_keuangan,
         'disetujui_keuangan_at' => now(),
-        'catatan_keuangan' => request('catatan_keuangan')
+        'catatan_keuangan' => $request->catatan_keuangan,
     ]);
     return redirect()->route('keuangan.pengadaan')->with('success', 'Pengajuan berhasil diverifikasi (anggaran sebagian).');
 }
@@ -147,6 +150,7 @@ public function tolak(Request $request, $id)
     $pengajuan = Pengajuan::findOrFail($id);
     $pengajuan->update([
         'status' => 'ditolak',
+         'log_status_keuangan' => 'ditolak_keuangan',
         'id_keuangan' =>  $request->id_keuangan,
         'disetujui_keuangan_at' => now(),
         'catatan_keuangan' => $request->alasan_tolak,

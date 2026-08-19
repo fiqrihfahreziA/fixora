@@ -34,7 +34,7 @@
                             'ditolak_keuangan' => 'danger',
                             'disetujui_direktur' => 'success',
                             'disetujui_sebagian_direktur' => 'info',
-                            'ditunda_direktur' => 'warning',
+                            'ditunda' => 'warning',
                             'ditolak_direktur' => 'danger'
                         ][$pengajuan->status ?? 'draft'] ?? 'secondary';
                         
@@ -51,7 +51,7 @@
                             'ditolak_keuangan' => 'Ditolak Keuangan',
                             'disetujui_direktur' => '✅ Disetujui Direktur',
                             'disetujui_sebagian_direktur' => '⚠️ Disetujui Sebagian',
-                            'ditunda_direktur' => '⏳ Ditunda',
+                            'ditunda' => '⏳ Ditunda',
                             'ditolak_direktur' => '❌ Ditolak Direktur'
                         ][$pengajuan->status ?? 'draft'] ?? $pengajuan->status ?? 'Unknown';
                     @endphp
@@ -138,11 +138,11 @@
 </div>
 
 <!-- Status Keputusan Direktur -->
-@if(in_array($pengajuan->status ?? '', ['disetujui_direktur', 'disetujui_sebagian_direktur', 'ditunda_direktur', 'ditolak_direktur']))
+@if(in_array($pengajuan->status ?? '', ['disetujui_direktur', 'disetujui_sebagian_direktur', 'ditunda', 'ditolak_direktur']))
 <div class="card border-0 shadow-sm mb-4 
     @if(($pengajuan->status ?? '') == 'disetujui_direktur') bg-success bg-opacity-10
     @elseif(($pengajuan->status ?? '') == 'disetujui_sebagian_direktur') bg-warning bg-opacity-10
-    @elseif(($pengajuan->status ?? '') == 'ditunda_direktur') bg-warning bg-opacity-10
+    @elseif(($pengajuan->status ?? '') == 'ditunda') bg-warning bg-opacity-10
     @else bg-danger bg-opacity-10 @endif
 ">
     <div class="card-body">
@@ -151,7 +151,7 @@
                 <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
             @elseif(($pengajuan->status ?? '') == 'disetujui_sebagian_direktur')
                 <i class="bi bi-check-circle-fill text-warning fs-4 me-3"></i>
-            @elseif(($pengajuan->status ?? '') == 'ditunda_direktur')
+            @elseif(($pengajuan->status ?? '') == 'ditunda')
                 <i class="bi bi-clock-fill text-warning fs-4 me-3"></i>
             @else
                 <i class="bi bi-x-circle-fill text-danger fs-4 me-3"></i>
@@ -160,14 +160,14 @@
                 <h6 class="fw-bold mb-0 
                     @if(($pengajuan->status ?? '') == 'disetujui_direktur') text-success
                     @elseif(($pengajuan->status ?? '') == 'disetujui_sebagian_direktur') text-warning
-                    @elseif(($pengajuan->status ?? '') == 'ditunda_direktur') text-warning
+                    @elseif(($pengajuan->status ?? '') == 'ditunda') text-warning
                     @else text-danger @endif
                 ">
                     @if(($pengajuan->status ?? '') == 'disetujui_direktur')
                         Pengajuan Disetujui oleh Direktur
                     @elseif(($pengajuan->status ?? '') == 'disetujui_sebagian_direktur')
                         Pengajuan Disetujui Sebagian oleh Direktur
-                    @elseif(($pengajuan->status ?? '') == 'ditunda_direktur')
+                    @elseif(($pengajuan->status ?? '') == 'ditunda')
                         Pengajuan Ditunda oleh Direktur
                     @else
                         Pengajuan Ditolak oleh Direktur
@@ -178,7 +178,7 @@
                         Disetujui oleh: {{ $pengajuan->direktur_approved_by ?? 'Direktur' }} 
                     @elseif(($pengajuan->status ?? '') == 'disetujui_sebagian_direktur')
                         Disetujui sebagian oleh: {{ $pengajuan->direktur_approved_by ?? 'Direktur' }} 
-                    @elseif(($pengajuan->status ?? '') == 'ditunda_direktur')
+                    @elseif(($pengajuan->status ?? '') == 'ditunda')
                         Ditunda oleh: {{ $pengajuan->direktur_postponed_by ?? 'Direktur' }} 
                     @else
                         Ditolak oleh: {{ $pengajuan->direktur_rejected_by ?? 'Direktur' }} 
@@ -498,7 +498,7 @@
         <!-- ============================================ -->
         <!-- AKSI PERSETUJUAN DIREKTUR (4 OPSI) -->
         <!-- ============================================ -->
-        @if(($pengajuan->status ?? '') == 'disetujui' || ($pengajuan->status ?? '') == 'menunggu_direktur')
+        @if(($pengajuan->status ?? '') == 'disetujui' || ($pengajuan->status ?? '') == 'menunggu_direktur' || ($pengajuan->status ?? '') == 'ditunda')
         <div class="card border-0 shadow-sm mb-4" style="background-color: #cfe2ff; border-left: 4px solid #0d6efd;">
             <div class="card-body">
                 <div class="row align-items-center">
@@ -712,7 +712,7 @@
                         <div class="timeline-icon 
                             @if(($pengajuan->status ?? '') == 'disetujui_direktur') bg-success
                             @elseif(($pengajuan->status ?? '') == 'disetujui_sebagian_direktur') bg-warning
-                            @elseif(($pengajuan->status ?? '') == 'ditunda_direktur') bg-warning
+                            @elseif(($pengajuan->status ?? '') == 'ditunda') bg-warning
                             @elseif(($pengajuan->status ?? '') == 'ditolak_direktur') bg-danger
                             @else bg-secondary @endif
                         ">
@@ -735,7 +735,7 @@
                                         {{ date('d M Y', strtotime($pengajuan->direktur_action_at)) }}
                                     @endif
                                 </p>
-                            @elseif(($pengajuan->status ?? '') == 'ditunda_direktur')
+                            @elseif(($pengajuan->status ?? '') == 'ditunda')
                                 <p class="mb-0 small text-warning">
                                     <i class="bi bi-clock"></i> Ditunda
                                     @if(isset($pengajuan->direktur_action_at))
@@ -972,10 +972,10 @@
                         <textarea name="alasan_direktur" id="alasan_tunda_direktur" class="form-control" rows="3" required placeholder="Isi alasan penundaan..."></textarea>
                     </div>
                     
-                    <div class="mb-3">
+                    {{-- <div class="mb-3">
                         <label for="rencana_tindak_lanjut" class="form-label">Rencana Tindak Lanjut (Opsional)</label>
                         <textarea name="rencana_tindak_lanjut" id="rencana_tindak_lanjut" class="form-control" rows="2" placeholder="Kapan akan diproses kembali?"></textarea>
-                    </div>
+                    </div> --}}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -1009,11 +1009,11 @@
                         Anda akan menolak pengajuan <strong>{{ $pengajuan->no_pengajuan ?? 'N/A' }}</strong>
                     </div>
                     
-                    <input type="hidden" name="penerima_id" value="{{ $authUser->karyawan->id }}">
+                    <input type="hidden" name="direktur_id" value="{{ $authUser->karyawan->id }}">
                     
                     <div class="mb-3">
                         <label for="alasan_tolak_direktur" class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
-                        <textarea name="alasan_direktur" id="alasan_tolak_direktur" class="form-control" rows="3" required placeholder="Isi alasan penolakan..."></textarea>
+                        <textarea name="catatan_direktur" id="alasan_tolak_direktur" class="form-control" rows="3" required placeholder="Isi alasan penolakan..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

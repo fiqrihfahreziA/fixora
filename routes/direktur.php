@@ -30,7 +30,8 @@ Route::middleware(['auth', 'role:direktur'])
         Route::put('/pengadaan/{id}/setujui-sebagian', [direkturController::class, 'setujuiSebagian'])->name('setujui.sebagian');
         Route::put('/pengadaan/{id}/tunda', [direkturController::class, 'tunda'])->name('tunda');
         Route::put('/pengadaan/{id}/tolak', [direkturController::class, 'tolak'])->name('tolak');
-        
+        Route::get('pengadaan/{id}/cetak', [direkturController::class, 'cetak'])->name('pengadaan.cetak');
+
         // Route::put('keuangan/verifikasi/lengkap/{id}', [KeuanganController::class, 'verifikasiLengkap'])->name('verifikasi.lengkap');
         // Route::put('keuangan/verifikasi/sebagian/{id}', [KeuanganController::class, 'verifikasiSebagian'])->name('verifikasi.sebagian');
         // Route::put('keuangan/tolak/{id}', [KeuanganController::class, 'tolak'])->name('tolak');

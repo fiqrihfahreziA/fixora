@@ -712,7 +712,7 @@
                         Silakan input nominal yang disetujui (tidak boleh lebih dari total pengajuan).
                     </div>
                     
-                    <input type="hidden" name="penerima_id" value="{{ $authUser->karyawan->id }}">
+                    <input type="hidden" name="id_keuangan" value="{{ $authUser->karyawan->id }}">
                     
                     <div class="mb-3">
                         <label for="total_disetujui_sebagian" class="form-label fw-bold">

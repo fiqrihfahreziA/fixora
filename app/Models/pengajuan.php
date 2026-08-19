@@ -81,4 +81,9 @@ class pengajuan extends Model
     {
         return $this->belongsTo(karyawan::class, 'id_keuangan');
    }
+    
+   public function direktur()
+    {
+        return $this->belongsTo(karyawan::class, 'direktur_id');
+   }
 }

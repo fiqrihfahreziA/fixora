@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PemohonController;
+use App\Http\Controllers\direkturController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
@@ -58,6 +59,7 @@ Route::middleware(['auth', 'role:pemohon'])
     
     Route::put('/pengadaan/{id}', [PemohonController::class, 'updatePengadaan'])
         ->name('pengadaan.update');
+     Route::get('pengadaan/{id}/cetak', [direkturController::class, 'cetak'])->name('pengadaan.cetak');
     // Route::post('/pengadaan/submit', [PemohonController::class, 'submit'])->name('pengadaan.submit');
         
             // Route::put('/karyawan/{id}', [AdminController::class, 'update'])

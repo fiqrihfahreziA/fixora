@@ -277,16 +277,18 @@ class direkturController extends Controller
         
         $pengajuan = Pengajuan::findOrFail($id);
         
+         $totalDisetujui = $pengajuan->total_disetujui ?? $pengajuan->total_pengajuan ?? 0;
         // Cek status
         if (!in_array($pengajuan->status, ['disetujui', 'menunggu_direktur'])) {
             return redirect()->back()->with('error', 'Pengajuan tidak dapat ditunda karena status tidak sesuai.');
         }
         
         $pengajuan->update([
-            'status' => 'ditunda_direktur',
-            'id_direktur' => $request->id_direktur ?? Auth::user()->id,
-            'catatan_direktur' => $request->alasan_direktur,
-            'alasan_direktur' => $request->alasan_direktur,
+            'status' => 'ditunda',
+            'total_disetujui_direktur' => $totalDisetujui,
+            'direktur_id' => $request->direktur_id,
+            'disetujui_direktur_at' => now(),
+            'catatan_direktur' => request('catatan_direktur')
         ]);
         
         return redirect()->route('direktur.pengadaan.detail', $id)->with('warning', 'Pengajuan berhasil ditunda.');
@@ -297,7 +299,35 @@ class direkturController extends Controller
      * TOLAK PENGAJUAN
      * ============================================
      */
+
     public function tolak(Request $request, $id)
+    {
+        $request->validate([
+            'catatan_direktur' => 'required|string|min:5',
+             'direktur_id' => 'required'
+            // 'id_direktur' => 'required'
+        ]);
+        
+        $pengajuan = Pengajuan::findOrFail($id);
+        
+         $totalDisetujui = 0;
+        // Cek status
+        if (!in_array($pengajuan->status, ['disetujui', 'menunggu_direktur','ditunda'])) {
+            return redirect()->back()->with('error', 'Pengajuan tidak dapat ditunda karena status tidak sesuai.');
+        }
+        
+        $pengajuan->update([
+            'status' => 'ditolak',
+            'total_disetujui_direktur' => $totalDisetujui,
+            'direktur_id' => $request->direktur_id,
+            'disetujui_direktur_at' => now(),
+            'catatan_direktur' => $request->catatan_direktur
+        ]);
+        
+        return redirect()->route('direktur.pengadaan.detail', $id)->with('warning', 'Pengajuan berhasil ditunda.');
+    }
+    
+    public function tolakd(Request $request, $id)
     {
         $request->validate([
             'alasan_direktur' => 'required|string|min:5',
@@ -313,10 +343,11 @@ class direkturController extends Controller
         
         // Update pengajuan
         $pengajuan->update([
-            'status' => 'ditolak_direktur',
-            'id_direktur' => $request->id_direktur ?? Auth::user()->id,
-            'catatan_direktur' => $request->alasan_direktur,
-            'alasan_direktur' => $request->alasan_direktur,
+            'status' => 'ditolak',
+            'direktur_id' => $request->direktur_id,
+            'disetujui_direktur_at' => now(),
+            'catatan_direktur' => request('catatan_direktur')
+    
         ]);
         
         // Update semua item menjadi ditolak
@@ -352,5 +383,40 @@ class direkturController extends Controller
         return redirect()->route('direktur.pengadaan.detail', $id)->with('success', 'Pengajuan berhasil di-reset dari status ditunda.');
     }
 
+    public function cetak($id)
+{
+    $pengajuan = Pengajuan::with('items')->findOrFail($id);
+    
+    // Cek apakah user memiliki akses
+    // Tambahkan authorization sesuai kebutuhan
+    
+    return view('direktur.pengadaan.print', compact('pengajuan'));
+}
+
+// Di controller untuk preview tanpa data
+public function preview()
+{
+    // Buat data dummy jika perlu preview
+    $pengajuan = new \stdClass();
+    $pengajuan->ruangan = 'Ruangan Rawat Inap';
+    $pengajuan->pengusul = 'dr. Ahmad';
+    $pengajuan->jabatan = 'Kepala Ruangan';
+    $pengajuan->nip = '197501012005011001';
+    $pengajuan->tanggal_pengajuan = now();
+    $pengajuan->tahun_anggaran = '2026';
+    $pengajuan->dasar_usulan = 'Kebutuhan Operasional,Penggantian Barang Rusak';
+    $pengajuan->alasan = 'Untuk meningkatkan pelayanan pasien';
+    $pengajuan->manfaat = 'Meningkatkan efisiensi pelayanan';
+    $pengajuan->dampak = 'Pelayanan menjadi terganggu';
+    $pengajuan->total = 150000000;
+    
+    // Items dummy
+    $pengajuan->items = [
+        (object) ['nama_barang' => 'Infus Pump', 'spesifikasi' => 'Digital', 'satuan' => 'Unit', 'jumlah' => 5, 'harga_satuan' => 15000000, 'total' => 75000000],
+        (object) ['nama_barang' => 'Bed Pasien', 'spesifikasi' => 'Elektrik', 'satuan' => 'Unit', 'jumlah' => 3, 'harga_satuan' => 25000000, 'total' => 75000000],
+    ];
+    
+    return view('pengadaan.print', compact('pengajuan'));
+}
 
 }
