@@ -668,8 +668,8 @@
                         </span> Disetujui
                     </div>
                     <div>
-                        <span class="checklist-box {{ $status_direktur == 'disetujui_sebagian' ? 'checked' : '' }}">
-                            {{ $status_direktur == 'disetujui_sebagian' ? '✓' : '☐' }}
+                        <span class="checklist-box {{ $status_direktur == 'disetujui sebagian' ? 'checked' : '' }}">
+                            {{ $status_direktur == 'disetujui sebagian' ? '✓' : '☐' }}
                         </span> Disetujui Sebagian
                     </div>
                     <div>
@@ -691,16 +691,69 @@
                 <td class="note-cell"><strong>Note :</strong><br> {{ $pengajuan->catatan_direktur ?? '' }}</td>
             </tr>
             <tr>
-                <td><strong>Nama &amp; Paraf :</strong><br> {{ $pengajuan->nama_unit ?? '' }}</td>
-                <td><br></td>
-                <td><br></td>
-                <td><br></td>
+                {{-- <td><strong>Nama &amp; Paraf :</strong><br> {{ $pengajuan->penerima->nama ?? '' }}</td> --}}
+                <td>
+                    <strong style="font-size: 9pt;">Nama &amp; Paraf :</strong>
+                <div style="text-align: center;">
+                    @if($pengajuan->penerima->ttd)
+                        <img src="{{ asset('storage/ttd/' . $pengajuan->penerima->ttd) }}" 
+                            alt="TTD" 
+                            style="max-width: 80px; max-height: 35px; display: block; margin: 2px auto;">
+                             <div style="font-size: 10pt;">{{ $pengajuan->penerima->nama ?? '' }}</div>
+                    @else
+                        <div style="font-size: 8pt; font-style: italic; color: #999;">(TTD)</div>
+                    @endif
+                </div>
+            </td>
+
+                <td>
+                    <strong style="font-size: 9pt;">Nama &amp; Paraf :</strong>
+                <div style="text-align: center;">
+                    @if($pengajuan->atasan->ttd)
+                        <img src="{{ asset('storage/ttd/' . $pengajuan->atasan->ttd) }}" 
+                            alt="TTD" 
+                            style="max-width: 80px; max-height: 35px; display: block; margin: 2px auto;">
+                             <div style="font-size: 10pt;">{{ $pengajuan->atasan->nama ?? '' }}</div>
+                    @else
+                        <div style="font-size: 8pt; font-style: italic; color: #999;">(TTD)</div>
+                    @endif
+                </div>
+            </td>
+                
+            <td>
+                <strong style="font-size: 9pt;">Nama &amp; Paraf :</strong>
+                <div style="text-align: center;">
+                    @if($pengajuan->keuangan->ttd)
+                        <img src="{{ asset('storage/ttd/' . $pengajuan->keuangan->ttd) }}" 
+                            alt="TTD" 
+                            style="max-width: 80px; max-height: 35px; display: block; margin: 2px auto;">
+                             <div style="font-size: 10pt;">{{ $pengajuan->keuangan->nama ?? '' }}</div>
+                    @else
+                        <div style="font-size: 8pt; font-style: italic; color: #999;">(TTD)</div>
+                    @endif
+                </div>
+            </td>
+
+               <td>
+                <strong style="font-size: 9pt;">Nama &amp; Paraf :</strong>
+                <div style="text-align: center;">
+                    @if($pengajuan->direktur->ttd)
+                        <img src="{{ asset('storage/ttd/' . $pengajuan->direktur->ttd) }}" 
+                            alt="TTD" 
+                            style="max-width: 80px; max-height: 35px; display: block; margin: 2px auto;">
+                             <div style="font-size: 10pt;">{{ $pengajuan->direktur->nama ?? '' }}</div>
+                    @else
+                        <div style="font-size: 8pt; font-style: italic; color: #999;">(TTD)</div>
+                    @endif
+                </div>
+            </td>
+
             </tr>
         </tbody>
     </table>
-    <div class="small-text" style="margin-top: 3px;">
+    {{-- <div class="small-text" style="margin-top: 3px;">
         * = Pemeliharaan oleh Ka. IPS-RS | Pengajuan Baru oleh Bidang terkait | Obat dan BHP oleh KFT | Terkait HAI's oleh PPI
-    </div>
+    </div> --}}
 
     <!-- ===== J. KEPUTUSAN MANAJEMEN ===== -->
     <div class="section-title">J. KEPUTUSAN MANAJEMEN</div>
@@ -708,7 +761,7 @@
         <p><strong>Direksi memutuskan:</strong></p>
         <div style="margin: 3px 0 5px 0;">
             @php
-                $keputusan = $pengajuan->status ?? '';
+                $keputusan = $pengajuan->log_status_direktur ?? '';
             @endphp
             <span class="checklist">
                 <span class="checklist-box {{ $keputusan == 'disetujui' ? 'checked' : '' }}">
@@ -716,8 +769,8 @@
                 </span> Disetujui
             </span>
             <span class="checklist">
-                <span class="checklist-box {{ $keputusan == 'disetujui_sebagian' ? 'checked' : '' }}">
-                    {{ $keputusan == 'disetujui_sebagian' ? '✓' : '☐' }}
+                <span class="checklist-box {{ $keputusan == 'disetujui sebagian' ? 'checked' : '' }}">
+                    {{ $keputusan == 'disetujui sebagian' ? '✓' : '☐' }}
                 </span> Disetujui Sebagian
             </span>
             <span class="checklist">
@@ -761,7 +814,27 @@
                         <div style="font-size: 9pt; margin: 2px 0;">NIP. {{ $pengajuan->karyawan->nip ?? '' }}</div>
                         <div style="margin-top: 4px;">
                             @if($pengajuan->karyawan->ttd)
-                                <img src="{{ asset('storage/ttd/' .$pengajuan->karyawan->ttd) }}" alt="Tanda Tangan" style="max-width: 100px; max-height: 50px; display: block; margin: 0 auto;">
+                                <div style="margin-top: 4px;">
+                                    @if($pengajuan->karyawan->ttd)
+                                        <div style="display: flex; justify-content: center;">
+                                            <div style="text-align: center;">
+                                                @php
+                                                    $diajukan = \Carbon\Carbon::parse($pengajuan->created_at);
+                                                @endphp
+                                                {!! DNS2D::getBarcodeHTML(
+                                                    "Diajukan Oleh: " .$pengajuan->karyawan->nama . "\n" .
+                                                    "Tanggal: " . $diajukan->format('d-m-Y') . "\n" .
+                                                    "Jam: " . $diajukan->format('H:i:s') . "\n" .
+                                                    "Instansi : RSUD Dr. Mohammad Zyn Sampang", 
+                                                    'QRCODE', 
+                                                    3, 3
+                                                ) !!}
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div style="font-size: 9pt; font-style: italic; color: #666;">TTD</div>
+                                    @endif
+                                </div>
                             @else
                                 <div style="font-size: 9pt; font-style: italic; color: #666;">TTD</div>
                             @endif
@@ -771,19 +844,47 @@
                         <div style="font-weight: bold; font-size: 10.5pt;">{{ $pengajuan->penerima->nama ?? '' }}</div>
                         <div style="font-size: 9pt; margin: 2px 0;">NIP. {{ $pengajuan->penerima->nip ?? '' }}</div>
                         <div style="margin-top: 4px;">
-                            @if($pengajuan->penerima->ttd)
-                                <img src="{{ asset('storage/ttd/' .$pengajuan->penerima->ttd) }}" alt="Tanda Tangan" style="max-width: 100px; max-height: 50px; display: block; margin: 0 auto;">
-                            @else
-                                <div style="font-size: 9pt; font-style: italic; color: #666;">TTD</div>
-                            @endif
-                        </div>
+                                    @if($pengajuan->penerima->ttd)
+                                        <div style="display: flex; justify-content: center;">
+                                            <div style="text-align: center;">
+                                                @php
+                                                    $diterima = \Carbon\Carbon::parse($pengajuan->diterima_at);
+                                                @endphp
+                                                {!! DNS2D::getBarcodeHTML(
+                                                    "Ditandatangani oleh: " .$pengajuan->penerima->nama . "\n" .
+                                                    "Tanggal: " . $diterima->format('d-m-Y') . "\n" .
+                                                    "Jam: " . $diterima->format('H:i:s') . "\n" .
+                                                    "Instansi : RSUD Dr. Mohammad Zyn Sampang", 
+                                                    'QRCODE', 
+                                                    3, 3
+                                                ) !!}
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div style="font-size: 9pt; font-style: italic; color: #666;">TTD</div>
+                                    @endif
+                                </div>
                     </td>
                     <td style="border: 1px solid #000; padding: 8px 6px; text-align: center; vertical-align: middle; height: 80px;">
                         <div style="font-weight: bold; font-size: 10.5pt;">{{ $pengajuan->atasan->nama ?? '' }}</div>
                         <div style="font-size: 9pt; margin: 2px 0;">NIP. {{ $pengajuan->atasan->nip ?? '' }}</div>
                         <div style="margin-top: 4px;">
                             @if($pengajuan->atasan->ttd)
-                                <img src="{{ asset('storage/ttd/' .$pengajuan->atasan->ttd) }}" alt="Tanda Tangan" style="max-width: 100px; max-height: 50px; display: block; margin: 0 auto;">
+                                <div style="display: flex; justify-content: center;">
+                                            <div style="text-align: center;">
+                                                @php
+                                                    $diterimakabid = \Carbon\Carbon::parse($pengajuan->disetujui_kabid_at);
+                                                @endphp
+                                                {!! DNS2D::getBarcodeHTML(
+                                                    "Ditandatangani oleh: " .$pengajuan->atasan->nama . "\n" .
+                                                    "Tanggal: " . $diterimakabid->format('d-m-Y') . "\n" .
+                                                    "Jam: " . $diterimakabid->format('H:i:s') . "\n" .
+                                                    "Instansi : RSUD Dr. Mohammad Zyn Sampang", 
+                                                    'QRCODE', 
+                                                    3, 3
+                                                ) !!}
+                                            </div>
+                                        </div>
                             @else
                                 <div style="font-size: 9pt; font-style: italic; color: #666;">TTD</div>
                             @endif
@@ -794,7 +895,21 @@
                         <div style="font-size: 9pt; margin: 2px 0;">NIP. {{ $pengajuan->direktur->nip ?? '' }}</div>
                         <div style="margin-top: 4px;">
                             @if($pengajuan->direktur->ttd)
-                                <img src="{{ asset('storage/ttd/' .$pengajuan->direktur->ttd) }}" alt="Tanda Tangan" style="max-width: 100px; max-height: 50px; display: block; margin: 0 auto;">
+                               <div style="display: flex; justify-content: center;">
+                                            <div style="text-align: center;">
+                                                @php
+                                                    $diterimadirektur = \Carbon\Carbon::parse($pengajuan->disetujui_direktur_at);
+                                                @endphp
+                                                {!! DNS2D::getBarcodeHTML(
+                                                    "Ditandatangani oleh: " .$pengajuan->direktur->nama . "\n" .
+                                                    "Tanggal: " . $diterimadirektur->format('d-m-Y') . "\n" .
+                                                    "Jam: " . $diterimadirektur->format('H:i:s') . "\n" .
+                                                    "Instansi : RSUD Dr. Mohammad Zyn Sampang", 
+                                                    'QRCODE', 
+                                                    3, 3
+                                                ) !!}
+                                            </div>
+                                        </div>
                             @else
                                 <div style="font-size: 9pt; font-style: italic; color: #666;">TTD</div>
                             @endif

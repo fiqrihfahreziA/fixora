@@ -132,7 +132,7 @@ public function verifikasiSebagian(Request $request, $id)
     $pengajuan = Pengajuan::findOrFail($id);
     $pengajuan->update([
         'status' => 'menunggu_direktur',
-         'log_status_keuangan' => 'disetujui_keuangan',
+         'log_status_keuangan' => 'sebagian',
         'total_disetujui' => $request->total_disetujui,
         'id_keuangan' =>  $request->id_keuangan,
         'disetujui_keuangan_at' => now(),

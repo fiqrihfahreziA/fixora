@@ -182,7 +182,7 @@ class direkturController extends Controller
     $pengajuan->update([
         'status' => 'disetujui',
         'log_status_direktur' => 'disetujui sebagian',
-        'total_disetujui_direktur' => $pengajuan->total_pengajuan,
+        'total_disetujui_direktur' => $pengajuan->total_disetujui,
         // 'total_disetujui_direktur' => $pengajuan->total_disetujui,
         'direktur_id' =>  $request->direktur_id,
         'disetujui_direktur_at' => now(),

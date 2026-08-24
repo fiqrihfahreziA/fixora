@@ -203,42 +203,6 @@
 </div>
 @endif
 
-  <!-- ============================================ -->
-        <!-- AKSI PERSETUJUAN DIREKTUR (4 OPSI) -->
-        <!-- ============================================ -->
-        @if(($pengajuan->status ?? '') == 'disetujui' || ($pengajuan->status ?? '') == 'menunggu_direktur' || ($pengajuan->status ?? '') == 'ditunda')
-        <div class="card border-0 shadow-sm mb-4" style="background-color: #cfe2ff; border-left: 4px solid #0d6efd;">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-12">
-                        <h6 class="fw-bold mb-2">
-                            <i class="bi bi-building text-primary me-2"></i>
-                            Keputusan Direktur
-                        </h6>
-                        <p class="text-muted small mb-3">
-                            ✅ Silakan periksa seluruh data pengajuan di atas, termasuk verifikasi dari Keuangan,
-                            sebelum memberikan keputusan akhir.
-                        </p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalSetujuiDirektur">
-                                <i class="bi bi-check-circle me-1"></i> Setujui Semua
-                            </button>
-                            <button class="btn btn-warning rounded-pill px-4 text-dark" data-bs-toggle="modal" data-bs-target="#modalSetujuiSebagianDirektur">
-                                <i class="bi bi-check-circle me-1"></i> Setujui Sebagian
-                            </button>
-                            <button class="btn btn-secondary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalTundaDirektur">
-                                <i class="bi bi-clock me-1"></i> Tunda
-                            </button>
-                            <button class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalTolakDirektur">
-                                <i class="bi bi-x-circle me-1"></i> Tolak
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
-        
 <div class="row">
     <!-- Kolom Kiri -->
     <div class="col-lg-8">
@@ -531,7 +495,41 @@
             </div>
         </div>
 
-      
+        <!-- ============================================ -->
+        <!-- AKSI PERSETUJUAN DIREKTUR (4 OPSI) -->
+        <!-- ============================================ -->
+        @if(($pengajuan->status ?? '') == 'disetujui' || ($pengajuan->status ?? '') == 'menunggu_direktur' || ($pengajuan->status ?? '') == 'ditunda')
+        <div class="card border-0 shadow-sm mb-4" style="background-color: #cfe2ff; border-left: 4px solid #0d6efd;">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-building text-primary me-2"></i>
+                            Keputusan Direktur
+                        </h6>
+                        <p class="text-muted small mb-3">
+                            ✅ Silakan periksa seluruh data pengajuan di atas, termasuk verifikasi dari Keuangan,
+                            sebelum memberikan keputusan akhir.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalSetujuiDirektur">
+                                <i class="bi bi-check-circle me-1"></i> Setujui Semua
+                            </button>
+                            <button class="btn btn-warning rounded-pill px-4 text-dark" data-bs-toggle="modal" data-bs-target="#modalSetujuiSebagianDirektur">
+                                <i class="bi bi-check-circle me-1"></i> Setujui Sebagian
+                            </button>
+                            <button class="btn btn-secondary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalTundaDirektur">
+                                <i class="bi bi-clock me-1"></i> Tunda
+                            </button>
+                            <button class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalTolakDirektur">
+                                <i class="bi bi-x-circle me-1"></i> Tolak
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <!-- PDF Data Kerusakan -->
         @if(isset($pengajuan->data_kerusakan) && $pengajuan->data_kerusakan)
@@ -894,7 +892,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning text-dark" id="btnSetujuiSebagian" >
+                    <button type="submit" class="btn btn-warning text-dark" id="btnSetujuiSebagian" disabled>
                         <i class="bi bi-check2-circle me-1"></i> Setujui Sebagian
                     </button>
                 </div>

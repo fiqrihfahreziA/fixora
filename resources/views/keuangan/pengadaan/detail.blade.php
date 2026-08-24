@@ -137,6 +137,39 @@
 </div>
 @endif
 
+  <!-- ============================================ -->
+        <!-- AKSI VERIFIKASI KEUANGAN (DI BAWAH SEMUA DATA) -->
+        <!-- ============================================ -->
+        @if(in_array($pengajuan->status ?? '', ['disetujui_kabid', 'menunggu_direktur']))
+        <div class="card border-0 shadow-sm mb-4" style="background-color: #fff3cd; border-left: 4px solid #ffc107;">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-check2-circle text-primary me-2"></i>
+                            Verifikasi Anggaran Keuangan
+                        </h6>
+                        <p class="text-muted small mb-3">
+                            ✅ Silakan periksa seluruh data pengajuan di atas sebelum melakukan verifikasi.
+                            Pilih opsi verifikasi di bawah ini.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalVerifikasiLengkap">
+                                <i class="bi bi-check-circle me-1"></i> Anggaran Tersedia (Setujui)
+                            </button>
+                            <button class="btn btn-warning rounded-pill px-4 text-dark" data-bs-toggle="modal" data-bs-target="#modalVerifikasiSebagian">
+                                <i class="bi bi-pencil-square me-1"></i> Anggaran Sebagian
+                            </button>
+                            <button class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalTolakKeuangan">
+                                <i class="bi bi-x-circle me-1"></i> Tolak
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        
 <div class="row">
     <!-- Kolom Kiri -->
     <div class="col-lg-8">
@@ -398,38 +431,7 @@
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- AKSI VERIFIKASI KEUANGAN (DI BAWAH SEMUA DATA) -->
-        <!-- ============================================ -->
-        @if(in_array($pengajuan->status ?? '', ['disetujui_kabid', 'menunggu_direktur']))
-        <div class="card border-0 shadow-sm mb-4" style="background-color: #fff3cd; border-left: 4px solid #ffc107;">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-12">
-                        <h6 class="fw-bold mb-2">
-                            <i class="bi bi-check2-circle text-primary me-2"></i>
-                            Verifikasi Anggaran Keuangan
-                        </h6>
-                        <p class="text-muted small mb-3">
-                            ✅ Silakan periksa seluruh data pengajuan di atas sebelum melakukan verifikasi.
-                            Pilih opsi verifikasi di bawah ini.
-                        </p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalVerifikasiLengkap">
-                                <i class="bi bi-check-circle me-1"></i> Anggaran Tersedia (Setujui)
-                            </button>
-                            <button class="btn btn-warning rounded-pill px-4 text-dark" data-bs-toggle="modal" data-bs-target="#modalVerifikasiSebagian">
-                                <i class="bi bi-pencil-square me-1"></i> Anggaran Sebagian
-                            </button>
-                            <button class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalTolakKeuangan">
-                                <i class="bi bi-x-circle me-1"></i> Tolak
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
+      
 
         <!-- PDF Data Kerusakan -->
         @if(isset($pengajuan->data_kerusakan) && $pengajuan->data_kerusakan)
