@@ -76,6 +76,8 @@ Route::middleware(['auth', 'role:penerima'])
            
 
     // PENGADAAN
+      Route::get('/pengadaan/export', [PenerimaController::class, 'exportExcel'])
+    ->name('pengadaan.export');
       Route::get('/chart/pengadaan', [PenerimaController::class, 'chartpengadaan'])
             ->name('chartp');
        // Detail pengajuan
@@ -88,7 +90,6 @@ Route::middleware(['auth', 'role:penerima'])
         ->name('pengadaan.verifikasi');
 
     Route::get('/report/pengadaan', [PenerimaController::class, 'reportPengadaan'])->name('reportPengadaan');
-    Route::get('/pengadaan/export', [PenerimaController::class, 'exportExcel'])
-    ->name('pengadaan.export');
+  
     });
 

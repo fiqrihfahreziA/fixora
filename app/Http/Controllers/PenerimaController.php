@@ -799,7 +799,701 @@ public function reportPengadaan()
     return $map[$status] ?? $status;
 }
 
- public function exportExcel(Request $request)
+public function exportExcel(Request $request)
+{
+    // ==========================================================
+    // AMBIL PARAMETER FILTER
+    // ==========================================================
+    $tahun = $request->input('tahun');
+    $bulan = $request->input('bulan');
+    $status = $request->input('status');
+    $bidangId = $request->input('bidang_id');
+
+    // ==========================================================
+    // QUERY DATA
+    // ==========================================================
+    $query = pengajuan::with([
+        'bidang',
+        'items',
+        'karyawan',
+        'penerima',
+        'atasan',
+        'direktur',
+    ]);
+
+    // Filter tahun
+    if ($tahun) {
+        $query->whereYear('tanggal_pengajuan', $tahun);
+    }
+
+    // Filter bulan
+    if ($bulan) {
+        $query->whereMonth('tanggal_pengajuan', $bulan);
+    }
+
+    // Filter status
+    if ($status !== null && $status !== '') {
+        $query->where('status', $status);
+    }
+
+    // Filter bidang
+    if ($bidangId) {
+        $query->where('bidang_id', $bidangId);
+    }
+
+    // Ambil data
+    $pengadaan = $query
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    // ==========================================================
+    // CEK DATA KOSONG
+    // ==========================================================
+    if ($pengadaan->isEmpty()) {
+        return back()->with(
+            'error',
+            'Tidak ada data untuk diexport.'
+        );
+    }
+
+    // ==========================================================
+    // BUAT SPREADSHEET
+    // ==========================================================
+    $spreadsheet = new Spreadsheet();
+
+    // Hapus sheet default
+    $defaultSheet = $spreadsheet->getActiveSheet();
+
+    $spreadsheet->removeSheetByIndex(
+        $spreadsheet->getIndex($defaultSheet)
+    );
+
+    // ==========================================================
+    // SHEET 1 - SEMUA DATA
+    // ==========================================================
+    $sheetSemua = $spreadsheet->createSheet();
+
+    $sheetSemua->setTitle('Semua Data');
+
+    $this->buatSheetPengadaan(
+        $sheetSemua,
+        $pengadaan,
+        $tahun,
+        $bulan,
+        $status,
+        'Semua Bidang'
+    );
+
+    // ==========================================================
+    // KELOMPOKKAN DATA BERDASARKAN BIDANG
+    // ==========================================================
+    $dataPerBidang = $pengadaan->groupBy('bidang_id');
+
+    foreach ($dataPerBidang as $idBidang => $dataBidang) {
+
+        // Ambil data bidang dari pengajuan pertama
+        $pengajuanPertama = $dataBidang->first();
+
+        $bidang = $pengajuanPertama?->bidang;
+
+        // Ambil nama bidang
+        $namaBidang = $bidang?->nama_bidang
+            ?? $bidang?->nama
+            ?? 'Tanpa Bidang';
+
+        // ======================================================
+        // NAMA SHEET EXCEL MAKSIMAL 31 KARAKTER
+        // ======================================================
+        $namaSheet = trim($namaBidang);
+
+        // Hilangkan karakter yang tidak diperbolehkan Excel
+        $namaSheet = str_replace(
+            ['\\', '/', '*', '[', ']', ':', '?'],
+            '',
+            $namaSheet
+        );
+
+        if ($namaSheet === '') {
+            $namaSheet = 'Tanpa Bidang';
+        }
+
+        // Maksimal 31 karakter
+        $namaSheet = mb_substr(
+            $namaSheet,
+            0,
+            31
+        );
+
+        // ======================================================
+        // CEGAH DUPLIKAT NAMA SHEET
+        // ======================================================
+        $namaSheetOriginal = $namaSheet;
+        $counter = 1;
+
+        while ($spreadsheet->sheetNameExists($namaSheet)) {
+
+            $suffix = ' ' . $counter;
+
+            $namaSheet = mb_substr(
+                $namaSheetOriginal,
+                0,
+                31 - mb_strlen($suffix)
+            ) . $suffix;
+
+            $counter++;
+        }
+
+        // ======================================================
+        // BUAT SHEET BIDANG
+        // ======================================================
+        $sheetBidang = $spreadsheet->createSheet();
+
+        $sheetBidang->setTitle($namaSheet);
+
+        $this->buatSheetPengadaan(
+            $sheetBidang,
+            $dataBidang,
+            $tahun,
+            $bulan,
+            $status,
+            $namaBidang
+        );
+    }
+
+    // ==========================================================
+    // AKTIFKAN SHEET PERTAMA
+    // ==========================================================
+    $spreadsheet->setActiveSheetIndex(0);
+
+    // ==========================================================
+    // DOWNLOAD
+    // ==========================================================
+    $writer = new Xlsx($spreadsheet);
+
+    $filename =
+        'Laporan_Pengadaan_' .
+        date('Ymd_His') .
+        '.xlsx';
+
+    return new StreamedResponse(
+        function () use ($writer) {
+            $writer->save('php://output');
+        },
+        200,
+        [
+            'Content-Type' =>
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+
+            'Content-Disposition' =>
+                'attachment; filename="' . $filename . '"',
+
+            'Cache-Control' =>
+                'max-age=0',
+
+            'Pragma' =>
+                'public',
+        ]
+    );
+}
+
+private function buatSheetPengadaan(
+    $sheet,
+    $pengadaan,
+    $tahun,
+    $bulan,
+    $status,
+    $namaBidang
+) {
+    // ==========================================================
+    // HEADER JUDUL
+    // ==========================================================
+    $sheet->setCellValue(
+        'A1',
+        'LAPORAN PENGADAAN'
+    );
+
+    $sheet->mergeCells('A1:M1');
+
+    $sheet->getStyle('A1')
+        ->getFont()
+        ->setBold(true)
+        ->setSize(16);
+
+    $sheet->getStyle('A1')
+        ->getAlignment()
+        ->setHorizontal(
+            Alignment::HORIZONTAL_CENTER
+        );
+
+    // ==========================================================
+    // INFO FILTER
+    // ==========================================================
+    $filterText = 'Periode: ';
+
+    if ($bulan) {
+        $filterText .= date(
+            'F',
+            mktime(0, 0, 0, $bulan, 1)
+        ) . ' ';
+    }
+
+    $filterText .= $tahun
+        ? $tahun
+        : 'Semua Tahun';
+
+    $filterText .= ' | Status: ';
+
+    if ($status !== null && $status !== '') {
+        $filterText .= $this->getStatusLabel($status);
+    } else {
+        $filterText .= 'Semua';
+    }
+
+    $filterText .= ' | Bidang: ' . $namaBidang;
+
+    $sheet->setCellValue(
+        'A2',
+        $filterText
+    );
+
+    $sheet->mergeCells('A2:M2');
+
+    $sheet->getStyle('A2')
+        ->getFont()
+        ->setSize(11);
+
+    $sheet->getStyle('A2')
+        ->getAlignment()
+        ->setHorizontal(
+            Alignment::HORIZONTAL_CENTER
+        );
+
+    // ==========================================================
+    // HEADER TABEL
+    // ==========================================================
+    $headers = [
+        'No',
+        'Tanggal',
+        'No Pengajuan',
+        'Pengusul',
+        'Penerima',
+        'Kepala Bidang',
+        'Direktur',
+        'Nama Barang',
+        'Jumlah',
+        'Harga / Unit',
+        'Total Harga',
+        'Bidang',
+        'Status'
+    ];
+
+    $headerRow = 4;
+
+    $column = 'A';
+
+    foreach ($headers as $header) {
+
+        $sheet->setCellValue(
+            $column . $headerRow,
+            $header
+        );
+
+        $column++;
+    }
+
+    // ==========================================================
+    // STYLE HEADER
+    // ==========================================================
+    $headerRange = 'A4:M4';
+
+    $sheet->getStyle($headerRange)
+        ->getFont()
+        ->setBold(true)
+        ->setSize(11);
+
+    $sheet->getStyle($headerRange)
+        ->getFont()
+        ->getColor()
+        ->setARGB('FFFFFFFF');
+
+    $sheet->getStyle($headerRange)
+        ->getAlignment()
+        ->setHorizontal(
+            Alignment::HORIZONTAL_CENTER
+        );
+
+    $sheet->getStyle($headerRange)
+        ->getAlignment()
+        ->setVertical(
+            Alignment::VERTICAL_CENTER
+        );
+
+    $sheet->getStyle($headerRange)
+        ->getAlignment()
+        ->setWrapText(true);
+
+    $sheet->getStyle($headerRange)
+        ->getFill()
+        ->setFillType(
+            Fill::FILL_SOLID
+        );
+
+    $sheet->getStyle($headerRange)
+        ->getFill()
+        ->getStartColor()
+        ->setARGB('FF4CAF50');
+
+    // ==========================================================
+    // DATA
+    // ==========================================================
+    $row = 5;
+
+    $no = 1;
+
+    foreach ($pengadaan as $item) {
+
+        // ======================================================
+        // SATU PENGAJUAN BISA MEMILIKI BANYAK ITEM
+        // ======================================================
+        foreach ($item->items as $barang) {
+
+            // ==================================================
+            // HARGA SATUAN
+            // ==================================================
+            $hargaSatuan = (float) (
+                $barang->harga_satuan ?? 0
+            );
+
+            // ==================================================
+            // TOTAL HARGA
+            // ==================================================
+            if ($barang->harga !== null) {
+
+                $totalHarga = (float) $barang->harga;
+
+            } else {
+
+                $totalHarga =
+                    (float) ($barang->jumlah ?? 0)
+                    * $hargaSatuan;
+            }
+
+            // ==================================================
+            // NO
+            // ==================================================
+            $sheet->setCellValue(
+                'A' . $row,
+                $no
+            );
+
+            // ==================================================
+            // TANGGAL
+            // ==================================================
+            $sheet->setCellValue(
+                'B' . $row,
+                $item->tanggal_pengajuan
+                    ? date(
+                        'd/m/Y',
+                        strtotime(
+                            $item->tanggal_pengajuan
+                        )
+                    )
+                    : '-'
+            );
+
+            // ==================================================
+            // NO PENGAJUAN
+            // ==================================================
+            $sheet->setCellValue(
+                'C' . $row,
+                $item->no_pengajuan ?? '-'
+            );
+
+            // ==================================================
+            // PENGUSUL
+            // Relasi: karyawan
+            // ==================================================
+            $sheet->setCellValue(
+                'D' . $row,
+                $item->karyawan?->nama_karyawan
+                    ?? $item->karyawan?->nama
+                    ?? '-'
+            );
+
+            // ==================================================
+            // PENERIMA
+            // Relasi: penerima
+            // ==================================================
+            $sheet->setCellValue(
+                'E' . $row,
+                $item->penerima?->nama_karyawan
+                    ?? $item->penerima?->nama
+                    ?? '-'
+            );
+
+            // ==================================================
+            // KEPALA BIDANG
+            // Relasi: atasan
+            // ==================================================
+            $sheet->setCellValue(
+                'F' . $row,
+                $item->atasan?->nama_karyawan
+                    ?? $item->atasan?->nama
+                    ?? '-'
+            );
+
+            // ==================================================
+            // DIREKTUR
+            // Relasi: direktur
+            // ==================================================
+            $sheet->setCellValue(
+                'G' . $row,
+                $item->direktur?->nama_karyawan
+                    ?? $item->direktur?->nama
+                    ?? '-'
+            );
+
+            // ==================================================
+            // NAMA BARANG
+            // ==================================================
+            $sheet->setCellValue(
+                'H' . $row,
+                $barang->nama_barang ?? '-'
+            );
+
+            // ==================================================
+            // JUMLAH
+            // ==================================================
+            $sheet->setCellValue(
+                'I' . $row,
+                (float) ($barang->jumlah ?? 0)
+            );
+
+            // ==================================================
+            // HARGA / UNIT
+            // ==================================================
+            $sheet->setCellValue(
+                'J' . $row,
+                $hargaSatuan
+            );
+
+            // ==================================================
+            // TOTAL HARGA
+            // ==================================================
+            $sheet->setCellValue(
+                'K' . $row,
+                $totalHarga
+            );
+
+            // ==================================================
+            // BIDANG
+            // ==================================================
+            $sheet->setCellValue(
+                'L' . $row,
+                $item->bidang?->nama_bidang
+                    ?? $item->bidang?->nama
+                    ?? '-'
+            );
+
+            // ==================================================
+            // STATUS
+            // ==================================================
+            $sheet->setCellValue(
+                'M' . $row,
+                $this->getStatusLabel(
+                    $item->status
+                )
+            );
+
+            // ==================================================
+            // FORMAT RUPIAH
+            // ==================================================
+            $sheet->getStyle(
+                'J' . $row . ':K' . $row
+            )
+                ->getNumberFormat()
+                ->setFormatCode(
+                    '"Rp" #,##0'
+                );
+
+            // ==================================================
+            // ALIGNMENT
+            // ==================================================
+            $sheet->getStyle(
+                'A' . $row . ':M' . $row
+            )
+                ->getAlignment()
+                ->setVertical(
+                    Alignment::VERTICAL_CENTER
+                );
+
+            $sheet->getStyle(
+                'A' . $row
+            )
+                ->getAlignment()
+                ->setHorizontal(
+                    Alignment::HORIZONTAL_CENTER
+                );
+
+            $sheet->getStyle(
+                'I' . $row
+            )
+                ->getAlignment()
+                ->setHorizontal(
+                    Alignment::HORIZONTAL_CENTER
+                );
+
+            // ==================================================
+            // WRAP TEXT
+            // ==================================================
+            $sheet->getStyle(
+                'D' . $row . ':H' . $row
+            )
+                ->getAlignment()
+                ->setWrapText(true);
+
+            $sheet->getStyle(
+                'L' . $row . ':M' . $row
+            )
+                ->getAlignment()
+                ->setWrapText(true);
+
+            $row++;
+
+            $no++;
+        }
+    }
+
+    // ==========================================================
+    // AUTO SIZE COLUMN
+    // ==========================================================
+    foreach (range('A', 'M') as $col) {
+
+        $sheet->getColumnDimension($col)
+            ->setAutoSize(true);
+    }
+
+    // Lebar minimum beberapa kolom
+    $sheet->getColumnDimension('A')->setWidth(6);
+    $sheet->getColumnDimension('B')->setWidth(14);
+    $sheet->getColumnDimension('C')->setWidth(18);
+    $sheet->getColumnDimension('D')->setWidth(22);
+    $sheet->getColumnDimension('E')->setWidth(22);
+    $sheet->getColumnDimension('F')->setWidth(22);
+    $sheet->getColumnDimension('G')->setWidth(22);
+    $sheet->getColumnDimension('H')->setWidth(30);
+    $sheet->getColumnDimension('I')->setWidth(10);
+    $sheet->getColumnDimension('J')->setWidth(18);
+    $sheet->getColumnDimension('K')->setWidth(20);
+    $sheet->getColumnDimension('L')->setWidth(20);
+    $sheet->getColumnDimension('M')->setWidth(18);
+
+    // ==========================================================
+    // BORDER
+    // ==========================================================
+    if ($row > 5) {
+
+        $dataRange = 'A4:M' . ($row - 1);
+
+        $sheet->getStyle($dataRange)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(
+                Border::BORDER_THIN
+            );
+    }
+
+    // ==========================================================
+    // FOOTER
+    // ==========================================================
+    $footerRow = $row + 1;
+
+    $totalItem = $no - 1;
+
+    $sheet->setCellValue(
+        'A' . $footerRow,
+        'Total Data: ' . $totalItem
+    );
+
+    $sheet->mergeCells(
+        'A' . $footerRow . ':M' . $footerRow
+    );
+
+    $sheet->getStyle(
+        'A' . $footerRow
+    )
+        ->getFont()
+        ->setBold(true);
+
+    $sheet->getStyle(
+        'A' . $footerRow
+    )
+        ->getAlignment()
+        ->setHorizontal(
+            Alignment::HORIZONTAL_RIGHT
+        );
+
+    // ==========================================================
+    // TANGGAL CETAK
+    // ==========================================================
+    $printRow = $footerRow + 1;
+
+    $sheet->setCellValue(
+        'A' . $printRow,
+        'Dicetak pada: ' .
+        date('d/m/Y H:i:s')
+    );
+
+    $sheet->mergeCells(
+        'A' . $printRow . ':M' . $printRow
+    );
+
+    $sheet->getStyle(
+        'A' . $printRow
+    )
+        ->getFont()
+        ->setSize(9);
+
+    $sheet->getStyle(
+        'A' . $printRow
+    )
+        ->getAlignment()
+        ->setHorizontal(
+            Alignment::HORIZONTAL_RIGHT
+        );
+
+    // ==========================================================
+    // FREEZE HEADER
+    // ==========================================================
+    $sheet->freezePane('A5');
+
+    // ==========================================================
+    // PAGE SETUP
+    // ==========================================================
+    $sheet->getPageSetup()
+        ->setOrientation(
+            \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE
+        );
+
+    $sheet->getPageSetup()
+        ->setPaperSize(
+            \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4
+        );
+
+    $sheet->getPageSetup()
+        ->setFitToWidth(1);
+
+    $sheet->getPageSetup()
+        ->setFitToHeight(0);
+
+    $sheet->getPageMargins()
+        ->setTop(0.5)
+        ->setRight(0.3)
+        ->setLeft(0.3)
+        ->setBottom(0.5);
+}
+
+ public function exportExcell(Request $request)
     {
         // Ambil parameter filter
         $tahun = $request->input('tahun');
@@ -808,7 +1502,7 @@ public function reportPengadaan()
         $bidangId = $request->input('bidang_id');
 
         // Query data dengan filter
-        $query = Pengajuan::with(['bidang', 'user']);
+        $query = pengajuan::with(['bidang', 'items']);
 
         if ($tahun) {
             $query->whereYear('tanggal_pengadaan', $tahun);
@@ -826,7 +1520,7 @@ public function reportPengadaan()
             $query->where('bidang_id', $bidangId);
         }
 
-        $pengadaan = $query->orderBy('tanggal_pengadaan', 'desc')->get();
+        $pengadaan = $query->orderBy('created_at', 'desc')->get();
 
         // Jika data kosong
         if ($pengadaan->isEmpty()) {
@@ -881,17 +1575,53 @@ public function reportPengadaan()
         $no = 1;
 
         foreach ($pengadaan as $item) {
-            $sheet->setCellValue('A' . $row, $no);
-            $sheet->setCellValue('B' . $row, $item->tanggal_pengadaan ? date('d/m/Y', strtotime($item->tanggal_pengadaan)) : '-');
-            $sheet->setCellValue('C' . $row, $item->nomor_pengadaan ?? '-');
-            $sheet->setCellValue('D' . $row, $item->nama_barang ?? '-');
-            $sheet->setCellValue('E' . $row, $item->jumlah ?? 0);
-            $sheet->setCellValue('F' . $row, $item->bidang->nama_bidang ?? $item->bidang->nama ?? '-');
-            $sheet->setCellValue('G' . $row, $this->getStatusLabel($item->status));
 
-            $row++;
-            $no++;
-        }
+    // Satu pengajuan bisa memiliki banyak item/barang
+    foreach ($item->items as $barang) {
+
+        $sheet->setCellValue(
+            'A' . $row,
+            $no
+        );
+
+        $sheet->setCellValue(
+            'B' . $row,
+            $item->created_at
+                ? date('d/m/Y', strtotime($item->created_at))
+                : '-'
+        );
+
+        $sheet->setCellValue(
+            'C' . $row,
+            $item->no_pengajuan ?? '-'
+        );
+
+        $sheet->setCellValue(
+            'D' . $row,
+            $barang->nama_barang ?? '-'
+        );
+
+        $sheet->setCellValue(
+            'E' . $row,
+            $barang->jumlah ?? 0
+        );
+
+        $sheet->setCellValue(
+            'F' . $row,
+            $item->bidang?->nama_bidang
+                ?? $item->bidang?->nama
+                ?? '-'
+        );
+
+        $sheet->setCellValue(
+            'G' . $row,
+            $this->getStatusLabel($item->status)
+        );
+
+        $row++;
+        $no++;
+    }
+}
 
         // === AUTO SIZE COLUMN ===
         foreach (range('A', 'G') as $col) {

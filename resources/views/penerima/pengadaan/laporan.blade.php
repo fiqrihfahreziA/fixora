@@ -39,7 +39,7 @@
             </div>
 
             <!-- Filter STATUS -->
-            <div class="col-md-3">
+            {{-- <div class="col-md-3">
                 <label>Status</label>
                 <select name="status" class="form-control">
                     <option value="">Semua Status</option>
@@ -47,10 +47,10 @@
                         <option value="{{ $key }}">{{ $status }}</option>
                     @endforeach
                 </select>
-            </div>
+            </div> --}}
 
             <!-- Filter BIDANG -->
-            <div class="col-md-3">
+            {{-- <div class="col-md-3">
                 <label>Bidang</label>
                 <select name="bidang_id" class="form-control">
                     <option value="">Semua Bidang</option>
@@ -61,7 +61,7 @@
                     @endforeach
                 </select>
             </div>
-        </div>
+        </div> --}}
 
         {{-- <!-- Tombol Preview -->
         <button class="btn btn-primary mt-3">
