@@ -18,6 +18,10 @@ use App\Models\Penerima;
 use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PenerimaController extends Controller
 {
@@ -745,44 +749,210 @@ public function verifikasi(Request $request, $id)
     }
 }
 
+public function reportPengadaan()
+{
+    $statuses = [
+        'draft' => 'Draft',
+        'diajukan' => 'Diajukan',
+        'disetujui_koordinator' => 'Disetujui Koordinator',
+        'disetujui_kabid' => 'Disetujui Kabid',
+        'dipertimbangkan' => 'Dipertimbangkan',
+        'menunggu_direktur' => 'Menunggu Direktur',
+        'disetujui' => 'Disetujui',
+        'disetujui sebagian' => 'Disetujui Sebagian',
+        'ditolak' => 'Ditolak',
+        'revisi' => 'Revisi',
+        'ditunda' => 'Ditunda',
+    ];
 
+    // PERBAIKAN: pakai bidang (lowercase) sesuai model Anda
+    $bidangs = \App\Models\bidang::all(); 
+    
+    $tahuns = pengajuan::selectRaw('DISTINCT YEAR(tanggal_pengajuan) as tahun')
+                ->orderBy('tahun', 'desc')
+                ->pluck('tahun')
+                ->toArray();
 
-// public function verifikasi(Request $request, $id)
-// {
-//     $request->validate([
-//         'status_verifikasi' => 'required|in:disetujui_koordinator,ditolak,revisi',
-//         'catatan_verifikasi' => 'required|string|min:5',
-//     ]);
+    return view('penerima.pengadaan.laporan', compact(
+        'statuses', 
+        'bidangs', 
+        'tahuns'
+    ));
+}
 
-//     try {
-//         $pengajuan = pengajuan::findOrFail($id);
-        
-//         $statusMap = [
-//             'disetujui_koordinator' => 'disetujui_koordinator',
-//             'ditolak' => 'ditolak_penerima',
-//             'revisi' => 'revisi',
-//         ];
-        
-//         $pengajuan->update([
-//             'status' => $statusMap[$request->status_verifikasi],
-//             'penerima_id' => Auth::id(),
-//             'catatan_unit' => $request->catatan_verifikasi,
-//             'diterima_at' => $request->status_verifikasi == 'disetujui_koordinator' ? now() : null,
-//         ]);
+    private function formatStatus($status)
+{
+    $map = [
+        'draft' => 'Draft',
+        'diajukan' => 'Diajukan',
+        'disetujui_koordinator' => 'Disetujui Koordinator',
+        'disetujui_kabid' => 'Disetujui Kabid',
+        'dipertimbangkan' => 'Dipertimbangkan',
+        'menunggu_direktur' => 'Menunggu Direktur',
+        'disetujui' => 'Disetujui',
+        'disetujui sebagian' => 'Disetujui Sebagian',
+        'ditolak' => 'Ditolak',
+        'revisi' => 'Revisi',
+        'ditunda' => 'Ditunda',
+    ];
 
-//         // ✅ Redirect ke index dengan pesan sukses
-//         return redirect()
-//             ->route('penerima.chartp')
-//             ->with('success', '✅ Pengajuan berhasil diverifikasi!');
+    return $map[$status] ?? $status;
+}
 
-//     } catch (\Exception $e) {
-//         return back()
-//             ->withInput()
-//             ->with('error', '❌ Gagal verifikasi: ' . $e->getMessage());
-//     }
-// }
+ public function exportExcel(Request $request)
+    {
+        // Ambil parameter filter
+        $tahun = $request->input('tahun');
+        $bulan = $request->input('bulan');
+        $status = $request->input('status');
+        $bidangId = $request->input('bidang_id');
 
+        // Query data dengan filter
+        $query = Pengajuan::with(['bidang', 'user']);
 
+        if ($tahun) {
+            $query->whereYear('tanggal_pengadaan', $tahun);
+        }
 
+        if ($bulan) {
+            $query->whereMonth('tanggal_pengadaan', $bulan);
+        }
+
+        if ($status !== null && $status !== '') {
+            $query->where('status', $status);
+        }
+
+        if ($bidangId) {
+            $query->where('bidang_id', $bidangId);
+        }
+
+        $pengadaan = $query->orderBy('tanggal_pengadaan', 'desc')->get();
+
+        // Jika data kosong
+        if ($pengadaan->isEmpty()) {
+            return back()->with('error', 'Tidak ada data untuk diexport.');
+        }
+
+        // Buat spreadsheet baru
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // === HEADER ===
+        $sheet->setCellValue('A1', 'LAPORAN PENGADAAN');
+        $sheet->mergeCells('A1:G1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Info filter
+        $filterText = 'Periode: ';
+        $filterText .= $bulan ? date('F', mktime(0, 0, 0, $bulan, 1)) . ' ' : '';
+        $filterText .= $tahun ? $tahun : 'Semua Tahun';
+        $filterText .= ' | Status: ' . ($status !== '' ? ($this->getStatusLabel($status)) : 'Semua');
+        $filterText .= ' | Bidang: ' . ($bidangId ? Bidang::find($bidangId)?->nama_bidang ?? '-' : 'Semua');
+
+        $sheet->setCellValue('A2', $filterText);
+        $sheet->mergeCells('A2:G2');
+        $sheet->getStyle('A2')->getFont()->setSize(11);
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // === TABLE HEADER ===
+        $headers = ['No', 'Tanggal', 'Nomor Pengadaan', 'Nama Barang', 'Jumlah', 'Bidang', 'Status'];
+        $column = 'A';
+
+        // Baris header dimulai dari baris 4 (setelah judul dan filter)
+        $headerRow = 4;
+
+        foreach ($headers as $header) {
+            $sheet->setCellValue($column . $headerRow, $header);
+            $column++;
+        }
+
+        // Style header
+        $headerRange = 'A4:G4';
+        $sheet->getStyle($headerRange)->getFont()->setBold(true)->setSize(11);
+        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle($headerRange)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle($headerRange)->getFill()->setFillType(Fill::FILL_SOLID);
+        $sheet->getStyle($headerRange)->getFill()->getStartColor()->setARGB('FF4CAF50');
+        $sheet->getStyle($headerRange)->getFont()->getColor()->setARGB('FFFFFFFF');
+
+        // === DATA ===
+        $row = 5;
+        $no = 1;
+
+        foreach ($pengadaan as $item) {
+            $sheet->setCellValue('A' . $row, $no);
+            $sheet->setCellValue('B' . $row, $item->tanggal_pengadaan ? date('d/m/Y', strtotime($item->tanggal_pengadaan)) : '-');
+            $sheet->setCellValue('C' . $row, $item->nomor_pengadaan ?? '-');
+            $sheet->setCellValue('D' . $row, $item->nama_barang ?? '-');
+            $sheet->setCellValue('E' . $row, $item->jumlah ?? 0);
+            $sheet->setCellValue('F' . $row, $item->bidang->nama_bidang ?? $item->bidang->nama ?? '-');
+            $sheet->setCellValue('G' . $row, $this->getStatusLabel($item->status));
+
+            $row++;
+            $no++;
+        }
+
+        // === AUTO SIZE COLUMN ===
+        foreach (range('A', 'G') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // === BORDER ===
+        $dataRange = 'A4:G' . ($row - 1);
+        $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        // === FOOTER ===
+        $footerRow = $row + 1;
+        $sheet->setCellValue('A' . $footerRow, 'Total Data: ' . $pengadaan->count());
+        $sheet->mergeCells('A' . $footerRow . ':G' . $footerRow);
+        $sheet->getStyle('A' . $footerRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $footerRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        // Tanggal cetak
+        $sheet->setCellValue('A' . ($footerRow + 1), 'Dicetak pada: ' . date('d/m/Y H:i:s'));
+        $sheet->mergeCells('A' . ($footerRow + 1) . ':G' . ($footerRow + 1));
+        $sheet->getStyle('A' . ($footerRow + 1))->getFont()->setSize(9);
+        $sheet->getStyle('A' . ($footerRow + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        // === SAVE & DOWNLOAD ===
+        $writer = new Xlsx($spreadsheet);
+
+        // Nama file
+        $filename = 'Laporan_Pengadaan_' . date('Ymd_His') . '.xlsx';
+
+        // Return response stream
+        return new StreamedResponse(
+            function () use ($writer) {
+                $writer->save('php://output');
+            },
+            200,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control' => 'max-age=0',
+            ]
+        );
+    }
+
+    /**
+     * Helper untuk mendapatkan label status
+     */
+    private function getStatusLabel($status)
+    {
+        $statuses = [
+            0 => 'Draft',
+            1 => 'Menunggu Persetujuan',
+            2 => 'Disetujui',
+            3 => 'Ditolak',
+            4 => 'Selesai',
+        ];
+
+        return $statuses[$status] ?? 'Unknown';
+    }
 
 }
+
+
+
+

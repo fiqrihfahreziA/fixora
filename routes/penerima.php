@@ -87,6 +87,8 @@ Route::middleware(['auth', 'role:penerima'])
      Route::put('/pengadaan/{id}/verifikasi', [PenerimaController::class, 'verifikasi'])
         ->name('pengadaan.verifikasi');
 
-       
+    Route::get('/report/pengadaan', [PenerimaController::class, 'reportPengadaan'])->name('reportPengadaan');
+    Route::get('/pengadaan/export', [PenerimaController::class, 'exportExcel'])
+    ->name('pengadaan.export');
     });
 

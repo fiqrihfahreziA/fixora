@@ -503,13 +503,13 @@
                         Pengadaan Barang
                     </a>
                 </li>
-                {{-- <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('pemohon.pengadaan.create') ? 'active' : '' }}" 
-                       href="{{ route('pemohon.pengadaan.create') }}">
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.reportPengadaan') ? 'active' : '' }}" 
+                       href="{{ route('penerima.reportPengadaan') }}">
                         <i class="bi bi-plus-circle"></i>
-                        Buat Pengajuan
+                        Laporan
                     </a>
-                </li> --}}
+                </li>
             </ul>
 
             <!-- User Dropdown -->
