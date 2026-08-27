@@ -40,13 +40,14 @@ return new class extends Migration
             // approval sederhana
             $table->foreignId('penerima_id')->nullable()->constrained('karyawans')->nullOnDelete();
             $table->foreignId('atasan_id')->nullable()->constrained('karyawans')->nullOnDelete();
-             $table->foreignId('keuangan_id')->nullable()->constrained('karyawans')->nullOnDelete();
+             $table->foreignId('id_keuangan')->nullable()->constrained('karyawans')->nullOnDelete();
           
            
            
 
              $table->decimal('total_pengajuan', 15, 2)->default(0);
              $table->decimal('total_disetujui', 15, 2)->default(0);
+               $table->decimal('total_disetujui_direktur', 15, 2)->default(0);
              $table->enum('status', [
                 'draft',
                 'diajukan',
@@ -83,7 +84,8 @@ return new class extends Migration
 
             // Direktur
             $table->text('catatan_direktur')->nullable();
-            
+             $table->text('alasan_direktur')->nullable();
+
             $table->timestamps();
         });
     }

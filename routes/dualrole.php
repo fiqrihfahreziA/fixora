@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AtasanController;
 use App\Http\Controllers\DualroleController;
+use App\Http\Controllers\PenerimaController;
 
 Route::middleware(['auth', 'dual.role'])
     ->prefix('multirole')
@@ -14,11 +15,11 @@ Route::middleware(['auth', 'dual.role'])
         Route::get('/', [DualroleController::class, 'index'])
             ->name('dashboard');
     
-         Route::get('/permintaann/atasan', [DualroleController::class, 'showpermintaann'])
+         Route::get('/permintaann/atasan', [AtasanController::class, 'index'])
             ->name('permintaan');
 
         //PENERIMA
-          Route::get('/permintaann', [DualroleController::class, 'showpermintaan'])
+          Route::get('/permintaann', [PenerimaController::class, 'index'])
             ->name('permintaann');
             
     });

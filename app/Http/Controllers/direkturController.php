@@ -44,7 +44,7 @@ class direkturController extends Controller
          * ============================
          */
         $query = Pengajuan::with(['items', 'karyawan', 'bidang'])
-            ->whereNotIn('status', ['diajukan', 'draft', 'revisi', 'disetujui_koordinator'])
+            ->whereNotIn('status', ['diajukan', 'draft', 'revisi', 'disetujui_koordinator', 'disetujui_kabid'])
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('no_pengajuan', 'like', "%{$search}%")
