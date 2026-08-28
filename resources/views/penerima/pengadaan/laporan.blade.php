@@ -63,6 +63,20 @@
             </div>
         </div> --}}
 
+         <!-- Filter ATASAN (PERUBAHAN: dari Bidang ke Atasan) -->
+            <div class="col-md-3">
+                <label>Atasan</label>
+                <select name="atasan_id" class="form-control">
+                    <option value="">Semua Atasan</option>
+                    @foreach($atasans as $atasan)
+                        <option value="{{ $atasan->id }}">
+                            {{ $atasan->nama_karyawan ?? $atasan->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
         {{-- <!-- Tombol Preview -->
         <button class="btn btn-primary mt-3">
             <i class="fas fa-eye"></i> Preview

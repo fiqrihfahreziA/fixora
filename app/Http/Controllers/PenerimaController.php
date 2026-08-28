@@ -749,36 +749,158 @@ public function verifikasi(Request $request, $id)
     }
 }
 
-public function reportPengadaan()
-{
-    $statuses = [
-        'draft' => 'Draft',
-        'diajukan' => 'Diajukan',
-        'disetujui_koordinator' => 'Disetujui Koordinator',
-        'disetujui_kabid' => 'Disetujui Kabid',
-        'dipertimbangkan' => 'Dipertimbangkan',
-        'menunggu_direktur' => 'Menunggu Direktur',
-        'disetujui' => 'Disetujui',
-        'disetujui sebagian' => 'Disetujui Sebagian',
-        'ditolak' => 'Ditolak',
-        'revisi' => 'Revisi',
-        'ditunda' => 'Ditunda',
-    ];
 
-    // PERBAIKAN: pakai bidang (lowercase) sesuai model Anda
-    $bidangs = \App\Models\bidang::all(); 
-    
-    $tahuns = pengajuan::selectRaw('DISTINCT YEAR(tanggal_pengajuan) as tahun')
-                ->orderBy('tahun', 'desc')
-                ->pluck('tahun')
-                ->toArray();
+// public function reportPengadaan(Request $request)
+// {
+//     $statuses = [
+//         'draft' => 'Draft',
+//         'diajukan' => 'Diajukan',
+//         'disetujui_koordinator' => 'Disetujui Koordinator',
+//         'disetujui_kabid' => 'Disetujui Kabid',
+//         'dipertimbangkan' => 'Dipertimbangkan',
+//         'menunggu_direktur' => 'Menunggu Direktur',
+//         'disetujui' => 'Disetujui',
+//         'disetujui sebagian' => 'Disetujui Sebagian',
+//         'ditolak' => 'Ditolak',
+//         'revisi' => 'Revisi',
+//         'ditunda' => 'Ditunda',
+//     ];
 
-    return view('penerima.pengadaan.laporan', compact(
-        'statuses', 
-        'bidangs', 
-        'tahuns'
-    ));
-}
+//     // AMBIL DATA ATASAN
+//     $atasans = karyawan::whereIn('id', function($query) {
+//         $query->select('atasan_id')
+//               ->from('pengajuans')
+//               ->whereNotNull('atasan_id');
+//     })->get();
+
+//     // TETAP MENGGUNAKAN tanggal_pengajuan
+//     $tahuns = pengajuan::selectRaw('DISTINCT YEAR(tanggal_pengajuan) as tahun')
+//                 ->whereNotNull('tanggal_pengajuan') // Tambahkan ini untuk keamanan
+//                 ->orderBy('tahun', 'desc')
+//                 ->pluck('tahun')
+//                 ->toArray();
+
+//     // AMBIL FILTER DARI REQUEST
+//     $tahunFilter = $request->input('tahun');
+//     $bulanFilter = $request->input('bulan');
+//     $statusFilter = $request->input('status');
+//     $atasanIdFilter = $request->input('atasan_id');
+
+//     // QUERY UNTUK PREVIEW - TETAP MENGGUNAKAN tanggal_pengajuan
+//     $query = pengajuan::with([
+//         'bidang',
+//         'items',
+//         'karyawan',
+//         'penerima',
+//         'atasan',
+//         'direktur',
+//     ]);
+
+//     if ($tahunFilter) {
+//         $query->whereYear('tanggal_pengajuan', $tahunFilter);
+//     }
+
+//     if ($bulanFilter) {
+//         $query->whereMonth('tanggal_pengajuan', $bulanFilter);
+//     }
+
+//     if ($statusFilter !== null && $statusFilter !== '') {
+//         $query->where('status', $statusFilter);
+//     }
+
+//     if ($atasanIdFilter) {
+//         $query->where('atasan_id', $atasanIdFilter);
+//     }
+
+//     $pengadaans = $query->orderBy('tanggal_pengajuan', 'desc')->get();
+
+//     return view('penerima.pengadaan.laporan', compact(
+//         'statuses', 
+//         'atasans', 
+//         'tahuns',
+//         'pengadaans',
+//         'tahunFilter',
+//         'bulanFilter',
+//         'statusFilter',
+//         'atasanIdFilter'
+//     ));
+// }
+
+  public function reportPengadaan(Request $request)
+    {
+        $statuses = [
+            'draft' => 'Draft',
+            'diajukan' => 'Diajukan',
+            'disetujui_koordinator' => 'Disetujui Koordinator',
+            'disetujui_kabid' => 'Disetujui Kabid',
+            'dipertimbangkan' => 'Dipertimbangkan',
+            'menunggu_direktur' => 'Menunggu Direktur',
+            'disetujui' => 'Disetujui',
+            'disetujui sebagian' => 'Disetujui Sebagian',
+            'ditolak' => 'Ditolak',
+            'revisi' => 'Revisi',
+            'ditunda' => 'Ditunda',
+        ];
+
+        // AMBIL DATA ATASAN
+        $atasans = karyawan::whereIn('id', function($query) {
+            $query->select('atasan_id')
+                  ->from('pengajuans')
+                  ->whereNotNull('atasan_id');
+        })->get();
+
+        // AMBIL TAHUN
+        $tahuns = pengajuan::selectRaw('DISTINCT YEAR(tanggal_pengajuan) as tahun')
+                    ->whereNotNull('tanggal_pengajuan')
+                    ->orderBy('tahun', 'desc')
+                    ->pluck('tahun')
+                    ->toArray();
+
+        // AMBIL FILTER DARI REQUEST
+        $tahunFilter = $request->input('tahun');
+        $bulanFilter = $request->input('bulan');
+        $statusFilter = $request->input('status');
+        $atasanIdFilter = $request->input('atasan_id');
+
+        // QUERY UNTUK PREVIEW
+        $query = pengajuan::with([
+            'bidang',
+            'items',
+            'karyawan',
+            'penerima',
+            'atasan',
+            'direktur',
+        ]);
+
+        if ($tahunFilter) {
+            $query->whereYear('tanggal_pengajuan', $tahunFilter);
+        }
+
+        if ($bulanFilter) {
+            $query->whereMonth('tanggal_pengajuan', $bulanFilter);
+        }
+
+        if ($statusFilter !== null && $statusFilter !== '') {
+            $query->where('status', $statusFilter);
+        }
+
+        if ($atasanIdFilter) {
+            $query->where('atasan_id', $atasanIdFilter);
+        }
+
+        $pengadaans = $query->orderBy('tanggal_pengajuan', 'desc')->get();
+
+        return view('penerima.pengadaan.laporan', compact(
+            'statuses', 
+            'atasans', 
+            'tahuns',
+            'pengadaans',
+            'tahunFilter',
+            'bulanFilter',
+            'statusFilter',
+            'atasanIdFilter'
+        ));
+    }
 
     private function formatStatus($status)
 {
@@ -799,859 +921,694 @@ public function reportPengadaan()
     return $map[$status] ?? $status;
 }
 
-public function exportExcel(Request $request)
-{
-    // ==========================================================
-    // AMBIL PARAMETER FILTER
-    // ==========================================================
-    $tahun = $request->input('tahun');
-    $bulan = $request->input('bulan');
-    $status = $request->input('status');
-    $bidangId = $request->input('bidang_id');
-
-    // ==========================================================
-    // QUERY DATA
-    // ==========================================================
-    $query = pengajuan::with([
-        'bidang',
-        'items',
-        'karyawan',
-        'penerima',
-        'atasan',
-        'direktur',
-    ]);
-
-    // Filter tahun
-    if ($tahun) {
-        $query->whereYear('tanggal_pengajuan', $tahun);
-    }
-
-    // Filter bulan
-    if ($bulan) {
-        $query->whereMonth('tanggal_pengajuan', $bulan);
-    }
-
-    // Filter status
-    if ($status !== null && $status !== '') {
-        $query->where('status', $status);
-    }
-
-    // Filter bidang
-    if ($bidangId) {
-        $query->where('bidang_id', $bidangId);
-    }
-
-    // Ambil data
-    $pengadaan = $query
-        ->orderBy('created_at', 'desc')
-        ->get();
-
-    // ==========================================================
-    // CEK DATA KOSONG
-    // ==========================================================
-    if ($pengadaan->isEmpty()) {
-        return back()->with(
-            'error',
-            'Tidak ada data untuk diexport.'
-        );
-    }
-
-    // ==========================================================
-    // BUAT SPREADSHEET
-    // ==========================================================
-    $spreadsheet = new Spreadsheet();
-
-    // Hapus sheet default
-    $defaultSheet = $spreadsheet->getActiveSheet();
-
-    $spreadsheet->removeSheetByIndex(
-        $spreadsheet->getIndex($defaultSheet)
-    );
-
-    // ==========================================================
-    // SHEET 1 - SEMUA DATA
-    // ==========================================================
-    $sheetSemua = $spreadsheet->createSheet();
-
-    $sheetSemua->setTitle('Semua Data');
-
-    $this->buatSheetPengadaan(
-        $sheetSemua,
-        $pengadaan,
-        $tahun,
-        $bulan,
-        $status,
-        'Semua Bidang'
-    );
-
-    // ==========================================================
-    // KELOMPOKKAN DATA BERDASARKAN BIDANG
-    // ==========================================================
-    $dataPerBidang = $pengadaan->groupBy('bidang_id');
-
-    foreach ($dataPerBidang as $idBidang => $dataBidang) {
-
-        // Ambil data bidang dari pengajuan pertama
-        $pengajuanPertama = $dataBidang->first();
-
-        $bidang = $pengajuanPertama?->bidang;
-
-        // Ambil nama bidang
-        $namaBidang = $bidang?->nama_bidang
-            ?? $bidang?->nama
-            ?? 'Tanpa Bidang';
-
-        // ======================================================
-        // NAMA SHEET EXCEL MAKSIMAL 31 KARAKTER
-        // ======================================================
-        $namaSheet = trim($namaBidang);
-
-        // Hilangkan karakter yang tidak diperbolehkan Excel
-        $namaSheet = str_replace(
-            ['\\', '/', '*', '[', ']', ':', '?'],
-            '',
-            $namaSheet
-        );
-
-        if ($namaSheet === '') {
-            $namaSheet = 'Tanpa Bidang';
-        }
-
-        // Maksimal 31 karakter
-        $namaSheet = mb_substr(
-            $namaSheet,
-            0,
-            31
-        );
-
-        // ======================================================
-        // CEGAH DUPLIKAT NAMA SHEET
-        // ======================================================
-        $namaSheetOriginal = $namaSheet;
-        $counter = 1;
-
-        while ($spreadsheet->sheetNameExists($namaSheet)) {
-
-            $suffix = ' ' . $counter;
-
-            $namaSheet = mb_substr(
-                $namaSheetOriginal,
-                0,
-                31 - mb_strlen($suffix)
-            ) . $suffix;
-
-            $counter++;
-        }
-
-        // ======================================================
-        // BUAT SHEET BIDANG
-        // ======================================================
-        $sheetBidang = $spreadsheet->createSheet();
-
-        $sheetBidang->setTitle($namaSheet);
-
-        $this->buatSheetPengadaan(
-            $sheetBidang,
-            $dataBidang,
-            $tahun,
-            $bulan,
-            $status,
-            $namaBidang
-        );
-    }
-
-    // ==========================================================
-    // AKTIFKAN SHEET PERTAMA
-    // ==========================================================
-    $spreadsheet->setActiveSheetIndex(0);
-
-    // ==========================================================
-    // DOWNLOAD
-    // ==========================================================
-    $writer = new Xlsx($spreadsheet);
-
-    $filename =
-        'Laporan_Pengadaan_' .
-        date('Ymd_His') .
-        '.xlsx';
-
-    return new StreamedResponse(
-        function () use ($writer) {
-            $writer->save('php://output');
-        },
-        200,
-        [
-            'Content-Type' =>
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-
-            'Content-Disposition' =>
-                'attachment; filename="' . $filename . '"',
-
-            'Cache-Control' =>
-                'max-age=0',
-
-            'Pragma' =>
-                'public',
-        ]
-    );
-}
-
-private function buatSheetPengadaan(
-    $sheet,
-    $pengadaan,
-    $tahun,
-    $bulan,
-    $status,
-    $namaBidang
-) {
-    // ==========================================================
-    // HEADER JUDUL
-    // ==========================================================
-    $sheet->setCellValue(
-        'A1',
-        'LAPORAN PENGADAAN'
-    );
-
-    $sheet->mergeCells('A1:M1');
-
-    $sheet->getStyle('A1')
-        ->getFont()
-        ->setBold(true)
-        ->setSize(16);
-
-    $sheet->getStyle('A1')
-        ->getAlignment()
-        ->setHorizontal(
-            Alignment::HORIZONTAL_CENTER
-        );
-
-    // ==========================================================
-    // INFO FILTER
-    // ==========================================================
-    $filterText = 'Periode: ';
-
-    if ($bulan) {
-        $filterText .= date(
-            'F',
-            mktime(0, 0, 0, $bulan, 1)
-        ) . ' ';
-    }
-
-    $filterText .= $tahun
-        ? $tahun
-        : 'Semua Tahun';
-
-    $filterText .= ' | Status: ';
-
-    if ($status !== null && $status !== '') {
-        $filterText .= $this->getStatusLabel($status);
-    } else {
-        $filterText .= 'Semua';
-    }
-
-    $filterText .= ' | Bidang: ' . $namaBidang;
-
-    $sheet->setCellValue(
-        'A2',
-        $filterText
-    );
-
-    $sheet->mergeCells('A2:M2');
-
-    $sheet->getStyle('A2')
-        ->getFont()
-        ->setSize(11);
-
-    $sheet->getStyle('A2')
-        ->getAlignment()
-        ->setHorizontal(
-            Alignment::HORIZONTAL_CENTER
-        );
-
-    // ==========================================================
-    // HEADER TABEL
-    // ==========================================================
-    $headers = [
-        'No',
-        'Tanggal',
-        'No Pengajuan',
-        'Pengusul',
-        'Penerima',
-        'Kepala Bidang',
-        'Direktur',
-        'Nama Barang',
-        'Jumlah',
-        'Harga / Unit',
-        'Total Harga',
-        'Bidang',
-        'Status'
-    ];
-
-    $headerRow = 4;
-
-    $column = 'A';
-
-    foreach ($headers as $header) {
-
-        $sheet->setCellValue(
-            $column . $headerRow,
-            $header
-        );
-
-        $column++;
-    }
-
-    // ==========================================================
-    // STYLE HEADER
-    // ==========================================================
-    $headerRange = 'A4:M4';
-
-    $sheet->getStyle($headerRange)
-        ->getFont()
-        ->setBold(true)
-        ->setSize(11);
-
-    $sheet->getStyle($headerRange)
-        ->getFont()
-        ->getColor()
-        ->setARGB('FFFFFFFF');
-
-    $sheet->getStyle($headerRange)
-        ->getAlignment()
-        ->setHorizontal(
-            Alignment::HORIZONTAL_CENTER
-        );
-
-    $sheet->getStyle($headerRange)
-        ->getAlignment()
-        ->setVertical(
-            Alignment::VERTICAL_CENTER
-        );
-
-    $sheet->getStyle($headerRange)
-        ->getAlignment()
-        ->setWrapText(true);
-
-    $sheet->getStyle($headerRange)
-        ->getFill()
-        ->setFillType(
-            Fill::FILL_SOLID
-        );
-
-    $sheet->getStyle($headerRange)
-        ->getFill()
-        ->getStartColor()
-        ->setARGB('FF4CAF50');
-
-    // ==========================================================
-    // DATA
-    // ==========================================================
-    $row = 5;
-
-    $no = 1;
-
-    foreach ($pengadaan as $item) {
-
-        // ======================================================
-        // SATU PENGAJUAN BISA MEMILIKI BANYAK ITEM
-        // ======================================================
-        foreach ($item->items as $barang) {
-
-            // ==================================================
-            // HARGA SATUAN
-            // ==================================================
-            $hargaSatuan = (float) (
-                $barang->harga_satuan ?? 0
-            );
-
-            // ==================================================
-            // TOTAL HARGA
-            // ==================================================
-            if ($barang->harga !== null) {
-
-                $totalHarga = (float) $barang->harga;
-
-            } else {
-
-                $totalHarga =
-                    (float) ($barang->jumlah ?? 0)
-                    * $hargaSatuan;
-            }
-
-            // ==================================================
-            // NO
-            // ==================================================
-            $sheet->setCellValue(
-                'A' . $row,
-                $no
-            );
-
-            // ==================================================
-            // TANGGAL
-            // ==================================================
-            $sheet->setCellValue(
-                'B' . $row,
-                $item->tanggal_pengajuan
-                    ? date(
-                        'd/m/Y',
-                        strtotime(
-                            $item->tanggal_pengajuan
-                        )
-                    )
-                    : '-'
-            );
-
-            // ==================================================
-            // NO PENGAJUAN
-            // ==================================================
-            $sheet->setCellValue(
-                'C' . $row,
-                $item->no_pengajuan ?? '-'
-            );
-
-            // ==================================================
-            // PENGUSUL
-            // Relasi: karyawan
-            // ==================================================
-            $sheet->setCellValue(
-                'D' . $row,
-                $item->karyawan?->nama_karyawan
-                    ?? $item->karyawan?->nama
-                    ?? '-'
-            );
-
-            // ==================================================
-            // PENERIMA
-            // Relasi: penerima
-            // ==================================================
-            $sheet->setCellValue(
-                'E' . $row,
-                $item->penerima?->nama_karyawan
-                    ?? $item->penerima?->nama
-                    ?? '-'
-            );
-
-            // ==================================================
-            // KEPALA BIDANG
-            // Relasi: atasan
-            // ==================================================
-            $sheet->setCellValue(
-                'F' . $row,
-                $item->atasan?->nama_karyawan
-                    ?? $item->atasan?->nama
-                    ?? '-'
-            );
-
-            // ==================================================
-            // DIREKTUR
-            // Relasi: direktur
-            // ==================================================
-            $sheet->setCellValue(
-                'G' . $row,
-                $item->direktur?->nama_karyawan
-                    ?? $item->direktur?->nama
-                    ?? '-'
-            );
-
-            // ==================================================
-            // NAMA BARANG
-            // ==================================================
-            $sheet->setCellValue(
-                'H' . $row,
-                $barang->nama_barang ?? '-'
-            );
-
-            // ==================================================
-            // JUMLAH
-            // ==================================================
-            $sheet->setCellValue(
-                'I' . $row,
-                (float) ($barang->jumlah ?? 0)
-            );
-
-            // ==================================================
-            // HARGA / UNIT
-            // ==================================================
-            $sheet->setCellValue(
-                'J' . $row,
-                $hargaSatuan
-            );
-
-            // ==================================================
-            // TOTAL HARGA
-            // ==================================================
-            $sheet->setCellValue(
-                'K' . $row,
-                $totalHarga
-            );
-
-            // ==================================================
-            // BIDANG
-            // ==================================================
-            $sheet->setCellValue(
-                'L' . $row,
-                $item->bidang?->nama_bidang
-                    ?? $item->bidang?->nama
-                    ?? '-'
-            );
-
-            // ==================================================
-            // STATUS
-            // ==================================================
-            $sheet->setCellValue(
-                'M' . $row,
-                $this->getStatusLabel(
-                    $item->status
-                )
-            );
-
-            // ==================================================
-            // FORMAT RUPIAH
-            // ==================================================
-            $sheet->getStyle(
-                'J' . $row . ':K' . $row
-            )
-                ->getNumberFormat()
-                ->setFormatCode(
-                    '"Rp" #,##0'
-                );
-
-            // ==================================================
-            // ALIGNMENT
-            // ==================================================
-            $sheet->getStyle(
-                'A' . $row . ':M' . $row
-            )
-                ->getAlignment()
-                ->setVertical(
-                    Alignment::VERTICAL_CENTER
-                );
-
-            $sheet->getStyle(
-                'A' . $row
-            )
-                ->getAlignment()
-                ->setHorizontal(
-                    Alignment::HORIZONTAL_CENTER
-                );
-
-            $sheet->getStyle(
-                'I' . $row
-            )
-                ->getAlignment()
-                ->setHorizontal(
-                    Alignment::HORIZONTAL_CENTER
-                );
-
-            // ==================================================
-            // WRAP TEXT
-            // ==================================================
-            $sheet->getStyle(
-                'D' . $row . ':H' . $row
-            )
-                ->getAlignment()
-                ->setWrapText(true);
-
-            $sheet->getStyle(
-                'L' . $row . ':M' . $row
-            )
-                ->getAlignment()
-                ->setWrapText(true);
-
-            $row++;
-
-            $no++;
-        }
-    }
-
-    // ==========================================================
-    // AUTO SIZE COLUMN
-    // ==========================================================
-    foreach (range('A', 'M') as $col) {
-
-        $sheet->getColumnDimension($col)
-            ->setAutoSize(true);
-    }
-
-    // Lebar minimum beberapa kolom
-    $sheet->getColumnDimension('A')->setWidth(6);
-    $sheet->getColumnDimension('B')->setWidth(14);
-    $sheet->getColumnDimension('C')->setWidth(18);
-    $sheet->getColumnDimension('D')->setWidth(22);
-    $sheet->getColumnDimension('E')->setWidth(22);
-    $sheet->getColumnDimension('F')->setWidth(22);
-    $sheet->getColumnDimension('G')->setWidth(22);
-    $sheet->getColumnDimension('H')->setWidth(30);
-    $sheet->getColumnDimension('I')->setWidth(10);
-    $sheet->getColumnDimension('J')->setWidth(18);
-    $sheet->getColumnDimension('K')->setWidth(20);
-    $sheet->getColumnDimension('L')->setWidth(20);
-    $sheet->getColumnDimension('M')->setWidth(18);
-
-    // ==========================================================
-    // BORDER
-    // ==========================================================
-    if ($row > 5) {
-
-        $dataRange = 'A4:M' . ($row - 1);
-
-        $sheet->getStyle($dataRange)
-            ->getBorders()
-            ->getAllBorders()
-            ->setBorderStyle(
-                Border::BORDER_THIN
-            );
-    }
-
-    // ==========================================================
-    // FOOTER
-    // ==========================================================
-    $footerRow = $row + 1;
-
-    $totalItem = $no - 1;
-
-    $sheet->setCellValue(
-        'A' . $footerRow,
-        'Total Data: ' . $totalItem
-    );
-
-    $sheet->mergeCells(
-        'A' . $footerRow . ':M' . $footerRow
-    );
-
-    $sheet->getStyle(
-        'A' . $footerRow
-    )
-        ->getFont()
-        ->setBold(true);
-
-    $sheet->getStyle(
-        'A' . $footerRow
-    )
-        ->getAlignment()
-        ->setHorizontal(
-            Alignment::HORIZONTAL_RIGHT
-        );
-
-    // ==========================================================
-    // TANGGAL CETAK
-    // ==========================================================
-    $printRow = $footerRow + 1;
-
-    $sheet->setCellValue(
-        'A' . $printRow,
-        'Dicetak pada: ' .
-        date('d/m/Y H:i:s')
-    );
-
-    $sheet->mergeCells(
-        'A' . $printRow . ':M' . $printRow
-    );
-
-    $sheet->getStyle(
-        'A' . $printRow
-    )
-        ->getFont()
-        ->setSize(9);
-
-    $sheet->getStyle(
-        'A' . $printRow
-    )
-        ->getAlignment()
-        ->setHorizontal(
-            Alignment::HORIZONTAL_RIGHT
-        );
-
-    // ==========================================================
-    // FREEZE HEADER
-    // ==========================================================
-    $sheet->freezePane('A5');
-
-    // ==========================================================
-    // PAGE SETUP
-    // ==========================================================
-    $sheet->getPageSetup()
-        ->setOrientation(
-            \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE
-        );
-
-    $sheet->getPageSetup()
-        ->setPaperSize(
-            \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4
-        );
-
-    $sheet->getPageSetup()
-        ->setFitToWidth(1);
-
-    $sheet->getPageSetup()
-        ->setFitToHeight(0);
-
-    $sheet->getPageMargins()
-        ->setTop(0.5)
-        ->setRight(0.3)
-        ->setLeft(0.3)
-        ->setBottom(0.5);
-}
-
- public function exportExcell(Request $request)
+
+
+//    public function exportExcel(Request $request)
+//     {
+//         // ==========================================================
+//         // AMBIL PARAMETER FILTER
+//         // ==========================================================
+//         $tahun = $request->input('tahun');
+//         $bulan = $request->input('bulan');
+//         $status = $request->input('status');
+//         $atasanId = $request->input('atasan_id');
+
+//         // ==========================================================
+//         // QUERY DATA
+//         // ==========================================================
+//         $query = pengajuan::with([
+//             'bidang',
+//             'items',
+//             'karyawan',
+//             'penerima',
+//             'atasan',
+//             'direktur',
+//         ]);
+
+//         // Filter tahun
+//         if ($tahun) {
+//             $query->whereYear('tanggal_pengajuan', $tahun);
+//         }
+
+//         // Filter bulan
+//         if ($bulan) {
+//             $query->whereMonth('tanggal_pengajuan', $bulan);
+//         }
+
+//         // Filter status
+//         if ($status !== null && $status !== '') {
+//             $query->where('status', $status);
+//         }
+
+//         // Filter atasan
+//         if ($atasanId) {
+//             $query->where('atasan_id', $atasanId);
+//         }
+
+//         // Ambil data
+//         $pengadaan = $query
+//             ->orderBy('tanggal_pengajuan', 'desc')
+//             ->get();
+
+//         // ==========================================================
+//         // CEK DATA KOSONG
+//         // ==========================================================
+//         if ($pengadaan->isEmpty()) {
+//             return back()->with('error', 'Tidak ada data untuk diexport.');
+//         }
+
+//         // ==========================================================
+//         // BUAT SPREADSHEET
+//         // ==========================================================
+//         $spreadsheet = new Spreadsheet();
+
+//         // Hapus sheet default
+//         $defaultSheet = $spreadsheet->getActiveSheet();
+//         $spreadsheet->removeSheetByIndex($spreadsheet->getIndex($defaultSheet));
+
+//         // ==========================================================
+//         // SHEET 1 - SEMUA DATA
+//         // ==========================================================
+//         $sheetSemua = $spreadsheet->createSheet();
+//         $sheetSemua->setTitle('Semua Data');
+
+//         $this->buatSheetPengadaan(
+//             $sheetSemua,
+//             $pengadaan,
+//             $tahun,
+//             $bulan,
+//             $status,
+//             ''
+//         );
+
+//         // ==========================================================
+//         // KELOMPOKKAN DATA BERDASARKAN ATASAN
+//         // ==========================================================
+//         $dataPerAtasan = $pengadaan->groupBy('atasan_id');
+
+//         foreach ($dataPerAtasan as $idAtasan => $dataAtasan) {
+
+//             // Ambil data atasan dari pengajuan pertama
+//             $pengajuanPertama = $dataAtasan->first();
+//             $atasan = $pengajuanPertama?->atasan;
+
+//             // Ambil nama atasan
+//             $namaAtasan = $atasan?->nama_karyawan
+//                 ?? $atasan?->nama
+//                 ?? 'Tanpa Atasan';
+
+//             // NAMA SHEET EXCEL MAKSIMAL 31 KARAKTER
+//             $namaSheet = trim($namaAtasan);
+
+//             // Hilangkan karakter yang tidak diperbolehkan Excel
+//             $namaSheet = str_replace(
+//                 ['\\', '/', '*', '[', ']', ':', '?'],
+//                 '',
+//                 $namaSheet
+//             );
+
+//             if ($namaSheet === '') {
+//                 $namaSheet = 'Tanpa Atasan';
+//             }
+
+//             // Maksimal 31 karakter
+//             $namaSheet = mb_substr($namaSheet, 0, 31);
+
+//             // CEGAH DUPLIKAT NAMA SHEET
+//             $namaSheetOriginal = $namaSheet;
+//             $counter = 1;
+
+//             while ($spreadsheet->sheetNameExists($namaSheet)) {
+//                 $suffix = ' ' . $counter;
+//                 $namaSheet = mb_substr($namaSheetOriginal, 0, 31 - mb_strlen($suffix)) . $suffix;
+//                 $counter++;
+//             }
+
+//             // BUAT SHEET ATASAN
+//             $sheetAtasan = $spreadsheet->createSheet();
+//             $sheetAtasan->setTitle($namaSheet);
+
+//             $this->buatSheetPengadaan(
+//                 $sheetAtasan,
+//                 $dataAtasan,
+//                 $tahun,
+//                 $bulan,
+//                 $status,
+//                 $namaAtasan
+//             );
+//         }
+
+//         // ==========================================================
+//         // AKTIFKAN SHEET PERTAMA
+//         // ==========================================================
+//         $spreadsheet->setActiveSheetIndex(0);
+
+//         // ==========================================================
+//         // DOWNLOAD
+//         // ==========================================================
+//         $writer = new Xlsx($spreadsheet);
+
+//         $filename = 'Laporan_Pengadaan_' . date('Ymd_His') . '.xlsx';
+
+//         return new StreamedResponse(
+//             function () use ($writer) {
+//                 $writer->save('php://output');
+//             },
+//             200,
+//             [
+//                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+//                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+//                 'Cache-Control' => 'max-age=0',
+//                 'Pragma' => 'public',
+//             ]
+//         );
+//     }
+
+//     /**
+//      * Method untuk membuat sheet pengadaan
+//      */
+//     private function buatSheetPengadaan(
+//         $sheet,
+//         $pengadaan,
+//         $tahun,
+//         $bulan,
+//         $status,
+//         $namaAtasan
+//     ) {
+//         // ==========================================================
+//         // HEADER JUDUL
+//         // ==========================================================
+//         $sheet->setCellValue('A1', 'LAPORAN PENGADAAN');
+//         $sheet->mergeCells('A1:O1'); // Diperluas sampai O
+
+//         $sheet->getStyle('A1')
+//             ->getFont()
+//             ->setBold(true)
+//             ->setSize(16);
+
+//         $sheet->getStyle('A1')
+//             ->getAlignment()
+//             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+//         // ==========================================================
+//         // INFO FILTER
+//         // ==========================================================
+//         $filterText = 'Periode: ';
+
+//         if ($bulan) {
+//             $filterText .= date('F', mktime(0, 0, 0, $bulan, 1)) . ' ';
+//         }
+
+//         $filterText .= $tahun ? $tahun : 'Semua Tahun';
+//         $filterText .= '';
+
+//         if ($status !== null && $status !== '') {
+//             $filterText .= $this->getStatusLabel($status);
+//         } else {
+//             // $filterText .= 'Semua';
+//              $filterText .= '';
+//         }
+
+//         $filterText .= '  ' . $namaAtasan;
+
+//         $sheet->setCellValue('A2', $filterText);
+//         $sheet->mergeCells('A2:O2');
+
+//         $sheet->getStyle('A2')
+//             ->getFont()
+//             ->setSize(11);
+
+//         $sheet->getStyle('A2')
+//             ->getAlignment()
+//             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+//         // ==========================================================
+//         // HEADER TABEL - DITAMBAHKAN KOLOM BARU
+//         // ==========================================================
+//         $headers = [
+//             'No',
+//             'Tanggal',
+//             'No Pengajuan',
+//             'Pengusul',
+//             'Penerima',
+//             'Kepala Bidang',
+//             'Direktur',
+//             'Nama Barang',
+//             'Jumlah',
+//             'Harga / Unit',
+//             'Total Harga',
+//             'Total Disetujui Direktur', // KOLOM BARU
+//             'Bidang',
+//             'Status',
+//             'Log Persetujuan' // KOLOM BARU
+//         ];
+
+//         $headerRow = 4;
+//         $column = 'A';
+
+//         foreach ($headers as $header) {
+//             $sheet->setCellValue($column . $headerRow, $header);
+//             $column++;
+//         }
+
+//         // ==========================================================
+//         // STYLE HEADER
+//         // ==========================================================
+//         $headerRange = 'A4:O4'; // Diperluas sampai O
+//         $sheet->getStyle($headerRange)
+//             ->getFont()
+//             ->setBold(true)
+//             ->setSize(11);
+
+//         $sheet->getStyle($headerRange)
+//             ->getFont()
+//             ->getColor()
+//             ->setARGB('FFFFFFFF');
+
+//         $sheet->getStyle($headerRange)
+//             ->getAlignment()
+//             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+//         $sheet->getStyle($headerRange)
+//             ->getAlignment()
+//             ->setVertical(Alignment::VERTICAL_CENTER);
+
+//         $sheet->getStyle($headerRange)
+//             ->getAlignment()
+//             ->setWrapText(true);
+
+//         $sheet->getStyle($headerRange)
+//             ->getFill()
+//             ->setFillType(Fill::FILL_SOLID);
+
+//         $sheet->getStyle($headerRange)
+//             ->getFill()
+//             ->getStartColor()
+//             ->setARGB('FF4CAF50');
+
+//         // ==========================================================
+//         // DATA
+//         // ==========================================================
+//         $row = 5;
+//         $no = 1;
+
+//         foreach ($pengadaan as $item) {
+
+//             // Satu pengajuan bisa memiliki banyak item
+//             foreach ($item->items as $barang) {
+
+//                 // HARGA SATUAN
+//                 $hargaSatuan = (float) ($barang->harga_satuan ?? 0);
+
+//                 // TOTAL HARGA
+//                 if ($barang->harga !== null) {
+//                     $totalHarga = (float) $barang->harga;
+//                 } else {
+//                     $totalHarga = (float) ($barang->jumlah ?? 0) * $hargaSatuan;
+//                 }
+
+//                 // TOTAL DISETUJUI DIREKTUR
+//                 $totalDisetujuiDirektur = (float) ($item->total_disetujui_direktur ?? 0);
+
+//                 // STATUS DIREKTUR - Ambil dari log_status_direktur
+//                 $statusDirektur = $item->log_status_direktur ?? $item->status;
+                
+//                 // TANGGAL DISETUJUI/DITOLAK DIREKTUR
+//                 $tanggalDirektur = $item->disetujui_direktur_at 
+//                     ? date('d/m/Y H:i', strtotime($item->disetujui_direktur_at))
+//                     : '-';
+
+//                 // NO
+//                 $sheet->setCellValue('A' . $row, $no);
+
+//                 // TANGGAL
+//                 $sheet->setCellValue(
+//                     'B' . $row,
+//                     $item->tanggal_pengajuan
+//                         ? date('d/m/Y', strtotime($item->tanggal_pengajuan))
+//                         : '-'
+//                 );
+
+//                 // NO PENGAJUAN
+//                 $sheet->setCellValue('C' . $row, $item->no_pengajuan ?? '-');
+
+//                 // PENGUSUL
+//                 $sheet->setCellValue(
+//                     'D' . $row,
+//                     $item->karyawan?->nama_karyawan
+//                         ?? $item->karyawan?->nama
+//                         ?? '-'
+//                 );
+
+//                 // PENERIMA
+//                 $sheet->setCellValue(
+//                     'E' . $row,
+//                     $item->penerima?->nama_karyawan
+//                         ?? $item->penerima?->nama
+//                         ?? '-'
+//                 );
+
+//                 // KEPALA BIDANG (ATASAN)
+//                 $sheet->setCellValue(
+//                     'F' . $row,
+//                     $item->atasan?->nama_karyawan
+//                         ?? $item->atasan?->nama
+//                         ?? '-'
+//                 );
+
+//                 // DIREKTUR
+//                 $sheet->setCellValue(
+//                     'G' . $row,
+//                     $item->direktur?->nama_karyawan
+//                         ?? $item->direktur?->nama
+//                         ?? '-'
+//                 );
+
+//                 // NAMA BARANG
+//                 $sheet->setCellValue('H' . $row, $barang->nama_barang ?? '-');
+
+//                 // JUMLAH
+//                 $sheet->setCellValue('I' . $row, (float) ($barang->jumlah ?? 0));
+
+//                 // HARGA / UNIT
+//                 $sheet->setCellValue('J' . $row, $hargaSatuan);
+
+//                 // TOTAL HARGA
+//                 $sheet->setCellValue('K' . $row, $totalHarga);
+
+//                 // TOTAL DISETUJUI DIREKTUR (KOLOM BARU)
+//                 $sheet->setCellValue('L' . $row, $totalDisetujuiDirektur);
+
+//                 // BIDANG
+//                 $sheet->setCellValue(
+//                     'M' . $row,
+//                     $item->bidang?->nama_bidang
+//                         ?? $item->bidang?->nama
+//                         ?? '-'
+//                 );
+
+//                 // STATUS (KOLOM BARU - pindah ke N)
+//                 $sheet->setCellValue(
+//                     'N' . $row,
+//                     $this->getStatusLabel($item->status)
+//                 );
+
+//                 // STATUS DIREKTUR + TANGGAL (KOLOM BARU - O)
+//                 $statusDirekturText = $this->getStatusLabel($statusDirektur);
+//                 $sheet->setCellValue(
+//                     'O' . $row,
+//                     $statusDirekturText . ' - ' . $tanggalDirektur
+//                 );
+
+//                 // FORMAT RUPIAH
+//                 $sheet->getStyle('J' . $row . ':L' . $row) // Diperluas sampai L
+//                     ->getNumberFormat()
+//                     ->setFormatCode('"Rp" #,##0');
+
+//                 // ALIGNMENT
+//                 $sheet->getStyle('A' . $row . ':O' . $row)
+//                     ->getAlignment()
+//                     ->setVertical(Alignment::VERTICAL_CENTER);
+
+//                 $sheet->getStyle('A' . $row)
+//                     ->getAlignment()
+//                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+//                 $sheet->getStyle('I' . $row)
+//                     ->getAlignment()
+//                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+//                 // WRAP TEXT
+//                 $sheet->getStyle('D' . $row . ':H' . $row)
+//                     ->getAlignment()
+//                     ->setWrapText(true);
+
+//                 $sheet->getStyle('M' . $row . ':O' . $row)
+//                     ->getAlignment()
+//                     ->setWrapText(true);
+
+//                 // WARNA BACKGROUND UNTUK STATUS DIREKTUR
+//                 if ($statusDirektur == 'disetujui') {
+//                     $sheet->getStyle('O' . $row)
+//                         ->getFill()
+//                         ->setFillType(Fill::FILL_SOLID)
+//                         ->getStartColor()
+//                         ->setARGB('FFC6EFCE'); // Hijau muda
+//                 } elseif ($statusDirektur == 'ditolak') {
+//                     $sheet->getStyle('O' . $row)
+//                         ->getFill()
+//                         ->setFillType(Fill::FILL_SOLID)
+//                         ->getStartColor()
+//                         ->setARGB('FFFFC7CE'); // Merah muda
+//                 }
+
+//                 $row++;
+//                 $no++;
+//             }
+//         }
+
+//         // ==========================================================
+//         // AUTO SIZE COLUMN
+//         // ==========================================================
+//         foreach (range('A', 'O') as $col) {
+//             $sheet->getColumnDimension($col)->setAutoSize(true);
+//         }
+
+//         // Lebar minimum beberapa kolom
+//         $sheet->getColumnDimension('A')->setWidth(6);
+//         $sheet->getColumnDimension('B')->setWidth(14);
+//         $sheet->getColumnDimension('C')->setWidth(18);
+//         $sheet->getColumnDimension('D')->setWidth(22);
+//         $sheet->getColumnDimension('E')->setWidth(22);
+//         $sheet->getColumnDimension('F')->setWidth(22);
+//         $sheet->getColumnDimension('G')->setWidth(22);
+//         $sheet->getColumnDimension('H')->setWidth(30);
+//         $sheet->getColumnDimension('I')->setWidth(10);
+//         $sheet->getColumnDimension('J')->setWidth(18);
+//         $sheet->getColumnDimension('K')->setWidth(20);
+//         $sheet->getColumnDimension('L')->setWidth(25); // Kolom Total Disetujui Direktur
+//         $sheet->getColumnDimension('M')->setWidth(20);
+//         $sheet->getColumnDimension('N')->setWidth(18);
+//         $sheet->getColumnDimension('O')->setWidth(30); // Kolom Status Direktur + Tanggal
+
+//         // ==========================================================
+//         // BORDER
+//         // ==========================================================
+//         if ($row > 5) {
+//             $dataRange = 'A4:O' . ($row - 1);
+//             $sheet->getStyle($dataRange)
+//                 ->getBorders()
+//                 ->getAllBorders()
+//                 ->setBorderStyle(Border::BORDER_THIN);
+//         }
+
+//         // ==========================================================
+//         // FOOTER
+//         // ==========================================================
+//         $footerRow = $row + 1;
+//         $totalItem = $no - 1;
+
+//         $sheet->setCellValue('A' . $footerRow, 'Total Data: ' . $totalItem);
+//         $sheet->mergeCells('A' . $footerRow . ':O' . $footerRow);
+
+//         $sheet->getStyle('A' . $footerRow)
+//             ->getFont()
+//             ->setBold(true);
+
+//         $sheet->getStyle('A' . $footerRow)
+//             ->getAlignment()
+//             ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+//         // ==========================================================
+//         // TANGGAL CETAK
+//         // ==========================================================
+//         $printRow = $footerRow + 1;
+
+//         $sheet->setCellValue('A' . $printRow, 'Dicetak pada: ' . date('d/m/Y H:i:s'));
+//         $sheet->mergeCells('A' . $printRow . ':O' . $printRow);
+
+//         $sheet->getStyle('A' . $printRow)
+//             ->getFont()
+//             ->setSize(9);
+
+//         $sheet->getStyle('A' . $printRow)
+//             ->getAlignment()
+//             ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+//         // ==========================================================
+//         // FREEZE HEADER
+//         // ==========================================================
+//         $sheet->freezePane('A5');
+
+//         // ==========================================================
+//         // PAGE SETUP
+//         // ==========================================================
+//         $sheet->getPageSetup()
+//             ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+
+//         $sheet->getPageSetup()
+//             ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
+
+//         $sheet->getPageSetup()
+//             ->setFitToWidth(1);
+
+//         $sheet->getPageSetup()
+//             ->setFitToHeight(0);
+
+//         $sheet->getPageMargins()
+//             ->setTop(0.5)
+//             ->setRight(0.3)
+//             ->setLeft(0.3)
+//             ->setBottom(0.5);
+//     }
+
+   public function exportExcel(Request $request)
     {
-        // Ambil parameter filter
+        // ==========================================================
+        // AMBIL PARAMETER FILTER
+        // ==========================================================
         $tahun = $request->input('tahun');
         $bulan = $request->input('bulan');
         $status = $request->input('status');
-        $bidangId = $request->input('bidang_id');
+        $atasanId = $request->input('atasan_id');
 
-        // Query data dengan filter
-        $query = pengajuan::with(['bidang', 'items']);
+        // ==========================================================
+        // QUERY DATA
+        // ==========================================================
+        $query = pengajuan::with([
+            'bidang',
+            'items',
+            'karyawan',
+            'penerima',
+            'atasan',
+            'direktur',
+        ]);
 
+        // Filter tahun
         if ($tahun) {
-            $query->whereYear('tanggal_pengadaan', $tahun);
+            $query->whereYear('tanggal_pengajuan', $tahun);
         }
 
+        // Filter bulan
         if ($bulan) {
-            $query->whereMonth('tanggal_pengadaan', $bulan);
+            $query->whereMonth('tanggal_pengajuan', $bulan);
         }
 
+        // Filter status
         if ($status !== null && $status !== '') {
             $query->where('status', $status);
         }
 
-        if ($bidangId) {
-            $query->where('bidang_id', $bidangId);
+        // Filter atasan
+        if ($atasanId) {
+            $query->where('atasan_id', $atasanId);
         }
 
-        $pengadaan = $query->orderBy('created_at', 'desc')->get();
+        // Ambil data
+        $pengadaan = $query
+            ->orderBy('tanggal_pengajuan', 'desc')
+            ->get();
 
-        // Jika data kosong
+        // ==========================================================
+        // CEK DATA KOSONG
+        // ==========================================================
         if ($pengadaan->isEmpty()) {
             return back()->with('error', 'Tidak ada data untuk diexport.');
         }
 
-        // Buat spreadsheet baru
+        // ==========================================================
+        // BUAT SPREADSHEET
+        // ==========================================================
         $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
 
-        // === HEADER ===
-        $sheet->setCellValue('A1', 'LAPORAN PENGADAAN');
-        $sheet->mergeCells('A1:G1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // Hapus sheet default
+        $defaultSheet = $spreadsheet->getActiveSheet();
+        $spreadsheet->removeSheetByIndex($spreadsheet->getIndex($defaultSheet));
 
-        // Info filter
-        $filterText = 'Periode: ';
-        $filterText .= $bulan ? date('F', mktime(0, 0, 0, $bulan, 1)) . ' ' : '';
-        $filterText .= $tahun ? $tahun : 'Semua Tahun';
-        $filterText .= ' | Status: ' . ($status !== '' ? ($this->getStatusLabel($status)) : 'Semua');
-        $filterText .= ' | Bidang: ' . ($bidangId ? Bidang::find($bidangId)?->nama_bidang ?? '-' : 'Semua');
+        // ==========================================================
+        // SHEET 1 - SEMUA DATA
+        // ==========================================================
+        $sheetSemua = $spreadsheet->createSheet();
+        $sheetSemua->setTitle('Semua Data');
 
-        $sheet->setCellValue('A2', $filterText);
-        $sheet->mergeCells('A2:G2');
-        $sheet->getStyle('A2')->getFont()->setSize(11);
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $this->buatSheetPengadaan(
+            $sheetSemua,
+            $pengadaan,
+            $tahun,
+            $bulan,
+            $status,
+            'Semua Atasan'
+        );
 
-        // === TABLE HEADER ===
-        $headers = ['No', 'Tanggal', 'Nomor Pengadaan', 'Nama Barang', 'Jumlah', 'Bidang', 'Status'];
-        $column = 'A';
+        // ==========================================================
+        // KELOMPOKKAN DATA BERDASARKAN ATASAN
+        // ==========================================================
+        $dataPerAtasan = $pengadaan->groupBy('atasan_id');
 
-        // Baris header dimulai dari baris 4 (setelah judul dan filter)
-        $headerRow = 4;
+        foreach ($dataPerAtasan as $idAtasan => $dataAtasan) {
 
-        foreach ($headers as $header) {
-            $sheet->setCellValue($column . $headerRow, $header);
-            $column++;
+            // Ambil data atasan dari pengajuan pertama
+            $pengajuanPertama = $dataAtasan->first();
+            $atasan = $pengajuanPertama?->atasan;
+
+            // Ambil nama atasan
+            $namaAtasan = $atasan?->nama_karyawan
+                ?? $atasan?->nama
+                ?? 'Tanpa Atasan';
+
+            // NAMA SHEET EXCEL MAKSIMAL 31 KARAKTER
+            $namaSheet = trim($namaAtasan);
+
+            // Hilangkan karakter yang tidak diperbolehkan Excel
+            $namaSheet = str_replace(
+                ['\\', '/', '*', '[', ']', ':', '?'],
+                '',
+                $namaSheet
+            );
+
+            if ($namaSheet === '') {
+                $namaSheet = 'Tanpa Atasan';
+            }
+
+            // Maksimal 31 karakter
+            $namaSheet = mb_substr($namaSheet, 0, 31);
+
+            // CEGAH DUPLIKAT NAMA SHEET
+            $namaSheetOriginal = $namaSheet;
+            $counter = 1;
+
+            while ($spreadsheet->sheetNameExists($namaSheet)) {
+                $suffix = ' ' . $counter;
+                $namaSheet = mb_substr($namaSheetOriginal, 0, 31 - mb_strlen($suffix)) . $suffix;
+                $counter++;
+            }
+
+            // BUAT SHEET ATASAN
+            $sheetAtasan = $spreadsheet->createSheet();
+            $sheetAtasan->setTitle($namaSheet);
+
+            $this->buatSheetPengadaan(
+                $sheetAtasan,
+                $dataAtasan,
+                $tahun,
+                $bulan,
+                $status,
+                $namaAtasan
+            );
         }
 
-        // Style header
-        $headerRange = 'A4:G4';
-        $sheet->getStyle($headerRange)->getFont()->setBold(true)->setSize(11);
-        $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle($headerRange)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle($headerRange)->getFill()->setFillType(Fill::FILL_SOLID);
-        $sheet->getStyle($headerRange)->getFill()->getStartColor()->setARGB('FF4CAF50');
-        $sheet->getStyle($headerRange)->getFont()->getColor()->setARGB('FFFFFFFF');
+        // ==========================================================
+        // AKTIFKAN SHEET PERTAMA
+        // ==========================================================
+        $spreadsheet->setActiveSheetIndex(0);
 
-        // === DATA ===
-        $row = 5;
-        $no = 1;
-
-        foreach ($pengadaan as $item) {
-
-    // Satu pengajuan bisa memiliki banyak item/barang
-    foreach ($item->items as $barang) {
-
-        $sheet->setCellValue(
-            'A' . $row,
-            $no
-        );
-
-        $sheet->setCellValue(
-            'B' . $row,
-            $item->created_at
-                ? date('d/m/Y', strtotime($item->created_at))
-                : '-'
-        );
-
-        $sheet->setCellValue(
-            'C' . $row,
-            $item->no_pengajuan ?? '-'
-        );
-
-        $sheet->setCellValue(
-            'D' . $row,
-            $barang->nama_barang ?? '-'
-        );
-
-        $sheet->setCellValue(
-            'E' . $row,
-            $barang->jumlah ?? 0
-        );
-
-        $sheet->setCellValue(
-            'F' . $row,
-            $item->bidang?->nama_bidang
-                ?? $item->bidang?->nama
-                ?? '-'
-        );
-
-        $sheet->setCellValue(
-            'G' . $row,
-            $this->getStatusLabel($item->status)
-        );
-
-        $row++;
-        $no++;
-    }
-}
-
-        // === AUTO SIZE COLUMN ===
-        foreach (range('A', 'G') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        // === BORDER ===
-        $dataRange = 'A4:G' . ($row - 1);
-        $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // === FOOTER ===
-        $footerRow = $row + 1;
-        $sheet->setCellValue('A' . $footerRow, 'Total Data: ' . $pengadaan->count());
-        $sheet->mergeCells('A' . $footerRow . ':G' . $footerRow);
-        $sheet->getStyle('A' . $footerRow)->getFont()->setBold(true);
-        $sheet->getStyle('A' . $footerRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-        // Tanggal cetak
-        $sheet->setCellValue('A' . ($footerRow + 1), 'Dicetak pada: ' . date('d/m/Y H:i:s'));
-        $sheet->mergeCells('A' . ($footerRow + 1) . ':G' . ($footerRow + 1));
-        $sheet->getStyle('A' . ($footerRow + 1))->getFont()->setSize(9);
-        $sheet->getStyle('A' . ($footerRow + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-        // === SAVE & DOWNLOAD ===
+        // ==========================================================
+        // DOWNLOAD
+        // ==========================================================
         $writer = new Xlsx($spreadsheet);
 
-        // Nama file
         $filename = 'Laporan_Pengadaan_' . date('Ymd_His') . '.xlsx';
 
-        // Return response stream
         return new StreamedResponse(
             function () use ($writer) {
                 $writer->save('php://output');
@@ -1661,25 +1618,460 @@ private function buatSheetPengadaan(
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
                 'Cache-Control' => 'max-age=0',
+                'Pragma' => 'public',
             ]
         );
     }
 
     /**
-     * Helper untuk mendapatkan label status
+     * Method untuk membuat sheet pengadaan
+     */
+    private function buatSheetPengadaan(
+        $sheet,
+        $pengadaan,
+        $tahun,
+        $bulan,
+        $status,
+        $namaAtasan
+    ) {
+        // ==========================================================
+        // HEADER JUDUL
+        // ==========================================================
+        $sheet->setCellValue('A1', 'LAPORAN PENGADAAN');
+        $sheet->mergeCells('A1:P1');
+
+        $sheet->getStyle('A1')
+            ->getFont()
+            ->setBold(true)
+            ->setSize(16);
+
+        $sheet->getStyle('A1')
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // ==========================================================
+        // INFO FILTER
+        // ==========================================================
+        $filterText = 'Periode: ';
+
+        if ($bulan) {
+            $filterText .= date('F', mktime(0, 0, 0, $bulan, 1)) . ' ';
+        }
+
+        $filterText .= $tahun ? $tahun : 'Semua Tahun';
+        $filterText .= ' | Status: ';
+
+        if ($status !== null && $status !== '') {
+            $filterText .= $this->getStatusLabel($status);
+        } else {
+            $filterText .= 'Semua';
+        }
+
+        $filterText .= ' | Atasan: ' . $namaAtasan;
+
+        $sheet->setCellValue('A2', $filterText);
+        $sheet->mergeCells('A2:P2');
+
+        $sheet->getStyle('A2')
+            ->getFont()
+            ->setSize(11);
+
+        $sheet->getStyle('A2')
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // ==========================================================
+        // HEADER TABEL
+        // ==========================================================
+        $headers = [
+            'No',
+            'Tanggal',
+            'No Pengajuan',
+            'Pengusul',
+            'Penerima',
+            'Kepala Bidang',
+            'Direktur',
+            'Nama Barang',
+            'Jumlah',
+            'Harga / Unit',
+            'Total Harga',
+            'Total Disetujui Direktur',
+            'Bidang',
+            'Status',
+            'Status Direktur',
+            'Tgl Direktur'
+        ];
+
+        $headerRow = 4;
+        $column = 'A';
+
+        foreach ($headers as $header) {
+            $sheet->setCellValue($column . $headerRow, $header);
+            $column++;
+        }
+
+        // ==========================================================
+        // STYLE HEADER
+        // ==========================================================
+        $headerRange = 'A4:P4';
+        $sheet->getStyle($headerRange)
+            ->getFont()
+            ->setBold(true)
+            ->setSize(11);
+
+        $sheet->getStyle($headerRange)
+            ->getFont()
+            ->getColor()
+            ->setARGB('FFFFFFFF');
+
+        $sheet->getStyle($headerRange)
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle($headerRange)
+            ->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle($headerRange)
+            ->getAlignment()
+            ->setWrapText(true);
+
+        $sheet->getStyle($headerRange)
+            ->getFill()
+            ->setFillType(Fill::FILL_SOLID);
+
+        $sheet->getStyle($headerRange)
+            ->getFill()
+            ->getStartColor()
+            ->setARGB('FF4CAF50');
+
+        // ==========================================================
+        // DATA
+        // ==========================================================
+        $row = 5;
+        $no = 1;
+
+        // VARIABEL UNTUK TOTAL
+        $totalHargaKeseluruhan = 0;
+        $totalDisetujuiDirekturKeseluruhan = 0;
+        $totalItem = 0;
+
+        foreach ($pengadaan as $item) {
+
+            // Satu pengajuan bisa memiliki banyak item
+            foreach ($item->items as $barang) {
+
+                // HARGA SATUAN
+                $hargaSatuan = (float) ($barang->harga_satuan ?? 0);
+
+                // TOTAL HARGA
+                if ($barang->harga !== null) {
+                    $totalHarga = (float) $barang->harga;
+                } else {
+                    $totalHarga = (float) ($barang->jumlah ?? 0) * $hargaSatuan;
+                }
+
+                // TOTAL DISETUJUI DIREKTUR
+                $totalDisetujuiDirektur = (float) ($item->total_disetujui_direktur ?? 0);
+
+                // AKUMULASI TOTAL
+                $totalHargaKeseluruhan += $totalHarga;
+                $totalDisetujuiDirekturKeseluruhan += $totalDisetujuiDirektur;
+                $totalItem++;
+
+                // STATUS DIREKTUR
+                $statusDirektur = $item->log_status_direktur ?? $item->status;
+                
+                // TANGGAL DISETUJUI/DITOLAK DIREKTUR
+                $tanggalDirektur = $item->disetujui_direktur_at 
+                    ? date('d/m/Y H:i', strtotime($item->disetujui_direktur_at))
+                    : '-';
+
+                // NO
+                $sheet->setCellValue('A' . $row, $no);
+
+                // TANGGAL
+                $sheet->setCellValue(
+                    'B' . $row,
+                    $item->tanggal_pengajuan
+                        ? date('d/m/Y', strtotime($item->tanggal_pengajuan))
+                        : '-'
+                );
+
+                // NO PENGAJUAN
+                $sheet->setCellValue('C' . $row, $item->no_pengajuan ?? '-');
+
+                // PENGUSUL
+                $sheet->setCellValue(
+                    'D' . $row,
+                    $item->karyawan?->nama_karyawan
+                        ?? $item->karyawan?->nama
+                        ?? '-'
+                );
+
+                // PENERIMA
+                $sheet->setCellValue(
+                    'E' . $row,
+                    $item->penerima?->nama_karyawan
+                        ?? $item->penerima?->nama
+                        ?? '-'
+                );
+
+                // KEPALA BIDANG (ATASAN)
+                $sheet->setCellValue(
+                    'F' . $row,
+                    $item->atasan?->nama_karyawan
+                        ?? $item->atasan?->nama
+                        ?? '-'
+                );
+
+                // DIREKTUR
+                $sheet->setCellValue(
+                    'G' . $row,
+                    $item->direktur?->nama_karyawan
+                        ?? $item->direktur?->nama
+                        ?? '-'
+                );
+
+                // NAMA BARANG
+                $sheet->setCellValue('H' . $row, $barang->nama_barang ?? '-');
+
+                // JUMLAH
+                $sheet->setCellValue('I' . $row, (float) ($barang->jumlah ?? 0));
+
+                // HARGA / UNIT
+                $sheet->setCellValue('J' . $row, $hargaSatuan);
+
+                // TOTAL HARGA
+                $sheet->setCellValue('K' . $row, $totalHarga);
+
+                // TOTAL DISETUJUI DIREKTUR
+                $sheet->setCellValue('L' . $row, $totalDisetujuiDirektur);
+
+                // BIDANG
+                $sheet->setCellValue(
+                    'M' . $row,
+                    $item->bidang?->nama_bidang
+                        ?? $item->bidang?->nama
+                        ?? '-'
+                );
+
+                // STATUS
+                $sheet->setCellValue(
+                    'N' . $row,
+                    $this->getStatusLabel($item->status)
+                );
+
+                // STATUS DIREKTUR
+                $sheet->setCellValue(
+                    'O' . $row,
+                    $this->getStatusLabel($statusDirektur)
+                );
+
+                // TANGGAL DIREKTUR
+                $sheet->setCellValue(
+                    'P' . $row,
+                    $tanggalDirektur
+                );
+
+                // FORMAT RUPIAH
+                $sheet->getStyle('J' . $row . ':L' . $row)
+                    ->getNumberFormat()
+                    ->setFormatCode('"Rp" #,##0');
+
+                // ALIGNMENT
+                $sheet->getStyle('A' . $row . ':P' . $row)
+                    ->getAlignment()
+                    ->setVertical(Alignment::VERTICAL_CENTER);
+
+                $sheet->getStyle('A' . $row)
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $sheet->getStyle('I' . $row)
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                // WRAP TEXT
+                $sheet->getStyle('D' . $row . ':H' . $row)
+                    ->getAlignment()
+                    ->setWrapText(true);
+
+                $sheet->getStyle('M' . $row . ':P' . $row)
+                    ->getAlignment()
+                    ->setWrapText(true);
+
+                // WARNA BACKGROUND UNTUK STATUS DIREKTUR
+                if ($statusDirektur == 'disetujui') {
+                    $sheet->getStyle('O' . $row . ':P' . $row)
+                        ->getFill()
+                        ->setFillType(Fill::FILL_SOLID)
+                        ->getStartColor()
+                        ->setARGB('FFC6EFCE');
+                } elseif ($statusDirektur == 'ditolak') {
+                    $sheet->getStyle('O' . $row . ':P' . $row)
+                        ->getFill()
+                        ->setFillType(Fill::FILL_SOLID)
+                        ->getStartColor()
+                        ->setARGB('FFFFC7CE');
+                }
+
+                $row++;
+                $no++;
+            }
+        }
+
+        // ==========================================================
+        // AUTO SIZE COLUMN
+        // ==========================================================
+        foreach (range('A', 'P') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Lebar minimum beberapa kolom
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(14);
+        $sheet->getColumnDimension('C')->setWidth(18);
+        $sheet->getColumnDimension('D')->setWidth(22);
+        $sheet->getColumnDimension('E')->setWidth(22);
+        $sheet->getColumnDimension('F')->setWidth(22);
+        $sheet->getColumnDimension('G')->setWidth(22);
+        $sheet->getColumnDimension('H')->setWidth(30);
+        $sheet->getColumnDimension('I')->setWidth(10);
+        $sheet->getColumnDimension('J')->setWidth(18);
+        $sheet->getColumnDimension('K')->setWidth(20);
+        $sheet->getColumnDimension('L')->setWidth(25);
+        $sheet->getColumnDimension('M')->setWidth(20);
+        $sheet->getColumnDimension('N')->setWidth(18);
+        $sheet->getColumnDimension('O')->setWidth(18);
+        $sheet->getColumnDimension('P')->setWidth(18);
+
+        // ==========================================================
+        // BORDER
+        // ==========================================================
+        if ($row > 5) {
+            $dataRange = 'A4:P' . ($row - 1);
+            $sheet->getStyle($dataRange)
+                ->getBorders()
+                ->getAllBorders()
+                ->setBorderStyle(Border::BORDER_THIN);
+        }
+
+        // ==========================================================
+        // FOOTER - TOTAL (RAPIH)
+        // ==========================================================
+        $footerRow = $row + 2;
+
+        // Total Data
+        $sheet->setCellValue('C' . $footerRow, 'Total Data :');
+        $sheet->mergeCells('C' . $footerRow . ':D' . $footerRow);
+        $sheet->getStyle('C' . $footerRow)->getFont()->setBold(true);
+        $sheet->getStyle('C' . $footerRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $footerRow, $totalItem . ' item');
+        $sheet->getStyle('E' . $footerRow)->getFont()->setBold(true);
+
+        // Total Permintaan Unit
+        $footerRow2 = $footerRow + 1;
+        $sheet->setCellValue('C' . $footerRow2, 'Total Permintaan Unit :');
+        $sheet->mergeCells('C' . $footerRow2 . ':D' . $footerRow2);
+        $sheet->getStyle('C' . $footerRow2)->getFont()->setBold(true);
+        $sheet->getStyle('C' . $footerRow2)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $footerRow2, $totalHargaKeseluruhan);
+        $sheet->getStyle('E' . $footerRow2)->getNumberFormat()->setFormatCode('"Rp" #,##0');
+        $sheet->getStyle('E' . $footerRow2)->getFont()->setBold(true);
+
+        // Total Disetujui Direktur
+        $footerRow3 = $footerRow2 + 1;
+        $sheet->setCellValue('C' . $footerRow3, 'Total Disetujui Direktur :');
+        $sheet->mergeCells('C' . $footerRow3 . ':D' . $footerRow3);
+        $sheet->getStyle('C' . $footerRow3)->getFont()->setBold(true);
+        $sheet->getStyle('C' . $footerRow3)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $footerRow3, $totalDisetujuiDirekturKeseluruhan);
+        $sheet->getStyle('E' . $footerRow3)->getNumberFormat()->setFormatCode('"Rp" #,##0');
+        $sheet->getStyle('E' . $footerRow3)->getFont()->setBold(true);
+
+        // ==========================================================
+        // TANGGAL CETAK
+        // ==========================================================
+        $printRow = $footerRow3 + 2;
+
+        $sheet->setCellValue('C' . $printRow, 'Dicetak pada: ' . date('d/m/Y H:i:s'));
+        $sheet->mergeCells('C' . $printRow . ':E' . $printRow);
+
+        $sheet->getStyle('C' . $printRow)
+            ->getFont()
+            ->setSize(9);
+
+        $sheet->getStyle('C' . $printRow)
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        // ==========================================================
+        // FREEZE HEADER
+        // ==========================================================
+        $sheet->freezePane('A5');
+
+        // ==========================================================
+        // PAGE SETUP
+        // ==========================================================
+        $sheet->getPageSetup()
+            ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+
+        $sheet->getPageSetup()
+            ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
+
+        $sheet->getPageSetup()
+            ->setFitToWidth(1);
+
+        $sheet->getPageSetup()
+            ->setFitToHeight(0);
+
+        $sheet->getPageMargins()
+            ->setTop(0.5)
+            ->setRight(0.3)
+            ->setLeft(0.3)
+            ->setBottom(0.5);
+    }
+
+
+
+    /**
+     * Mendapatkan label status
      */
     private function getStatusLabel($status)
     {
         $statuses = [
-            0 => 'Draft',
-            1 => 'Menunggu Persetujuan',
-            2 => 'Disetujui',
-            3 => 'Ditolak',
-            4 => 'Selesai',
+            'draft' => 'Draft',
+            'diajukan' => 'Diajukan',
+            'disetujui_koordinator' => 'Disetujui Koordinator',
+            'disetujui_kabid' => 'Disetujui Kabid',
+            'dipertimbangkan' => 'Dipertimbangkan',
+            'menunggu_direktur' => 'Menunggu Direktur',
+            'disetujui' => 'Disetujui',
+            'disetujui sebagian' => 'Disetujui Sebagian',
+            'ditolak' => 'Ditolak',
+            'revisi' => 'Revisi',
+            'ditunda' => 'Ditunda',
         ];
 
-        return $statuses[$status] ?? 'Unknown';
+        return $statuses[$status] ?? $status;
     }
+
+    // /**
+    //  * Helper untuk mendapatkan label status
+    //  */
+    // private function getStatusLabel($status)
+    // {
+    //     $statuses = [
+    //         0 => 'Draft',
+    //         1 => 'Menunggu Persetujuan',
+    //         2 => 'Disetujui',
+    //         3 => 'Ditolak',
+    //         4 => 'Selesai',
+    //     ];
+
+    //     return $statuses[$status] ?? 'Unknown';
+    // }
 
 }
 

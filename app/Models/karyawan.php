@@ -34,6 +34,40 @@ class karyawan extends Model
         return $this->belongsTo(bidang::class, 'bidang_id');
     }
 
+      public function pengajuans()
+    {
+        return $this->hasMany(pengajuan::class, 'atasan_id');
+    }
+
+     public function pengajuanKaryawan()
+    {
+        return $this->hasMany(pengajuan::class, 'karyawan_id');
+    }
+
+    /**
+     * Relasi ke pengajuan sebagai penerima
+     */
+    public function pengajuanPenerima()
+    {
+        return $this->hasMany(pengajuan::class, 'penerima_id');
+    }
+
+    /**
+     * Relasi ke pengajuan sebagai direktur
+     */
+    public function pengajuanDirektur()
+    {
+        return $this->hasMany(pengajuan::class, 'direktur_id');
+    }
+
+    /**
+     * Relasi ke pengajuan sebagai keuangan
+     */
+    public function pengajuanKeuangan()
+    {
+        return $this->hasMany(pengajuan::class, 'id_keuangan');
+    }
+
 
     use HasFactory;
 }
