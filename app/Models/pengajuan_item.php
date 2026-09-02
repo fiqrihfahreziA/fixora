@@ -11,6 +11,7 @@ class pengajuan_item extends Model
    protected $fillable = [
     'pengajuan_id', 'nama_barang', 'spesifikasi', 'satuan', 'jumlah', 'harga_satuan', 'harga','jumlah_disetujui','harga_disetujui'];
 
+    
      public function pengajuan()
     {
         return $this->belongsTo(pengajuan::class);

@@ -716,7 +716,7 @@ public function verifikasi(Request $request, $id)
         
         $statusMap = [
             'disetujui_koordinator' => 'disetujui_koordinator',
-            'ditolak' => 'ditolak_penerima',
+            'ditolak' => 'ditolak',
             'revisi' => 'revisi',
             
         ];
@@ -920,547 +920,6 @@ public function verifikasi(Request $request, $id)
 
     return $map[$status] ?? $status;
 }
-
-
-
-//    public function exportExcel(Request $request)
-//     {
-//         // ==========================================================
-//         // AMBIL PARAMETER FILTER
-//         // ==========================================================
-//         $tahun = $request->input('tahun');
-//         $bulan = $request->input('bulan');
-//         $status = $request->input('status');
-//         $atasanId = $request->input('atasan_id');
-
-//         // ==========================================================
-//         // QUERY DATA
-//         // ==========================================================
-//         $query = pengajuan::with([
-//             'bidang',
-//             'items',
-//             'karyawan',
-//             'penerima',
-//             'atasan',
-//             'direktur',
-//         ]);
-
-//         // Filter tahun
-//         if ($tahun) {
-//             $query->whereYear('tanggal_pengajuan', $tahun);
-//         }
-
-//         // Filter bulan
-//         if ($bulan) {
-//             $query->whereMonth('tanggal_pengajuan', $bulan);
-//         }
-
-//         // Filter status
-//         if ($status !== null && $status !== '') {
-//             $query->where('status', $status);
-//         }
-
-//         // Filter atasan
-//         if ($atasanId) {
-//             $query->where('atasan_id', $atasanId);
-//         }
-
-//         // Ambil data
-//         $pengadaan = $query
-//             ->orderBy('tanggal_pengajuan', 'desc')
-//             ->get();
-
-//         // ==========================================================
-//         // CEK DATA KOSONG
-//         // ==========================================================
-//         if ($pengadaan->isEmpty()) {
-//             return back()->with('error', 'Tidak ada data untuk diexport.');
-//         }
-
-//         // ==========================================================
-//         // BUAT SPREADSHEET
-//         // ==========================================================
-//         $spreadsheet = new Spreadsheet();
-
-//         // Hapus sheet default
-//         $defaultSheet = $spreadsheet->getActiveSheet();
-//         $spreadsheet->removeSheetByIndex($spreadsheet->getIndex($defaultSheet));
-
-//         // ==========================================================
-//         // SHEET 1 - SEMUA DATA
-//         // ==========================================================
-//         $sheetSemua = $spreadsheet->createSheet();
-//         $sheetSemua->setTitle('Semua Data');
-
-//         $this->buatSheetPengadaan(
-//             $sheetSemua,
-//             $pengadaan,
-//             $tahun,
-//             $bulan,
-//             $status,
-//             ''
-//         );
-
-//         // ==========================================================
-//         // KELOMPOKKAN DATA BERDASARKAN ATASAN
-//         // ==========================================================
-//         $dataPerAtasan = $pengadaan->groupBy('atasan_id');
-
-//         foreach ($dataPerAtasan as $idAtasan => $dataAtasan) {
-
-//             // Ambil data atasan dari pengajuan pertama
-//             $pengajuanPertama = $dataAtasan->first();
-//             $atasan = $pengajuanPertama?->atasan;
-
-//             // Ambil nama atasan
-//             $namaAtasan = $atasan?->nama_karyawan
-//                 ?? $atasan?->nama
-//                 ?? 'Tanpa Atasan';
-
-//             // NAMA SHEET EXCEL MAKSIMAL 31 KARAKTER
-//             $namaSheet = trim($namaAtasan);
-
-//             // Hilangkan karakter yang tidak diperbolehkan Excel
-//             $namaSheet = str_replace(
-//                 ['\\', '/', '*', '[', ']', ':', '?'],
-//                 '',
-//                 $namaSheet
-//             );
-
-//             if ($namaSheet === '') {
-//                 $namaSheet = 'Tanpa Atasan';
-//             }
-
-//             // Maksimal 31 karakter
-//             $namaSheet = mb_substr($namaSheet, 0, 31);
-
-//             // CEGAH DUPLIKAT NAMA SHEET
-//             $namaSheetOriginal = $namaSheet;
-//             $counter = 1;
-
-//             while ($spreadsheet->sheetNameExists($namaSheet)) {
-//                 $suffix = ' ' . $counter;
-//                 $namaSheet = mb_substr($namaSheetOriginal, 0, 31 - mb_strlen($suffix)) . $suffix;
-//                 $counter++;
-//             }
-
-//             // BUAT SHEET ATASAN
-//             $sheetAtasan = $spreadsheet->createSheet();
-//             $sheetAtasan->setTitle($namaSheet);
-
-//             $this->buatSheetPengadaan(
-//                 $sheetAtasan,
-//                 $dataAtasan,
-//                 $tahun,
-//                 $bulan,
-//                 $status,
-//                 $namaAtasan
-//             );
-//         }
-
-//         // ==========================================================
-//         // AKTIFKAN SHEET PERTAMA
-//         // ==========================================================
-//         $spreadsheet->setActiveSheetIndex(0);
-
-//         // ==========================================================
-//         // DOWNLOAD
-//         // ==========================================================
-//         $writer = new Xlsx($spreadsheet);
-
-//         $filename = 'Laporan_Pengadaan_' . date('Ymd_His') . '.xlsx';
-
-//         return new StreamedResponse(
-//             function () use ($writer) {
-//                 $writer->save('php://output');
-//             },
-//             200,
-//             [
-//                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-//                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-//                 'Cache-Control' => 'max-age=0',
-//                 'Pragma' => 'public',
-//             ]
-//         );
-//     }
-
-//     /**
-//      * Method untuk membuat sheet pengadaan
-//      */
-//     private function buatSheetPengadaan(
-//         $sheet,
-//         $pengadaan,
-//         $tahun,
-//         $bulan,
-//         $status,
-//         $namaAtasan
-//     ) {
-//         // ==========================================================
-//         // HEADER JUDUL
-//         // ==========================================================
-//         $sheet->setCellValue('A1', 'LAPORAN PENGADAAN');
-//         $sheet->mergeCells('A1:O1'); // Diperluas sampai O
-
-//         $sheet->getStyle('A1')
-//             ->getFont()
-//             ->setBold(true)
-//             ->setSize(16);
-
-//         $sheet->getStyle('A1')
-//             ->getAlignment()
-//             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-//         // ==========================================================
-//         // INFO FILTER
-//         // ==========================================================
-//         $filterText = 'Periode: ';
-
-//         if ($bulan) {
-//             $filterText .= date('F', mktime(0, 0, 0, $bulan, 1)) . ' ';
-//         }
-
-//         $filterText .= $tahun ? $tahun : 'Semua Tahun';
-//         $filterText .= '';
-
-//         if ($status !== null && $status !== '') {
-//             $filterText .= $this->getStatusLabel($status);
-//         } else {
-//             // $filterText .= 'Semua';
-//              $filterText .= '';
-//         }
-
-//         $filterText .= '  ' . $namaAtasan;
-
-//         $sheet->setCellValue('A2', $filterText);
-//         $sheet->mergeCells('A2:O2');
-
-//         $sheet->getStyle('A2')
-//             ->getFont()
-//             ->setSize(11);
-
-//         $sheet->getStyle('A2')
-//             ->getAlignment()
-//             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-//         // ==========================================================
-//         // HEADER TABEL - DITAMBAHKAN KOLOM BARU
-//         // ==========================================================
-//         $headers = [
-//             'No',
-//             'Tanggal',
-//             'No Pengajuan',
-//             'Pengusul',
-//             'Penerima',
-//             'Kepala Bidang',
-//             'Direktur',
-//             'Nama Barang',
-//             'Jumlah',
-//             'Harga / Unit',
-//             'Total Harga',
-//             'Total Disetujui Direktur', // KOLOM BARU
-//             'Bidang',
-//             'Status',
-//             'Log Persetujuan' // KOLOM BARU
-//         ];
-
-//         $headerRow = 4;
-//         $column = 'A';
-
-//         foreach ($headers as $header) {
-//             $sheet->setCellValue($column . $headerRow, $header);
-//             $column++;
-//         }
-
-//         // ==========================================================
-//         // STYLE HEADER
-//         // ==========================================================
-//         $headerRange = 'A4:O4'; // Diperluas sampai O
-//         $sheet->getStyle($headerRange)
-//             ->getFont()
-//             ->setBold(true)
-//             ->setSize(11);
-
-//         $sheet->getStyle($headerRange)
-//             ->getFont()
-//             ->getColor()
-//             ->setARGB('FFFFFFFF');
-
-//         $sheet->getStyle($headerRange)
-//             ->getAlignment()
-//             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-//         $sheet->getStyle($headerRange)
-//             ->getAlignment()
-//             ->setVertical(Alignment::VERTICAL_CENTER);
-
-//         $sheet->getStyle($headerRange)
-//             ->getAlignment()
-//             ->setWrapText(true);
-
-//         $sheet->getStyle($headerRange)
-//             ->getFill()
-//             ->setFillType(Fill::FILL_SOLID);
-
-//         $sheet->getStyle($headerRange)
-//             ->getFill()
-//             ->getStartColor()
-//             ->setARGB('FF4CAF50');
-
-//         // ==========================================================
-//         // DATA
-//         // ==========================================================
-//         $row = 5;
-//         $no = 1;
-
-//         foreach ($pengadaan as $item) {
-
-//             // Satu pengajuan bisa memiliki banyak item
-//             foreach ($item->items as $barang) {
-
-//                 // HARGA SATUAN
-//                 $hargaSatuan = (float) ($barang->harga_satuan ?? 0);
-
-//                 // TOTAL HARGA
-//                 if ($barang->harga !== null) {
-//                     $totalHarga = (float) $barang->harga;
-//                 } else {
-//                     $totalHarga = (float) ($barang->jumlah ?? 0) * $hargaSatuan;
-//                 }
-
-//                 // TOTAL DISETUJUI DIREKTUR
-//                 $totalDisetujuiDirektur = (float) ($item->total_disetujui_direktur ?? 0);
-
-//                 // STATUS DIREKTUR - Ambil dari log_status_direktur
-//                 $statusDirektur = $item->log_status_direktur ?? $item->status;
-                
-//                 // TANGGAL DISETUJUI/DITOLAK DIREKTUR
-//                 $tanggalDirektur = $item->disetujui_direktur_at 
-//                     ? date('d/m/Y H:i', strtotime($item->disetujui_direktur_at))
-//                     : '-';
-
-//                 // NO
-//                 $sheet->setCellValue('A' . $row, $no);
-
-//                 // TANGGAL
-//                 $sheet->setCellValue(
-//                     'B' . $row,
-//                     $item->tanggal_pengajuan
-//                         ? date('d/m/Y', strtotime($item->tanggal_pengajuan))
-//                         : '-'
-//                 );
-
-//                 // NO PENGAJUAN
-//                 $sheet->setCellValue('C' . $row, $item->no_pengajuan ?? '-');
-
-//                 // PENGUSUL
-//                 $sheet->setCellValue(
-//                     'D' . $row,
-//                     $item->karyawan?->nama_karyawan
-//                         ?? $item->karyawan?->nama
-//                         ?? '-'
-//                 );
-
-//                 // PENERIMA
-//                 $sheet->setCellValue(
-//                     'E' . $row,
-//                     $item->penerima?->nama_karyawan
-//                         ?? $item->penerima?->nama
-//                         ?? '-'
-//                 );
-
-//                 // KEPALA BIDANG (ATASAN)
-//                 $sheet->setCellValue(
-//                     'F' . $row,
-//                     $item->atasan?->nama_karyawan
-//                         ?? $item->atasan?->nama
-//                         ?? '-'
-//                 );
-
-//                 // DIREKTUR
-//                 $sheet->setCellValue(
-//                     'G' . $row,
-//                     $item->direktur?->nama_karyawan
-//                         ?? $item->direktur?->nama
-//                         ?? '-'
-//                 );
-
-//                 // NAMA BARANG
-//                 $sheet->setCellValue('H' . $row, $barang->nama_barang ?? '-');
-
-//                 // JUMLAH
-//                 $sheet->setCellValue('I' . $row, (float) ($barang->jumlah ?? 0));
-
-//                 // HARGA / UNIT
-//                 $sheet->setCellValue('J' . $row, $hargaSatuan);
-
-//                 // TOTAL HARGA
-//                 $sheet->setCellValue('K' . $row, $totalHarga);
-
-//                 // TOTAL DISETUJUI DIREKTUR (KOLOM BARU)
-//                 $sheet->setCellValue('L' . $row, $totalDisetujuiDirektur);
-
-//                 // BIDANG
-//                 $sheet->setCellValue(
-//                     'M' . $row,
-//                     $item->bidang?->nama_bidang
-//                         ?? $item->bidang?->nama
-//                         ?? '-'
-//                 );
-
-//                 // STATUS (KOLOM BARU - pindah ke N)
-//                 $sheet->setCellValue(
-//                     'N' . $row,
-//                     $this->getStatusLabel($item->status)
-//                 );
-
-//                 // STATUS DIREKTUR + TANGGAL (KOLOM BARU - O)
-//                 $statusDirekturText = $this->getStatusLabel($statusDirektur);
-//                 $sheet->setCellValue(
-//                     'O' . $row,
-//                     $statusDirekturText . ' - ' . $tanggalDirektur
-//                 );
-
-//                 // FORMAT RUPIAH
-//                 $sheet->getStyle('J' . $row . ':L' . $row) // Diperluas sampai L
-//                     ->getNumberFormat()
-//                     ->setFormatCode('"Rp" #,##0');
-
-//                 // ALIGNMENT
-//                 $sheet->getStyle('A' . $row . ':O' . $row)
-//                     ->getAlignment()
-//                     ->setVertical(Alignment::VERTICAL_CENTER);
-
-//                 $sheet->getStyle('A' . $row)
-//                     ->getAlignment()
-//                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-//                 $sheet->getStyle('I' . $row)
-//                     ->getAlignment()
-//                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-//                 // WRAP TEXT
-//                 $sheet->getStyle('D' . $row . ':H' . $row)
-//                     ->getAlignment()
-//                     ->setWrapText(true);
-
-//                 $sheet->getStyle('M' . $row . ':O' . $row)
-//                     ->getAlignment()
-//                     ->setWrapText(true);
-
-//                 // WARNA BACKGROUND UNTUK STATUS DIREKTUR
-//                 if ($statusDirektur == 'disetujui') {
-//                     $sheet->getStyle('O' . $row)
-//                         ->getFill()
-//                         ->setFillType(Fill::FILL_SOLID)
-//                         ->getStartColor()
-//                         ->setARGB('FFC6EFCE'); // Hijau muda
-//                 } elseif ($statusDirektur == 'ditolak') {
-//                     $sheet->getStyle('O' . $row)
-//                         ->getFill()
-//                         ->setFillType(Fill::FILL_SOLID)
-//                         ->getStartColor()
-//                         ->setARGB('FFFFC7CE'); // Merah muda
-//                 }
-
-//                 $row++;
-//                 $no++;
-//             }
-//         }
-
-//         // ==========================================================
-//         // AUTO SIZE COLUMN
-//         // ==========================================================
-//         foreach (range('A', 'O') as $col) {
-//             $sheet->getColumnDimension($col)->setAutoSize(true);
-//         }
-
-//         // Lebar minimum beberapa kolom
-//         $sheet->getColumnDimension('A')->setWidth(6);
-//         $sheet->getColumnDimension('B')->setWidth(14);
-//         $sheet->getColumnDimension('C')->setWidth(18);
-//         $sheet->getColumnDimension('D')->setWidth(22);
-//         $sheet->getColumnDimension('E')->setWidth(22);
-//         $sheet->getColumnDimension('F')->setWidth(22);
-//         $sheet->getColumnDimension('G')->setWidth(22);
-//         $sheet->getColumnDimension('H')->setWidth(30);
-//         $sheet->getColumnDimension('I')->setWidth(10);
-//         $sheet->getColumnDimension('J')->setWidth(18);
-//         $sheet->getColumnDimension('K')->setWidth(20);
-//         $sheet->getColumnDimension('L')->setWidth(25); // Kolom Total Disetujui Direktur
-//         $sheet->getColumnDimension('M')->setWidth(20);
-//         $sheet->getColumnDimension('N')->setWidth(18);
-//         $sheet->getColumnDimension('O')->setWidth(30); // Kolom Status Direktur + Tanggal
-
-//         // ==========================================================
-//         // BORDER
-//         // ==========================================================
-//         if ($row > 5) {
-//             $dataRange = 'A4:O' . ($row - 1);
-//             $sheet->getStyle($dataRange)
-//                 ->getBorders()
-//                 ->getAllBorders()
-//                 ->setBorderStyle(Border::BORDER_THIN);
-//         }
-
-//         // ==========================================================
-//         // FOOTER
-//         // ==========================================================
-//         $footerRow = $row + 1;
-//         $totalItem = $no - 1;
-
-//         $sheet->setCellValue('A' . $footerRow, 'Total Data: ' . $totalItem);
-//         $sheet->mergeCells('A' . $footerRow . ':O' . $footerRow);
-
-//         $sheet->getStyle('A' . $footerRow)
-//             ->getFont()
-//             ->setBold(true);
-
-//         $sheet->getStyle('A' . $footerRow)
-//             ->getAlignment()
-//             ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-//         // ==========================================================
-//         // TANGGAL CETAK
-//         // ==========================================================
-//         $printRow = $footerRow + 1;
-
-//         $sheet->setCellValue('A' . $printRow, 'Dicetak pada: ' . date('d/m/Y H:i:s'));
-//         $sheet->mergeCells('A' . $printRow . ':O' . $printRow);
-
-//         $sheet->getStyle('A' . $printRow)
-//             ->getFont()
-//             ->setSize(9);
-
-//         $sheet->getStyle('A' . $printRow)
-//             ->getAlignment()
-//             ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-//         // ==========================================================
-//         // FREEZE HEADER
-//         // ==========================================================
-//         $sheet->freezePane('A5');
-
-//         // ==========================================================
-//         // PAGE SETUP
-//         // ==========================================================
-//         $sheet->getPageSetup()
-//             ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-
-//         $sheet->getPageSetup()
-//             ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
-
-//         $sheet->getPageSetup()
-//             ->setFitToWidth(1);
-
-//         $sheet->getPageSetup()
-//             ->setFitToHeight(0);
-
-//         $sheet->getPageMargins()
-//             ->setTop(0.5)
-//             ->setRight(0.3)
-//             ->setLeft(0.3)
-//             ->setBottom(0.5);
-//     }
 
    public function exportExcel(Request $request)
     {
@@ -2033,7 +1492,268 @@ public function verifikasi(Request $request, $id)
             ->setBottom(0.5);
     }
 
+     public function chartspengadaans(){
 
+        return view('penerima.pengadaan.chart');
+        
+    }
+    
+  public function chartspengadaan(Request $request)
+    {
+        $authUser = Auth::user();
+        $bidangId = $authUser->karyawan->bidang_id ?? null;
+
+        // ===== AMBIL DATA BIDANG UNTUK DITAMPILKAN =====
+        $bidangs = Bidang::orderBy('nama_bidang')->get();
+        
+        // ===== AMBIL RUANGAN UNIK DARI BIDANG USER =====
+        $ruangans = Pengajuan::select('instalasi')
+            ->distinct()
+            ->whereNotNull('instalasi')
+            ->when($bidangId, function($query) use ($bidangId) {
+                return $query->where('bidang_id', $bidangId);
+            })
+            ->orderBy('instalasi')
+            ->pluck('instalasi')
+            ->toArray();
+
+        // ===== FILTER REQUEST =====
+        $filterRuangan = $request->filter_ruangan;
+        $filterTahun = $request->tahun_anggaran;
+        $filterStatus = $request->status;
+
+        // ===== QUERY DASAR - OTOMATIS FILTER BIDANG USER =====
+        $baseQuery = Pengajuan::query();
+
+        // 🔥 WAJIB: Hanya data dari bidang user yang login
+        if ($bidangId) {
+            $baseQuery->where('bidang_id', $bidangId);
+        }
+
+        // Filter Ruangan
+        if ($filterRuangan) {
+            $baseQuery->where('instalasi', $filterRuangan);
+        }
+
+        // Filter Tahun
+        if ($filterTahun) {
+            $baseQuery->where('tahun_anggaran', $filterTahun);
+        }
+
+        // Filter Status
+        if ($filterStatus) {
+            $baseQuery->where('status', $filterStatus);
+        }
+
+        // ===== STATISTIK =====
+        $stats = [
+            'total' => (clone $baseQuery)->count(),
+            'draft' => (clone $baseQuery)->where('status', 'draft')->count(),
+            'diajukan' => (clone $baseQuery)->whereIn('status', ['diajukan', 'disetujui_koordinator', 'disetujui_kabid'])->count(),
+            'disetujui' => (clone $baseQuery)->where('status', 'disetujui')->count(),
+            'ditolak' => (clone $baseQuery)->where('status', 'ditolak')->count(),
+            'menunggu_direktur' => (clone $baseQuery)->where('status', 'menunggu_direktur')->count(),
+        ];
+
+        // ===== CHART DATA =====
+        $chartData = $this->getChartData($baseQuery, $bidangId, $filterRuangan, $filterTahun);
+
+        // ===== REKAP BULANAN =====
+        $rekapBulanan = $this->getRekapBulanan($baseQuery);
+
+        // ===== DATA PAGINATION =====
+        $allPengajuan = $baseQuery->with(['bidang', 'karyawan', 'items'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->all());
+
+        return view('penerima.pengadaan.chart', compact(
+            'authUser',
+            'stats',
+            'chartData',
+            'rekapBulanan',
+            'allPengajuan',
+            'bidangs',
+            'ruangans',
+            'filterRuangan',
+            'filterTahun',
+            'filterStatus'
+        ));
+    }
+
+    /**
+     * Get data untuk chart
+     */
+    private function getChartData($baseQuery, $bidangId, $filterRuangan, $filterTahun)
+    {
+        // ===== 1. STATUS DISTRIBUSI - HANYA DISETUJUI & DITOLAK =====
+        $statusQuery = clone $baseQuery;
+        
+        $statusData = [
+            'Disetujui' => (clone $statusQuery)->where('status', 'disetujui')->count(),
+            'Ditolak' => (clone $statusQuery)->where('status', 'ditolak')->count(),
+        ];
+
+        // ===== 2. TREND PER BULAN (6 bulan terakhir) =====
+        $trendQuery = clone $baseQuery;
+        $trendQuery->where('status', '!=', 'draft')
+            ->where('status', '!=', 'ditolak')
+            ->where('tanggal_pengajuan', '>=', now()->subMonths(6));
+
+        $trendData = $trendQuery
+            ->select(
+                DB::raw('MONTH(tanggal_pengajuan) as bulan'),
+                DB::raw('YEAR(tanggal_pengajuan) as tahun'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('tahun', 'bulan')
+            ->orderBy('tahun')
+            ->orderBy('bulan')
+            ->get();
+
+        $trend = [];
+        $bulanNama = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        
+        foreach ($trendData as $item) {
+            $trend[] = [
+                'bulan' => $bulanNama[$item->bulan - 1] . ' ' . $item->tahun,
+                'total' => $item->total
+            ];
+        }
+
+        // ===== 3. TOP BARANG =====
+        $topBarangQuery = pengajuan_item::query()
+            ->join('pengajuans', 'pengajuan_items.pengajuan_id', '=', 'pengajuans.id')
+            ->where('pengajuans.status', '!=', 'draft')
+            ->where('pengajuans.status', '!=', 'ditolak');
+
+        if ($bidangId) {
+            $topBarangQuery->where('pengajuans.bidang_id', $bidangId);
+        }
+        if ($filterRuangan) {
+            $topBarangQuery->where('pengajuans.instalasi', $filterRuangan);
+        }
+        if ($filterTahun) {
+            $topBarangQuery->where('pengajuans.tahun_anggaran', $filterTahun);
+        }
+
+        $topBarang = $topBarangQuery
+            ->select(
+                'pengajuan_items.nama_barang',
+                DB::raw('SUM(pengajuan_items.jumlah) as total_jumlah')
+            )
+            ->groupBy('pengajuan_items.nama_barang')
+            ->orderBy('total_jumlah', 'desc')
+            ->limit(10)
+            ->get();
+
+        $topBarangData = [];
+        foreach ($topBarang as $item) {
+            $topBarangData[] = [
+                'nama' => $item->nama_barang,
+                'jumlah' => (int) $item->total_jumlah
+            ];
+        }
+
+        // ===== 4. NILAI PER BULAN =====
+        $nilaiQuery = clone $baseQuery;
+        $nilaiQuery->where('status', 'disetujui')
+            ->where('tanggal_pengajuan', '>=', now()->subMonths(6));
+
+        $nilaiData = $nilaiQuery
+            ->select(
+                DB::raw('MONTH(tanggal_pengajuan) as bulan'),
+                DB::raw('YEAR(tanggal_pengajuan) as tahun'),
+                DB::raw('SUM(total_pengajuan) as total_nilai')
+            )
+            ->groupBy('tahun', 'bulan')
+            ->orderBy('tahun')
+            ->orderBy('bulan')
+            ->get();
+
+        $nilai = [];
+        foreach ($nilaiData as $item) {
+            $nilai[] = [
+                'bulan' => $bulanNama[$item->bulan - 1] . ' ' . $item->tahun,
+                'total' => (float) $item->total_nilai
+            ];
+        }
+
+        // ===== 5. PER RUANGAN =====
+        $perRuanganQuery = clone $baseQuery;
+        $perRuanganData = $perRuanganQuery
+            ->select(
+                'instalasi',
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(CASE WHEN status = "disetujui" THEN 1 ELSE 0 END) as disetujui'),
+                DB::raw('SUM(CASE WHEN status = "ditolak" THEN 1 ELSE 0 END) as ditolak'),
+                DB::raw('SUM(total_pengajuan) as total_nilai')
+            )
+            ->whereNotNull('instalasi')
+            ->groupBy('instalasi')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        $perRuangan = [];
+        foreach ($perRuanganData as $item) {
+            $perRuangan[] = [
+                'ruangan' => $item->instalasi,
+                'total' => $item->total,
+                'disetujui' => $item->disetujui,
+                'ditolak' => $item->ditolak,
+                'nilai' => (float) $item->total_nilai
+            ];
+        }
+
+        return [
+            'status' => $statusData,
+            'trend' => $trend,
+            'topBarang' => $topBarangData,
+            'nilai' => $nilai,
+            'perRuangan' => $perRuangan
+        ];
+    }
+
+    /**
+     * Get rekap bulanan untuk tabel
+     */
+    private function getRekapBulanan($baseQuery)
+    {
+        $query = clone $baseQuery;
+        
+        $rekap = $query
+            ->select(
+                DB::raw('MONTH(tanggal_pengajuan) as bulan'),
+                DB::raw('YEAR(tanggal_pengajuan) as tahun'),
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(total_pengajuan) as total_nilai'),
+                DB::raw('SUM(CASE WHEN status = "disetujui" THEN 1 ELSE 0 END) as disetujui'),
+                DB::raw('SUM(CASE WHEN status = "ditolak" THEN 1 ELSE 0 END) as ditolak'),
+                DB::raw('SUM(CASE WHEN status IN ("diajukan", "disetujui_koordinator", "disetujui_kabid", "menunggu_direktur") THEN 1 ELSE 0 END) as proses')
+            )
+            ->whereNotNull('tanggal_pengajuan')
+            ->groupBy('tahun', 'bulan')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->limit(12)
+            ->get();
+
+        $bulanNama = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $result = [];
+
+        foreach ($rekap as $item) {
+            $result[] = [
+                'bulan' => $bulanNama[$item->bulan - 1] . ' ' . $item->tahun,
+                'total' => $item->total,
+                'nilai' => (float) $item->total_nilai,
+                'disetujui' => $item->disetujui,
+                'ditolak' => $item->ditolak,
+                'proses' => $item->proses
+            ];
+        }
+
+        return $result;
+    }
 
     /**
      * Mendapatkan label status
@@ -2057,21 +1777,7 @@ public function verifikasi(Request $request, $id)
         return $statuses[$status] ?? $status;
     }
 
-    // /**
-    //  * Helper untuk mendapatkan label status
-    //  */
-    // private function getStatusLabel($status)
-    // {
-    //     $statuses = [
-    //         0 => 'Draft',
-    //         1 => 'Menunggu Persetujuan',
-    //         2 => 'Disetujui',
-    //         3 => 'Ditolak',
-    //         4 => 'Selesai',
-    //     ];
-
-    //     return $statuses[$status] ?? 'Unknown';
-    // }
+   
 
 }
 

@@ -90,6 +90,8 @@ Route::middleware(['auth', 'role:penerima'])
         ->name('pengadaan.verifikasi');
 
     Route::get('/report/pengadaan', [PenerimaController::class, 'reportPengadaan'])->name('reportPengadaan');
+
+    Route::get('/chartss/pengadaan', [PenerimaController::class, 'chartspengadaan'])->name('chartPengadaan');
   
     });
 

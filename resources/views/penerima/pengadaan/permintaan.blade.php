@@ -264,11 +264,11 @@
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     @endif
-                                    @if($pengajuan->status == 'disetujui')
+                                    {{-- @if($pengajuan->status == 'disetujui')
                                         <a href="#" class="btn btn-sm btn-outline-success rounded-3" title="Cetak">
                                             <i class="bi bi-printer"></i>
                                         </a>
-                                    @endif
+                                    @endif --}}
                                 </div>
                             </td>
                         </tr>
@@ -503,11 +503,11 @@ MODAL DETAIL
                         <i class="bi bi-pencil me-1"></i>Respon
                     </a>
                 @endif
-                @if($pengajuan->status == 'disetujui')
+                {{-- @if($pengajuan->status == 'disetujui')
                     <a href="#" class="btn btn-success rounded-pill px-4">
                         <i class="bi bi-printer me-1"></i>Cetak
                     </a>
-                @endif
+                @endif --}}
             </div>
         </div>
     </div>

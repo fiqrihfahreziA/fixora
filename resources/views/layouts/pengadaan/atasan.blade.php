@@ -498,18 +498,27 @@
             <ul class="navbar-nav ms-4 me-auto">
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.chartp*') ? 'active' : '' }}" 
-                       href="{{ route('penerima.chartp') }}">
+                       href="{{ route('atasan.pengadaan') }}">
                         <i class="bi bi-box"></i>
                         Pengadaan Barang
                     </a>
                 </li>
-                {{-- <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('pemohon.pengadaan.create') ? 'active' : '' }}" 
-                       href="{{ route('pemohon.pengadaan.create') }}">
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('atasan.reportPengadaan') ? 'active' : '' }}" 
+                    href="{{ route('atasan.reportPengadaan') }}">
                         <i class="bi bi-plus-circle"></i>
-                        Buat Pengajuan
+                        <span>Laporan</span>
                     </a>
-                </li> --}}
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('atasan.pengadaan.chart') ? 'active' : '' }}" 
+                    href="{{ route('atasan.pengadaan.chart') }}">
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+                        <span>Dashboard Chart</span>
+                    </a>
+                </li>
             </ul>
 
             <!-- User Dropdown -->

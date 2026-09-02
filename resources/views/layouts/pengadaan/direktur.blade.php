@@ -503,13 +503,13 @@
                         Pengadaan Barang
                     </a>
                 </li>
-                {{-- <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('pemohon.pengadaan.create') ? 'active' : '' }}" 
-                       href="{{ route('pemohon.pengadaan.create') }}">
-                        <i class="bi bi-plus-circle"></i>
-                        Buat Pengajuan
-                    </a>
-                </li> --}}
+               <!-- Di sidebar atau menu navigation -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('atasan.pengadaan.chart') }}">
+                            <i class="bi bi-graph-up-arrow me-2"></i>
+                            <span>Dashboard Chart</span>
+                        </a>
+                    </li>
             </ul>
 
             <!-- User Dropdown -->

@@ -13,6 +13,9 @@
                     <p class="text-muted mb-0">Kelola permintaan dan perbaikan barang Anda</p>
                 </div>
                 <div>
+                    <a href="{{ route('atasan.pengadaan.chart') }}" class="btn btn-outline-primary rounded-pill px-3 me-2">
+                        <i class="bi bi-graph-up-arrow me-1"></i>Chart
+                    </a>
                     <span class="badge bg-primary bg-opacity-10 text-primary px-4 py-2 rounded-pill">
                         <i class="bi bi-building me-2"></i>{{ $authUser->karyawan->bidang->nama_bidang ?? 'Semua Bidang' }}
                     </span>
@@ -116,68 +119,59 @@
     </div>
 
     <!-- Filter & Search Section -->
-<div class="card border-0 shadow-sm rounded-4 mb-4">
-    <div class="card-body p-4">
-        <form action="{{ route('atasan.pengadaan') }}" method="GET" class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label fw-semibold small text-muted">
-                    <i class="bi bi-search me-1"></i> Cari
-                </label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-0">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" 
-                           name="search" 
-                           class="form-control border-0 bg-light" 
-                           placeholder="Cari no pengajuan, nama barang..." 
-                           value="{{ request('search') }}">
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form action="{{ route('atasan.pengadaan') }}" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-search me-1"></i> Cari
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" 
+                               name="search" 
+                               class="form-control border-0 bg-light" 
+                               placeholder="Cari no pengajuan, nama barang..." 
+                               value="{{ request('search') }}">
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-semibold small text-muted">
-                    <i class="bi bi-filter me-1"></i> Status
-                </label>
-                <select name="status" class="form-select bg-light border-0">
-                    <option value="">Semua Status</option>
-                    <option value="disetujui_koordinator" {{ request('status') == 'disetujui_koordinator' ? 'selected' : '' }}>Disetujui Koordinator</option>
-                    <option value="disetujui_kabid" {{ request('status') == 'disetujui_kabid' ? 'selected' : '' }}>Disetujui Kabid</option>
-                    <option value="menunggu_direktur" {{ request('status') == 'menunggu_direktur' ? 'selected' : '' }}>Menunggu Direktur</option>
-                    <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                    <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label fw-semibold small text-muted">
-                    <i class="bi bi-calendar me-1"></i> Tahun Anggaran
-                </label>
-                <select name="tahun_anggaran" class="form-select bg-light border-0">
-                    <option value="">Semua Tahun</option>
-                    @for($i = date('Y'); $i >= date('Y')-5; $i--)
-                        <option value="{{ $i }}" {{ request('tahun_anggaran') == $i ? 'selected' : '' }}>
-                            {{ $i }}
-                        </option>
-                    @endfor
-                </select>
-            </div>
-            {{-- <div class="col-md-2">
-                <label class="form-label fw-semibold small text-muted">
-                    <i class="bi bi-tag me-1"></i> Jenis
-                </label>
-                <select name="type" class="form-select bg-light border-0">
-                    <option value="">Semua Jenis</option>
-                    <option value="permintaan" {{ request('type') == 'permintaan' ? 'selected' : '' }}>Permintaan</option>
-                    <option value="perbaikan" {{ request('type') == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
-                </select>
-            </div> --}}
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100 rounded-pill">
-                    <i class="bi bi-funnel me-1"></i> Filter
-                </button>
-            </div>
-        </form>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-filter me-1"></i> Status
+                    </label>
+                    <select name="status" class="form-select bg-light border-0">
+                        <option value="">Semua Status</option>
+                        <option value="disetujui_koordinator" {{ request('status') == 'disetujui_koordinator' ? 'selected' : '' }}>Disetujui Koordinator</option>
+                        <option value="disetujui_kabid" {{ request('status') == 'disetujui_kabid' ? 'selected' : '' }}>Disetujui Kabid</option>
+                        <option value="menunggu_direktur" {{ request('status') == 'menunggu_direktur' ? 'selected' : '' }}>Menunggu Direktur</option>
+                        <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                        <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold small text-muted">
+                        <i class="bi bi-calendar me-1"></i> Tahun Anggaran
+                    </label>
+                    <select name="tahun_anggaran" class="form-select bg-light border-0">
+                        <option value="">Semua Tahun</option>
+                        @for($i = date('Y'); $i >= date('Y')-5; $i--)
+                            <option value="{{ $i }}" {{ request('tahun_anggaran') == $i ? 'selected' : '' }}>
+                                {{ $i }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill">
+                        <i class="bi bi-funnel me-1"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+
     <!-- Tabel -->
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
@@ -221,7 +215,6 @@
                             <td>
                                 @php
                                     $statusColor = [
-                                   
                                         'disetujui_koordinator' => 'info',
                                         'disetujui_kabid' => 'primary',
                                         'menunggu_direktur' => 'warning',
@@ -230,7 +223,6 @@
                                     ][$pengajuan->status] ?? 'secondary';
                                     
                                     $statusLabel = [
-                                    
                                         'disetujui_koordinator' => 'Disetujui Koordinator',
                                         'disetujui_kabid' => 'Disetujui Kabid',
                                         'menunggu_direktur' => 'Menunggu Direktur',
@@ -238,10 +230,19 @@
                                         'ditolak' => 'Ditolak'
                                     ][$pengajuan->status] ?? $pengajuan->status;
                                 @endphp
-                                <span class="badge bg-{{ $statusColor }}-subtle text-{{ $statusColor }} px-3 py-2 rounded-pill">
+                                <span class="badge bg-{{ $statusColor }}-subtle text-{{ $statusColor }} px-3 py-2 rounded-pill d-inline-block">
                                     <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>
                                     {{ $statusLabel }}
                                 </span>
+                                <!-- Total Disetujui di Tabel -->
+                                @if($pengajuan->status == 'disetujui')
+                                    <div class="mt-1">
+                                        <span class="badge bg-success bg-opacity-10 text-success px-2 py-1 rounded-pill" style="font-size: 0.6rem;">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            {{ $pengajuan->log_status_direktur }}: Rp {{ number_format($pengajuan->total_disetujui_direktur	, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                @endif
                             </td>
                             <td>
                                 <span class="fw-semibold">Rp {{ number_format($pengajuan->total_pengajuan, 0, ',', '.') }}</span>
@@ -260,11 +261,11 @@
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     @endif
-                                    @if($pengajuan->status == 'disetujui')
+                                    {{-- @if($pengajuan->status == 'disetujui')
                                         <a href="#" class="btn btn-sm btn-outline-success rounded-3" title="Cetak">
                                             <i class="bi bi-printer"></i>
                                         </a>
-                                    @endif
+                                    @endif --}}
                                 </div>
                             </td>
                         </tr>
@@ -294,12 +295,11 @@
 </div>
 
 <!-- ============================================
-MODAL DETAIL
+MODAL DETAIL DENGAN TOTAL DISETUJUI
 ============================================ -->
 @foreach($allPengajuan as $pengajuan)
 @php
     $statusColor = [
-
         'disetujui_koordinator' => 'info',
         'disetujui_kabid' => 'primary',
         'menunggu_direktur' => 'purple',
@@ -366,6 +366,34 @@ MODAL DETAIL
                         </div>
                     </div>
                 </div>
+
+                <!-- ========================================== -->
+                <!-- TOTAL DISETUJUI - CARD HIJAU -->
+                <!-- ========================================== -->
+                @if($pengajuan->status == 'disetujui')
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-success bg-success-subtle border-0 rounded-3 p-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                                        <i class="bi bi-check-lg text-white fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted small d-block">Status Pengajuan</span>
+                                        <h6 class="fw-bold text-success mb-0">Telah Disetujui</h6>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-muted small d-block">Total Disetujui</span>
+                                    <h5 class="fw-bold text-success mb-0">Rp {{ number_format($pengajuan->total_pengajuan, 0, ',', '.') }}</h5>
+                                    <small class="text-muted">Disetujui pada: {{ date('d M Y', strtotime($pengajuan->updated_at)) }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Informasi Pemohon -->
                 <div class="row g-3 mb-4">
@@ -490,17 +518,16 @@ MODAL DETAIL
 
             <div class="modal-footer border-0 p-4 pt-0">
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
-                {{-- @if($pengajuan->status == 'diajukan' || $pengajuan->status == 'disetujui_koordinator') --}}
                 @if($pengajuan->status == 'disetujui_koordinator')
-                    <a href="{{ route('atasan.pengadaan.show', $pengajuan->id) }}" class="btn btn-warning rounded-pill px-4 text-white" target="_blank" >
+                    <a href="{{ route('atasan.pengadaan.show', $pengajuan->id) }}" class="btn btn-warning rounded-pill px-4 text-white" target="_blank">
                         <i class="bi bi-pencil me-1"></i>Respon
                     </a>
                 @endif
-                @if($pengajuan->status == 'disetujui')
+                {{-- @if($pengajuan->status == 'disetujui')
                     <a href="#" class="btn btn-success rounded-pill px-4">
                         <i class="bi bi-printer me-1"></i>Cetak
                     </a>
-                @endif
+                @endif --}}
             </div>
         </div>
     </div>

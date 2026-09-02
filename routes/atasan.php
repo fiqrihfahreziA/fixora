@@ -35,12 +35,25 @@ Route::middleware(['auth', 'role:atasan'])
         // Route::delete('/permintaan-penerima/{id}',[PenerimaController::class, 'destroy'])->name('permintaan.destroyy');
 
         // pengadaan
+        Route::get('/pengadaan/export', [AtasanController::class, 'exportExcel'])
+    ->name('pengadaan.export');
+        Route::get('/pengadaan/chart', [AtasanController::class, 'chartIndex'])
+            ->name('pengadaan.chart');
+
+            // Route untuk mendapatkan data chart (AJAX)
+        Route::get('/pengadaan/chart-data', [AtasanController::class, 'getChartData'])
+                ->name('pengadaan.chart-data');
+
         Route::get('/chart/pengadaan', [AtasanController::class, 'pengadaanshow'])
             ->name('pengadaan');
         
         Route::get('/pengadaan/{id}', [AtasanController::class, 'showpengadaan'])->name('pengadaan.show');
         Route::put('/pengadaan/{id}/verifikasi', [AtasanController::class, 'verifikasi'])
             ->name('pengadaan.verifikasi');
+      
+        Route::get('/reporta/pengadaan', [AtasanController::class, 'reportPengadaan'])->name('reportPengadaan');
+
+        Route::get('/chartssa/pengadaan', [AtasanController::class, 'chartspengadaan'])->name('chartPengadaan');
 
     });
 

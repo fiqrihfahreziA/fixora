@@ -506,8 +506,16 @@
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.reportPengadaan') ? 'active' : '' }}" 
                        href="{{ route('penerima.reportPengadaan') }}">
-                        <i class="bi bi-plus-circle"></i>
+                        <i class="bi bi-plus-circle-fill"
                         Laporan
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.chartPengadaan') ? 'active' : '' }}" 
+                       href="{{ route('penerima.chartPengadaan') }}">
+                        <i class="bi bi-bar-chart"></i>
+                        Chart
                     </a>
                 </li>
             </ul>
