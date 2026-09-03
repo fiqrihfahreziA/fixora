@@ -506,7 +506,7 @@
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.reportPengadaan') ? 'active' : '' }}" 
                        href="{{ route('penerima.reportPengadaan') }}">
-                        <i class="bi bi-plus-circle-fill"
+                        <i class="bi bi-plus-circle"></i>
                         Laporan
                     </a>
                 </li>

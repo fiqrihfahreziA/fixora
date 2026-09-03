@@ -497,10 +497,18 @@
             <!-- Navigation -->
             <ul class="navbar-nav ms-4 me-auto">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.chartp*') ? 'active' : '' }}" 
-                       href="{{ route('penerima.chartp') }}">
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('keuangan.chartp*') ? 'active' : '' }}" 
+                       href="{{ route('keuangan.pengadaan') }}">
                         <i class="bi bi-box"></i>
                         Pengadaan Barang
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.reportPengadaan') ? 'active' : '' }}" 
+                       href="{{ route('keuangan.reportPengadaan') }}">
+                        <i class="bi bi-plus-circle"></i>
+                        Laporan
                     </a>
                 </li>
                 {{-- <li class="nav-item">

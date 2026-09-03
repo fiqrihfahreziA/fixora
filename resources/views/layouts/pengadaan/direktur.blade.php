@@ -473,7 +473,7 @@
 <nav class="navbar navbar-expand-lg navbar-glass">
     <div class="container">
         <!-- Brand -->
-        <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('keuangan.dashboard') }}">
+        <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('direktur.dashboard') }}">
             <div class="brand-icon animate__animated animate__fadeInDown">
                 <img src="{{ asset('gambar/rsmz.png') }}" alt="Logo RSMZ">
             </div>
@@ -497,18 +497,21 @@
             <!-- Navigation -->
             <ul class="navbar-nav ms-4 me-auto">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.chartp*') ? 'active' : '' }}" 
-                       href="{{ route('penerima.chartp') }}">
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('direktur.pengadaan') ? 'active' : '' }}" 
+                       href="{{ route('direktur.pengadaan') }}">
                         <i class="bi bi-box"></i>
                         Pengadaan Barang
                     </a>
                 </li>
                <!-- Di sidebar atau menu navigation -->
+
+               
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('atasan.pengadaan.chart') }}">
-                            <i class="bi bi-graph-up-arrow me-2"></i>
-                            <span>Dashboard Chart</span>
-                        </a>
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('direktur.reportPengadaan') ? 'active' : '' }}" 
+                       href="{{ route('direktur.reportPengadaan') }}">
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+                            <span>Laporan</span>
+                    </a>
                     </li>
             </ul>
 

@@ -497,7 +497,7 @@
             <!-- Navigation -->
             <ul class="navbar-nav ms-4 me-auto">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('penerima.chartp*') ? 'active' : '' }}" 
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('atasan.pengadaan') ? 'active' : '' }}" 
                        href="{{ route('atasan.pengadaan') }}">
                         <i class="bi bi-box"></i>
                         Pengadaan Barang

@@ -31,7 +31,9 @@ Route::middleware(['auth', 'role:direktur'])
         Route::put('/pengadaan/{id}/tunda', [direkturController::class, 'tunda'])->name('tunda');
         Route::put('/pengadaan/{id}/tolak', [direkturController::class, 'tolak'])->name('tolak');
         Route::get('pengadaan/{id}/cetak', [direkturController::class, 'cetak'])->name('pengadaan.cetak');
-
+        Route::get('/report/pengadaan', [direkturController::class, 'reportPengadaan'])->name('reportPengadaan');
+        Route::get('/pengadaan/export', [direkturController::class, 'exportExcel'])
+            ->name('export.csv');
       
 
     });

@@ -28,21 +28,9 @@ Route::middleware(['auth', 'role:keuangan'])
         Route::put('keuangan/verifikasi/lengkap/{id}', [KeuanganController::class, 'verifikasiLengkap'])->name('verifikasi.lengkap');
         Route::put('keuangan/verifikasi/sebagian/{id}', [KeuanganController::class, 'verifikasiSebagian'])->name('verifikasi.sebagian');
         Route::put('keuangan/tolak/{id}', [KeuanganController::class, 'tolak'])->name('tolak');
-        // Route::get('/permintaann/edit/{id}', [AtasanController::class, 'edit'])->name('permintaan.edit');
-        // Route::put('/permintaannea/update/{id}', [AtasanController::class, 'update'])->name('permintaan.update');   
-      
-        // Route::get('/atasan/permintaan/{id}/view', [AtasanController::class, 'view'])
-        //     ->name('permintaan.view');
-        // Route::get('permintaan/{id}/gambar', [AtasanController::class, 'lihatGambar'])->name('permintaan.gambar');
-        // // Route::delete('/permintaan-penerima/{id}',[PenerimaController::class, 'destroy'])->name('permintaan.destroyy');
-
-        // // pengadaan
-        // Route::get('/chart/pengadaan', [AtasanController::class, 'pengadaanshow'])
-        //     ->name('pengadaan');
-        
-        // Route::get('/pengadaan/{id}', [AtasanController::class, 'showpengadaan'])->name('pengadaan.show');
-        // Route::put('/pengadaan/{id}/verifikasi', [AtasanController::class, 'verifikasi'])
-        //     ->name('pengadaan.verifikasi');
+        Route::get('/report/pengadaan', [KeuanganController::class, 'reportPengadaan'])->name('reportPengadaan');
+        Route::get('/pengadaan/export', [KeuanganController::class, 'exportExcel'])
+            ->name('export.csv');
 
     });
 

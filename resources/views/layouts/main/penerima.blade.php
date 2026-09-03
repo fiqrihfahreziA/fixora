@@ -52,7 +52,7 @@
     <div class="container">
 
         <!-- LOGO + JUDUL -->
-        <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+        <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('penerima.dashboard') }}">
             <img src="{{ asset('gambar/rsmz.png') }}"
                  alt="Logo RSMZ"
                  class="bg-white rounded-circle p-1 animate__animated animate__fadeInDown"
